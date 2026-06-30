@@ -1,0 +1,35 @@
+# Local and private files
+.env
+.env.*
+*.local
+*.log
+*.zip
+*.7z
+*.rar
+
+# Agent/client local state
+.claude/
+.codex/
+.cursor/
+.mcp.json
+settings.local.json
+
+# Obsidian local state that may reveal private filenames or workspace layout
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+
+# Build and dependency outputs
+node_modules/
+dist/
+build/
+.next/
+.vite/
+coverage/
+
+# Test logs and cloned source repos should stay outside the vault
+_test-logs/
+github-repos/
+runtime/
+cache/
+
