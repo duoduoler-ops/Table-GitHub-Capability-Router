@@ -105,9 +105,11 @@ The defaults are examples, not universal truth.
 
 ## Privacy First
 
+This section is for people who copy, fork, or adapt this template and want to publish their own version. It does not give anyone permission to push to this repository. Only the repository owner and explicitly added collaborators can publish changes here.
+
 Do not publish your real vault directly. Publish a sanitized starter kit or a demo vault.
 
-This check is only a safety net before you push. It searches for common private paths, tokens, cookies, passwords, emails, phone labels, and Chinese ID/phone/email keywords. If it finds a hit, read the line and decide whether it is a real secret, a private path, or just an example inside the documentation.
+The command below is a pre-publish safety check for your own copy. It searches for common private paths, tokens, cookies, passwords, emails, phone labels, and Chinese ID/phone/email keywords. If it finds a hit, read the line and decide whether it is a real secret, a private path, or just an example inside the documentation.
 
 Before pushing, run a local scan like:
 
@@ -236,9 +238,11 @@ Need Gate：是否需要额外能力
 
 ## 隐私优先
 
+这一节是给“复制、fork 或改造这个模板，并准备发布自己版本的人”看的。它不是授权别人往这个仓库发布内容。只有仓库 owner 和被明确添加的 collaborator 才能 push 到这里。
+
 不要直接公开自己的真实 vault。公开前应该抽象成 starter kit 或 demo vault。
 
-下面这条命令只是发布前的保险检查：它会搜索常见私人路径、Token、Cookie、密码、邮箱、手机号标签，以及“身份证/手机号/邮箱”等中文关键词。命中后不要紧张，逐条看它是真隐私、私人路径，还是文档里的示例。
+下面这条命令只是你发布自己版本前的保险检查：它会搜索常见私人路径、Token、Cookie、密码、邮箱、手机号标签，以及“身份证/手机号/邮箱”等中文关键词。命中后不要紧张，逐条看它是真隐私、私人路径，还是文档里的示例。
 
 推送前建议运行：
 
