@@ -9,6 +9,8 @@
 - Source / 来源:
 - Version or commit / 版本或 commit:
 - Related project grade / 相关项目等级: S / A / B / C / N/A
+- Related project card / 相关项目卡:
+- Distillation page / 提炼页:
 - Capability slot / 能力槽:
 
 ## Storage Decision / 冷库处置
@@ -30,6 +32,9 @@
 - Need gate / 是否必须额外能力:
 - Alternatives / 替代方案:
 - Registry entry / Registry 条目:
+- If reference, minimum read scope / 若为 reference，最小读取范围:
+- If reference, pages to read first / 若为 reference，优先读取页面:
+- If reference, pages not to read by default / 若为 reference，默认不读取页面:
 
 ## Activation / 激活
 
@@ -55,4 +60,3 @@
 - Side effects / 外部副作用:
 
 ## Notes / 备注
-

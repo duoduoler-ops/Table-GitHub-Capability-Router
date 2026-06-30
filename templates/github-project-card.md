@@ -9,6 +9,7 @@
 - Project type / 项目类型:
 - Capability chain / 能力链:
 - Capability slot / 能力槽:
+- Distillation page / 提炼页:
 - Current evidence / 当前证据:
 - Retention grade / 入库等级: S / A / B / C / D
 
@@ -19,6 +20,7 @@
 - It produces / 它产出:
 - Next 30-day use case / 未来 30 天使用场景:
 - If B reference, reusable takeaway / 若为 B reference，提炼产物:
+- Distillation destination / 提炼落点: workflow / concept / own project / none
 
 ## Quick Rejection / 快速否决
 
@@ -81,6 +83,21 @@ Change these weights for your own goals. Do not let the total score automaticall
 - Summary path / 摘要路径:
 - Raw log path / 原始日志路径:
 
+## Knowledge Distillation / 知识提炼
+
+Use this section only when the project creates reusable knowledge. Prefer updating an existing workflow, concept, or project page. Create a new distillation page only when the method has no natural home yet.
+
+仅当项目产出可复用知识时填写本节。优先更新已有工作流页、概念页或项目页。只有方法没有自然归属时，才新建提炼页。
+
+- Reusable method / 可复用方法:
+- Existing page to update / 优先更新页面:
+- New page if needed / 必要时新建页面:
+- Backlink from project card / 项目卡反链:
+- Backlink from distillation page / 提炼页反链:
+- Related capability-slot row / 相关能力槽行:
+- Reference manifest / reference manifest:
+- Do not duplicate here / 不在此处重复:
+
 ## Cold-Storage Decision / 冷库处置
 
 - Asset type / 资产形态: runtime / skill / plugin / mcp-config / script / reference / source-pointer
@@ -92,6 +109,7 @@ Change these weights for your own goals. Do not let the total score automaticall
 - Health check / 健康检查:
 - Disable and rollback / 停用和回滚:
 - Registry eligibility / Registry 资格:
+- If reference, read scope / 若为 reference，最小读取范围:
 
 ## Decision / 结论
 
@@ -100,4 +118,3 @@ Change these weights for your own goals. Do not let the total score automaticall
 - Keep, combine, challenge, replace, or reject / 保留、互补、挑战、替换或否决:
 - Review trigger / 复查触发条件:
 - Next smallest step / 最小下一步:
-

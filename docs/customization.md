@@ -109,7 +109,23 @@ low / medium / high
 
 Do not write "installed" as if it means "healthy", "safe", or "should be routed".
 
-## 6. Registry Scope
+## 6. Project Distillation Pages
+
+Decide where extracted knowledge should live before you start importing many projects.
+
+Recommended mapping:
+
+| Extracted knowledge | Destination |
+| --- | --- |
+| Repeatable process, checklist, prompt, or review rubric | Workflow pages |
+| General idea, architecture, or mental model | Concept pages |
+| Project-specific implementation lesson | Your own project pages |
+| Evidence about the GitHub source itself | GitHub project card |
+| Agent read scope and routing boundary | Capability/reference manifest |
+
+Avoid one-project-one-distillation-page by default. Update an existing page when the new project strengthens an existing method. Create a new page only when the project introduces a reusable method that does not have a natural home yet.
+
+## 7. Registry Scope
 
 Your registry should stay small. It answers:
 
@@ -126,7 +142,7 @@ It should include:
 
 It should not include every project you ever bookmarked.
 
-## 7. Language
+## 8. Language
 
 You can run the vault in:
 
@@ -246,7 +262,23 @@ low / medium / high
 
 不要把“已安装”直接写成“健康、安全、应该调用”。
 
-## 6. Registry 范围
+## 6. 项目提炼页
+
+开始大量导入项目前，先决定提炼出来的知识应该放在哪里。
+
+推荐映射：
+
+| 提炼出的知识 | 放置位置 |
+| --- | --- |
+| 可重复流程、检查清单、提示词或审稿标准 | 工作流页 |
+| 通用想法、架构或思维模型 | 概念页 |
+| 只和某个自有项目有关的实现经验 | 你的项目页 |
+| GitHub 来源本身的证据 | GitHub 项目卡 |
+| Agent 的读取范围和路由边界 | 能力或 reference manifest |
+
+默认不要变成“一个项目一个提炼页”。如果新项目只是强化已有方法，就更新已有页面。只有项目带来了一个没有自然归属的新方法，才新建提炼页。
+
+## 7. Registry 范围
 
 Registry 应该很薄。它回答：
 
@@ -263,7 +295,7 @@ Registry 应该很薄。它回答：
 
 它不应该包含你收藏过的所有项目。
 
-## 7. 语言
+## 8. 语言
 
 你的 vault 可以使用：
 
@@ -273,4 +305,3 @@ Registry 应该很薄。它回答：
 - 领域混合语言。
 
 命令、路径、API 名、模型名和库名要保持精确。
-

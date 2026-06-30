@@ -14,6 +14,7 @@ Use it when you want your AI assistant to stop leaving GitHub repos, prompts, to
 
 - Automatically turns GitHub links, READMEs, or saved repos into structured project cards, candidate/rejection records, capability-slot updates, and maintenance logs.
 - Screens existing Skills, Plugins, MCP servers, scripts, and CLIs into an inventory/cold-storage system instead of letting every tool compete for context.
+- Distills reusable ideas from retained projects into existing workflow, concept, or project pages instead of creating duplicate project summaries.
 - Reduces context size and token cost by keeping full clones, runtimes, raw logs, and large tool details outside the hot Obsidian layer.
 - Avoids tool noise and unstable triggering by separating `active`, `cold`, `disabled`, and `reference` assets, then routing through need gates and preflight checks.
 - Writes useful conclusions back to the vault, so the next agent session can reuse them.
@@ -30,9 +31,19 @@ Raw input or GitHub URL
 -> current capability and duplicate check
 -> evidence-based project card
 -> capability-slot comparison
+-> reusable knowledge distilled into a workflow, concept, or project page
 -> optional cold-storage manifest
 -> index and maintenance-log update
 ```
+
+The split is intentional:
+
+| Page | Main question |
+| --- | --- |
+| Project card | Why is this source worth keeping, testing, or rejecting? |
+| Distillation page | What reusable method, checklist, prompt, or architecture did we extract from it? |
+| Reference manifest | How can an agent safely rediscover and read the minimum useful reference later? |
+| Thin registry | Can this task directly route to an executable capability now? |
 
 Existing capability intake:
 
@@ -71,14 +82,15 @@ See [How It Works](docs/how-it-works.md) for the full bilingual explanation.
 3. Choose your own goals and scoring weights in [Customization Guide](docs/customization.md).
 4. Put raw notes in your inbox folder.
 5. Ask your agent to read the rules and process one GitHub project using the project-card template.
-6. For existing tools, ask your agent to screen installed Skills, Plugins, MCP servers, scripts, or CLIs into capability manifests before adding them to the active registry.
+6. If the project produces a reusable idea, update an existing workflow, concept, or project page. Create a new distillation page only when it introduces a genuinely new method.
+7. For existing tools, ask your agent to screen installed Skills, Plugins, MCP servers, scripts, or CLIs into capability manifests before adding them to the active registry.
 
 Example first prompt:
 
 ```text
 Open {{VAULT_PATH}}. Read the vault rules, the project-intake workflow, and the GitHub project-card template.
 Evaluate this GitHub project in lightweight mode. Do not clone or install anything.
-Create or update the project card, update the relevant index, and append a short maintenance-log entry.
+Create or update the project card, update the relevant workflow/concept/project page if reusable knowledge should be distilled, update the relevant index, and append a short maintenance-log entry.
 Project URL: <paste URL here>
 ```
 
@@ -99,6 +111,7 @@ The defaults are examples, not universal truth.
 - Weights: adjust the score weights to match your life and current stage.
 - Evidence gates: decide when a project can move from candidate to retained.
 - Capability slots: rename the verbs and outputs to fit your work.
+- Distillation pages: decide whether reusable knowledge should live under workflows, concepts, or a specific project.
 - Risk rules: tighten or relax what counts as high-risk.
 - Paths: keep cloned repos, raw logs, and runtime files outside the Obsidian vault.
 - Language: use English, Chinese, or bilingual pages.
@@ -147,6 +160,7 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 
 - 把 GitHub URL、README 或收藏项目自动整理成结构化项目卡、候选/否决记录、能力槽更新和维护日志。
 - 把已有 Skill、Plugin、MCP、脚本、CLI 先筛查入库，而不是让所有工具都挤进上下文里互相抢触发。
+- 把正式保留项目里的可复用方法提炼进已有工作流页、概念页或具体项目页，而不是重复写一份项目介绍。
 - 通过薄 Registry 和冷库 manifest 减少上下文占用和 token 消耗；完整 clone、运行时、原始日志和大段工具细节留在热层之外。
 - 通过 `active`、`cold`、`disabled`、`reference` 分层，以及 Need Gate / Preflight，减少工具噪声、误触发和调用不稳定。
 - 把有价值的结论写回 vault，下次 Agent 会话可以继续复用。
@@ -163,9 +177,19 @@ GitHub 项目自动入库：
 -> 现有能力与重复关系筛查
 -> 基于证据创建项目卡
 -> 对比能力槽和现有方案
+-> 把可复用知识提炼进工作流页、概念页或项目页
 -> 必要时创建冷库 manifest
 -> 更新索引和维护日志
 ```
+
+这里的分工是刻意拆开的：
+
+| 页面 | 主要回答 |
+| --- | --- |
+| 项目卡 | 这个来源为什么值得保留、测试或否决？ |
+| 提炼页 | 从它里面抽出了什么可复用方法、清单、提示词或架构？ |
+| reference manifest | Agent 以后怎么安全找到它，并只读取最小必要参考？ |
+| 薄 Registry | 当前任务现在能不能直接路由到某个可执行能力？ |
 
 已有能力筛查入库：
 
@@ -204,14 +228,15 @@ Need Gate：是否需要额外能力
 3. 在 [Customization Guide](docs/customization.md) 中设置你自己的目标和权重。
 4. 把原始资料放进收件箱。
 5. 让 Agent 读取规则，并按项目卡模板处理一个 GitHub 项目。
-6. 对已有工具，让 Agent 先把已安装或已保存的 Skill、Plugin、MCP、脚本、CLI 筛查成能力 manifest，再决定是否进入 active Registry。
+6. 如果项目产出可复用方法，优先更新已有工作流页、概念页或项目页。只有真的形成新方法时，才新建提炼页。
+7. 对已有工具，让 Agent 先把已安装或已保存的 Skill、Plugin、MCP、脚本、CLI 筛查成能力 manifest，再决定是否进入 active Registry。
 
 第一条提示词示例：
 
 ```text
 打开 {{VAULT_PATH}}。先阅读 vault 规则、项目入库流程和 GitHub 项目卡模板。
 请对这个 GitHub 项目做轻量评估。不要 clone，不要安装，不要运行脚本。
-创建或更新项目卡，更新相关索引，并追加一条维护日志。
+创建或更新项目卡；如果有可复用知识，更新相关工作流页、概念页或项目页；更新相关索引，并追加一条维护日志。
 项目 URL：<粘贴 URL>
 ```
 
@@ -232,6 +257,7 @@ Need Gate：是否需要额外能力
 - 权重：评分权重必须按你自己的阶段调整。
 - 证据门槛：自己决定什么情况下项目可以从候选进入正式保留。
 - 能力槽：按你的工作重命名“动词 + 对象 + 产物”。
+- 提炼页：决定可复用知识应该进入工作流、概念，还是某个具体项目页。
 - 风险规则：按自己的权限边界调整高风险定义。
 - 路径：完整 clone、原始日志和运行时不要放进 Obsidian vault。
 - 语言：可以中文、英文或中英双语。

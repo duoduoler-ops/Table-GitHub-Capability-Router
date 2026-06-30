@@ -12,6 +12,31 @@ This workflow connects three layers:
 
 The main design goal is to keep the hot context small. Full clones, raw logs, runtime folders, and long tool descriptions stay outside the Obsidian hot layer. The agent reads short indexes and manifests first, then opens only the minimum detail needed for the current task.
 
+## Knowledge Placement
+
+Do not put every retained GitHub project into a separate standalone knowledge page. Put the extracted knowledge where it will actually be reused:
+
+| Extracted value | Best location |
+| --- | --- |
+| Reusable SOP, checklist, prompt pattern, or workflow | Workflow page |
+| General architecture, concept, or decision model | Concept page |
+| Notes that only matter inside one of your own projects | That project page |
+| Source evidence, grade, risk, and test decision | GitHub project card |
+| Agent-readable rediscovery and read-scope metadata | Reference manifest |
+| Executable routing option | Thin registry, only if eligible |
+
+The common pattern is:
+
+```text
+GitHub project card
+-> update or create the smallest useful distillation page
+-> reference manifest points to that page and its read scope
+-> capability-slot index records the relationship to current options
+-> thin registry only includes executable and eligible capabilities
+```
+
+One distillation page can absorb ideas from multiple projects. A new page is needed only when the project produces a genuinely new reusable method.
+
 ## Core Loop
 
 ```text
@@ -126,6 +151,7 @@ Scores can help sort similar candidates, but they should not automatically produ
 Write useful conclusions back into:
 
 - project card;
+- workflow, concept, or project distillation page;
 - capability-slot index;
 - candidate pool or rejection log;
 - cold-storage manifest;
@@ -145,6 +171,31 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 | 能力盘点与冷库 | 筛查已有 Skill、Plugin、MCP、脚本和 CLI；记录 manifest、健康检查、风险和回滚 | 不等于默认启用所有工具 |
 
 核心设计目标是让热层上下文保持小而稳定。完整 clone、原始日志、运行时目录和很长的工具说明都留在 Obsidian 热层之外。Agent 先读取短索引和 manifest，再按当前任务打开最小必要详情。
+
+## 知识放在哪里
+
+不要把每个正式保留的 GitHub 项目都单独写成一页重复知识。提炼出来的内容应该放到以后真正会复用的位置：
+
+| 提炼出的价值 | 推荐位置 |
+| --- | --- |
+| 可复用 SOP、检查清单、提示词模式或工作流程 | 工作流页 |
+| 通用架构、概念或决策模型 | 概念页 |
+| 只服务某个自有项目的笔记 | 对应项目页 |
+| 来源证据、等级、风险和测试决策 | GitHub 项目卡 |
+| 给 Agent 以后重新发现和限定读取范围的 metadata | reference manifest |
+| 可执行路由选项 | 薄 Registry，仅限符合条件的能力 |
+
+常见联动是：
+
+```text
+GitHub 项目卡
+-> 更新或创建最小有用提炼页
+-> reference manifest 指向该提炼页和最小读取范围
+-> 能力槽索引记录它与当前方案的关系
+-> 薄 Registry 只收可执行且符合条件的能力
+```
+
+一个提炼页可以吸收多个项目的想法。只有项目真的产出新方法时，才需要新建提炼页。
 
 ## 核心循环
 
@@ -260,6 +311,7 @@ retired：不再使用
 有用结论应该写回：
 
 - 项目卡；
+- 工作流、概念或项目提炼页；
 - 能力槽索引；
 - 候选池或否决记录；
 - 冷库 manifest；
