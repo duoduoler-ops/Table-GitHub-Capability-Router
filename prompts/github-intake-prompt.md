@@ -31,6 +31,39 @@ Project URL:
 <paste URL here>
 ```
 
+## Existing Capability Intake / 已有能力筛查入库
+
+```text
+Open {{VAULT_PATH}}.
+
+Read:
+- the capability cold-storage workflow;
+- the capability manifest template;
+- the registry rules;
+- the capability-slot index.
+
+Screen the existing capability below.
+
+Rules:
+- Do not enable new permissions.
+- Do not modify global configuration.
+- Do not install, update, or run unknown scripts.
+- Treat "do not use extra capability" as a valid routing option.
+- Separate management status, health status, and risk.
+- Do not mark an installed capability as healthy unless a real health check supports it.
+- Keep large logs, runtimes, caches, and full source clones outside the Obsidian vault.
+
+Write back:
+- create or update the capability manifest;
+- decide whether it is active, cold, disabled, reference, or retired;
+- decide whether it should enter the thin registry;
+- update the relevant index;
+- add a short maintenance-log entry if the status changed.
+
+Capability name or path:
+<paste Skill / Plugin / MCP / script / CLI name or path here>
+```
+
 ## 中文
 
 ```text
@@ -62,3 +95,35 @@ Project URL:
 <在这里粘贴 URL>
 ```
 
+## 已有能力筛查入库
+
+```text
+打开 {{VAULT_PATH}}。
+
+先阅读：
+- 能力冷库流程；
+- 能力 manifest 模板；
+- Registry 规则；
+- 能力槽索引。
+
+请筛查下面这个已有能力。
+
+规则：
+- 不要启用新权限。
+- 不要修改全局配置。
+- 不要安装、更新或运行未知脚本。
+- “不调用额外能力”也是合法路由候选。
+- 管理状态、健康状态和风险要分开记录。
+- 不能因为某个能力“已安装”就把它写成 healthy，必须有真实健康检查证据。
+- 大体积日志、运行时、缓存和完整源码 clone 不要放进 Obsidian vault。
+
+写回：
+- 创建或更新能力 manifest；
+- 判断它应该是 active、cold、disabled、reference 还是 retired；
+- 判断它是否应该进入薄 Registry；
+- 更新相关索引；
+- 如果状态发生变化，追加一条简短维护日志。
+
+能力名称或路径：
+<粘贴 Skill / Plugin / MCP / 脚本 / CLI 名称或路径>
+```

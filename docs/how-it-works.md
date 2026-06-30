@@ -8,7 +8,9 @@ This workflow connects three layers:
 | --- | --- | --- |
 | Obsidian LLM Wiki | Stores rules, notes, indexes, decisions, and summaries | Does not run tools or replace permissions |
 | GitHub Project Intake | Decides whether a project is useful, redundant, risky, or worth testing | Does not prove runtime success by itself |
-| Capability Cold Storage | Tracks executable assets, manifests, health checks, risk, and rollback | Does not mean every tool is enabled by default |
+| Capability Inventory & Cold Storage | Screens existing Skills, Plugins, MCP servers, scripts, and CLIs; tracks manifests, health checks, risk, and rollback | Does not mean every tool is enabled by default |
+
+The main design goal is to keep the hot context small. Full clones, raw logs, runtime folders, and long tool descriptions stay outside the Obsidian hot layer. The agent reads short indexes and manifests first, then opens only the minimum detail needed for the current task.
 
 ## Core Loop
 
@@ -42,6 +44,14 @@ For a GitHub project, answer in 30 seconds:
 - What capability slot does it belong to?
 - Is the value already covered by the base model, the current agent, local tools, or existing notes?
 
+For an existing capability, answer:
+
+- What task can it actually do?
+- Is it already installed, merely downloaded, or only a reference?
+- What permissions, accounts, files, or external services can it touch?
+- Is it healthy, unverified, degraded, broken, or missing?
+- Should it be active, cold, disabled, reference, or retired?
+
 Capability slots should use this shape:
 
 ```text
@@ -69,6 +79,16 @@ The goal is not to collect more tools. The goal is to decide:
 
 ```text
 keep current / combine / test as challenger / replace / use lightweight fallback
+```
+
+For existing capabilities, the goal is to reduce routing noise:
+
+```text
+active only when it is useful and safe by default
+cold when useful but should be activated deliberately
+disabled when installed but should not be routed
+reference when it is method knowledge, not an executable tool
+retired when it should no longer be used
 ```
 
 ## 4. Verify
@@ -109,6 +129,7 @@ Write useful conclusions back into:
 - capability-slot index;
 - candidate pool or rejection log;
 - cold-storage manifest;
+- thin registry entry or explicit non-entry;
 - maintenance log.
 
 Keep raw logs, full clones, runtime files, and model caches outside the Obsidian vault.
@@ -121,7 +142,9 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 | --- | --- | --- |
 | Obsidian LLM Wiki | 保存规则、笔记、索引、决策和摘要 | 不直接运行工具，不替代权限控制 |
 | GitHub 项目入库 | 判断项目是否有用、重复、风险高、值得测试 | 不单独证明项目能跑通 |
-| 能力冷库 | 记录可执行资产、manifest、健康检查、风险和回滚 | 不等于默认启用所有工具 |
+| 能力盘点与冷库 | 筛查已有 Skill、Plugin、MCP、脚本和 CLI；记录 manifest、健康检查、风险和回滚 | 不等于默认启用所有工具 |
+
+核心设计目标是让热层上下文保持小而稳定。完整 clone、原始日志、运行时目录和很长的工具说明都留在 Obsidian 热层之外。Agent 先读取短索引和 manifest，再按当前任务打开最小必要详情。
 
 ## 核心循环
 
@@ -155,6 +178,14 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 - 它属于哪个能力槽？
 - 模型本身、当前 Agent、本机工具或已有笔记是否已经覆盖？
 
+对已有能力则回答：
+
+- 它到底能完成什么任务？
+- 它是已经安装、只是下载过，还是只适合作 reference？
+- 它会触碰哪些权限、账号、文件或外部服务？
+- 它是 healthy、unverified、degraded、broken 还是 missing？
+- 它应该是 active、cold、disabled、reference 还是 retired？
+
 能力槽建议使用：
 
 ```text
@@ -182,6 +213,16 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 
 ```text
 保留现有 / 互补组合 / 挑战者测试 / 替换现有 / 回退轻量方案
+```
+
+对已有能力，目标是减少路由噪声：
+
+```text
+active：默认有用且安全
+cold：有用，但需要显式激活
+disabled：已经安装，但不应该参与路由
+reference：只是方法知识，不是可执行工具
+retired：不再使用
 ```
 
 ## 4. 验证
@@ -222,7 +263,7 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 - 能力槽索引；
 - 候选池或否决记录；
 - 冷库 manifest；
+- 薄 Registry 条目，或明确不进入 Registry；
 - 维护日志。
 
 原始日志、完整 clone、运行时文件和模型缓存不要放进 Obsidian vault。
-
