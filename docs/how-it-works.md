@@ -12,6 +12,22 @@ This workflow connects three layers:
 
 The main design goal is to keep the hot context small. Full clones, raw logs, runtime folders, and long tool descriptions stay outside the Obsidian hot layer. The agent reads short indexes and manifests first, then opens only the minimum detail needed for the current task.
 
+## Routing Layers
+
+Capability discovery is layered instead of flat. The agent never scans the whole library:
+
+```text
+Rules files (always visible, kept thin)
+-> Level-1 thin router: task categories, truncation-safe one-liners
+-> Level-2 registry rows: triggers and do-not-use conditions
+-> Level-3 capability card: full detail of one capability
+-> Level-4 the capability itself: loaded only when enabled
+```
+
+Every entry that stays exposed to the agent must be truncation-safe: purpose first, do-not-use conditions early, nothing critical at the end of the line. After a task, temporarily enabled capabilities are recycled back to their pre-task state.
+
+Why the layers exist — context injection, truncation behavior, and manager-type capabilities — is explained in [What Your Agent Actually Sees](context-and-routing.md). The concrete template is [Capability Router](../templates/capability-router.md).
+
 ## Knowledge Placement
 
 Do not put every retained GitHub project into a separate standalone knowledge page. Put the extracted knowledge where it will actually be reused:
@@ -171,6 +187,22 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 | 能力盘点与冷库 | 筛查已有 Skill、Plugin、MCP、脚本和 CLI；记录 manifest、健康检查、风险和回滚 | 不等于默认启用所有工具 |
 
 核心设计目标是让热层上下文保持小而稳定。完整 clone、原始日志、运行时目录和很长的工具说明都留在 Obsidian 热层之外。Agent 先读取短索引和 manifest，再按当前任务打开最小必要详情。
+
+## 路由分层
+
+能力发现是分层的，不是平铺的。Agent 从不扫描整库：
+
+```text
+规则文件（常驻可见，保持薄）
+-> 一级薄路由：任务分类，每项截断安全的一句话
+-> 二级 Registry 行：触发与禁用条件
+-> 三级能力卡：单个能力的完整说明
+-> 四级能力本体：启用时才进入上下文
+```
+
+所有常驻暴露给 Agent 的条目必须截断安全：用途先行，禁止场景前置，关键限制不放行尾。任务结束后，临时启用的能力回收到任务前状态。
+
+为什么要这样分层——上下文注入、截断行为、总管型能力——见 [Agent 实际看到什么](context-and-routing.md)；具体模板见 [能力路由模板](../templates/capability-router.md)。
 
 ## 知识放在哪里
 

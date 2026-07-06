@@ -141,3 +141,55 @@ Capability name or path:
 能力名称或路径：
 <粘贴 Skill / Plugin / MCP / 脚本 / CLI 名称或路径>
 ```
+
+## Always-Visible Layer Audit / 常驻层体检
+
+### English
+
+```text
+Open {{VAULT_PATH}}. Read the capability router and the routing rules.
+
+Audit my always-visible layer. Do not change any configuration yet; report first.
+
+List everything that enters context in every session:
+- rules files and their approximate size;
+- skills currently set to auto or conditional discovery, with their descriptions;
+- plugin components contributed to the discovery layer;
+- MCP server instructions and tool descriptions that stay exposed;
+- session-start hook injections.
+
+For each item, answer:
+- Is it truncation-safe? (purpose within the first ~100 characters, do-not-use conditions early, nothing critical at the end)
+- Is it manager-type? (startup-wide trigger, rewrites default flow, self-reinforcing, hook injection)
+- When was it last actually used?
+- Should it stay always-visible, move behind the thin router, become explicit-only, or be disabled?
+
+Output a table plus a shortlist of the top 3 changes worth making,
+each with its expected effect and rollback method.
+Do not apply any change without my confirmation.
+```
+
+### 中文
+
+```text
+打开 {{VAULT_PATH}}。先阅读能力路由表和路由规则。
+
+请给我的常驻层做一次体检。先不要改任何配置，只输出报告。
+
+列出每次会话都会进入上下文的内容：
+- 规则文件及大致体量；
+- 当前设为自动或条件发现的 Skill 及其 description；
+- Plugin 贡献进发现层的组件；
+- 启用后仍暴露的 MCP server instructions 和工具描述；
+- SessionStart Hook 注入的内容。
+
+对每一项回答：
+- 它截断安全吗？（前 100 字能表达用途、禁止场景前置、关键限制不在末尾）
+- 它是总管型吗？（启动型宽触发、改默认流程、自我强化、Hook 注入）
+- 最近一次真实使用是什么时候？
+- 它应该继续常驻、退到薄路由后面、改为仅显式调用，还是禁用？
+
+输出一张表，外加最值得做的 3 个改动清单，
+每个改动写清预期效果和回滚方式。
+未经我确认不要实际修改任何配置。
+```

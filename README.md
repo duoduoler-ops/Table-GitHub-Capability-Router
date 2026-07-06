@@ -10,10 +10,25 @@ This repository is a Markdown-first starter kit. It does not ship an automation 
 
 Use it when you want your AI assistant to stop leaving GitHub repos, prompts, tools, and project notes scattered across temporary context, and start maintaining them as a reusable personal knowledge workbench.
 
+## Design Principle: Own the First Routing Layer
+
+By default, coding agents discover capabilities by reading a pile of skill / plugin / MCP descriptions. Whoever writes the broadest description grabs the entry point; when descriptions overflow the budget they get cut mid-sentence, and triggering becomes unstable. This kit replaces that default discovery layer with a thin router you own:
+
+```text
+The default mechanism lays every tool out on the table and lets the agent pick.
+A thin router hands the agent the thinnest possible map
+and opens one drawer at a time.
+```
+
+This kit is not a skill storage box — it is routing-power governance: deciding what the agent sees by default, when, how much, and who qualifies for the first layer. The mechanism (context injection, truncation, manager-type capabilities) is explained in [What Your Agent Actually Sees](docs/context-and-routing.md).
+
 ## What It Solves
 
 - Automatically turns GitHub links, READMEs, or saved repos into structured project cards, candidate/rejection records, capability-slot updates, and maintenance logs.
 - Screens existing Skills, Plugins, MCP servers, scripts, and CLIs into an inventory/cold-storage system instead of letting every tool compete for context.
+- Replaces default capability discovery with a layered router (thin router -> registry rows -> capability card -> capability itself), so the agent reads the minimum instead of scanning every description.
+- Keeps every exposed routing entry truncation-safe: purpose and restrictions up front, so budget cuts cannot silently delete the "do not use for..." half.
+- Flags manager-type capabilities (startup-wide triggers, session-start hook injections) that grab the first routing layer, and governs them unbundled instead of allowing whole packages by name.
 - Distills reusable ideas from retained projects into existing workflow, concept, or project pages instead of creating duplicate project summaries.
 - Reduces context size and token cost by keeping full clones, runtimes, raw logs, and large tool details outside the hot Obsidian layer.
 - Avoids tool noise and unstable triggering by separating `active`, `cold`, `disabled`, and `reference` assets, then routing through need gates and preflight checks.
@@ -67,9 +82,20 @@ Need gate
 -> Execute the smallest useful step
 -> Verify the result
 -> Write back only meaningful state changes
+-> Recycle temporarily enabled capabilities back to their pre-task state
 ```
 
-See [How It Works](docs/how-it-works.md) for the full bilingual explanation.
+Routing is layered so the agent never scans the whole library:
+
+```text
+Rules files (always visible, kept thin)
+-> Level-1 thin router: task categories, truncation-safe one-liners
+-> Level-2 registry rows: triggers and do-not-use conditions
+-> Level-3 capability card: full detail of one capability
+-> Level-4 the capability itself: loaded only when enabled
+```
+
+See [How It Works](docs/how-it-works.md) for the full bilingual explanation, and [What Your Agent Actually Sees](docs/context-and-routing.md) for why the router is layered this way.
 
 ## Quick Start
 
@@ -84,6 +110,7 @@ See [How It Works](docs/how-it-works.md) for the full bilingual explanation.
 5. Ask your agent to read the rules and process one GitHub project using the project-card template.
 6. If the project produces a reusable idea, update an existing workflow, concept, or project page. Create a new distillation page only when it introduces a genuinely new method.
 7. For existing tools, ask your agent to screen installed Skills, Plugins, MCP servers, scripts, or CLIs into capability manifests before adding them to the active registry.
+8. Build your thin router from `templates/capability-router.md`: define under ten task categories, keep every exposed entry truncation-safe, and point your agent rules at the router instead of full-library scans.
 
 Example first prompt:
 
@@ -135,12 +162,14 @@ See [Privacy and Sanitization](docs/privacy-and-sanitization.md).
 ## Included Files
 
 - `LICENSE`: MIT license.
+- `docs/context-and-routing.md`: first principles — what the agent actually sees, truncation, routing power, manager-type capabilities.
 - `docs/how-it-works.md`: the end-to-end workflow.
 - `docs/customization.md`: what users should modify.
 - `docs/privacy-and-sanitization.md`: what not to publish.
+- `templates/capability-router.md`: thin router template (Level-1 categories + Level-2 registry rows + writing rules).
 - `templates/github-project-card.md`: project evaluation template.
 - `templates/capability-manifest.md`: cold-storage capability manifest template.
-- `prompts/github-intake-prompt.md`: copy-paste prompt for agent-assisted intake.
+- `prompts/github-intake-prompt.md`: copy-paste prompts for intake, capability screening, and always-visible layer audits.
 
 ## License
 
@@ -156,10 +185,24 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 
 当你不想再让 GitHub repo、提示词、工具和项目笔记散落在临时上下文里，而是希望 AI 助手把它们维护成一个可复用的个人知识工作台时，可以使用这套模板。
 
+## 设计原则：自己掌握第一层路由
+
+默认机制下，coding agent 靠读一堆 Skill / Plugin / MCP 的 description 来发现能力：谁描述写得泛，谁就抢到入口；描述挤爆预算时会被拦腰截断，触发随之变得不稳定。这套模板用一张你自己掌握的薄路由，替代默认发现层：
+
+```text
+默认机制是把所有工具摆在桌上，让 Agent 自己挑；
+薄路由是先给 Agent 一张极薄的地图，一次只开一个抽屉。
+```
+
+这套模板不是 Skill 收纳箱，而是路由权治理：决定 Agent 默认看见什么、什么时候看见、看见多少，以及谁有资格进入第一层。机制细节（上下文注入、截断、总管型能力）见 [Agent 实际看到什么](docs/context-and-routing.md)。
+
 ## 它解决什么问题
 
 - 把 GitHub URL、README 或收藏项目自动整理成结构化项目卡、候选/否决记录、能力槽更新和维护日志。
 - 把已有 Skill、Plugin、MCP、脚本、CLI 先筛查入库，而不是让所有工具都挤进上下文里互相抢触发。
+- 用分层路由（薄路由 -> Registry 行 -> 能力卡 -> 能力本体）替代默认能力发现，Agent 每次只读最小必要信息，不扫描全部 description。
+- 所有暴露给 Agent 的路由入口保持截断安全：用途和限制前置，预算裁剪不会悄悄删掉"不要用于……"那一半。
+- 识别并标记总管型能力（启动型宽触发、SessionStart Hook 注入这类抢占第一层路由的能力），拆包治理，不因包名放行整包。
 - 把正式保留项目里的可复用方法提炼进已有工作流页、概念页或具体项目页，而不是重复写一份项目介绍。
 - 通过薄 Registry 和冷库 manifest 减少上下文占用和 token 消耗；完整 clone、运行时、原始日志和大段工具细节留在热层之外。
 - 通过 `active`、`cold`、`disabled`、`reference` 分层，以及 Need Gate / Preflight，减少工具噪声、误触发和调用不稳定。
@@ -213,9 +256,20 @@ Need Gate：是否需要额外能力
 -> Execute：执行最小有用步骤
 -> Verify：验证结果
 -> Write Back：只把有意义的状态变化写回
+-> Recycle：把临时启用的能力恢复到任务前状态
 ```
 
-完整说明见 [How It Works](docs/how-it-works.md)。
+路由是分层的，Agent 从不扫描整库：
+
+```text
+规则文件（常驻可见，保持薄）
+-> 一级薄路由：任务分类，每项截断安全的一句话
+-> 二级 Registry 行：触发与禁用条件
+-> 三级能力卡：单个能力的完整说明
+-> 四级能力本体：启用时才进入上下文
+```
+
+完整说明见 [How It Works](docs/how-it-works.md)；为什么这样分层，见 [Agent 实际看到什么](docs/context-and-routing.md)。
 
 ## 快速开始
 
@@ -230,6 +284,7 @@ Need Gate：是否需要额外能力
 5. 让 Agent 读取规则，并按项目卡模板处理一个 GitHub 项目。
 6. 如果项目产出可复用方法，优先更新已有工作流页、概念页或项目页。只有真的形成新方法时，才新建提炼页。
 7. 对已有工具，让 Agent 先把已安装或已保存的 Skill、Plugin、MCP、脚本、CLI 筛查成能力 manifest，再决定是否进入 active Registry。
+8. 用 `templates/capability-router.md` 搭你的薄路由：定义十个以内的任务分类，所有暴露条目保持截断安全，并把 Agent 规则指向薄路由，不做整库扫描。
 
 第一条提示词示例：
 
@@ -281,12 +336,14 @@ rg -n "C:\\Users|D:\\|API[_ -]?KEY|TOKEN|COOKIE|SECRET|Bearer|password|email|pho
 ## 包含文件
 
 - `LICENSE`：MIT 许可证。
+- `docs/context-and-routing.md`：第一性原理——Agent 实际看到什么、截断机制、路由权、总管型能力。
 - `docs/how-it-works.md`：端到端工作流说明。
 - `docs/customization.md`：哪些地方应该自行修改。
 - `docs/privacy-and-sanitization.md`：哪些内容不要公开。
+- `templates/capability-router.md`：薄路由模板（一级分类 + 二级 Registry 行 + 写作规则）。
 - `templates/github-project-card.md`：项目评价模板。
 - `templates/capability-manifest.md`：能力冷库 manifest 模板。
-- `prompts/github-intake-prompt.md`：Agent 辅助入库提示词。
+- `prompts/github-intake-prompt.md`：入库、能力筛查与常驻层体检提示词。
 
 ## 许可证
 
