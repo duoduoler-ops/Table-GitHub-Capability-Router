@@ -4,15 +4,17 @@ English | [中文](#中文)
 
 An Obsidian LLM Wiki + coding-agent workflow for GitHub project intake, capability cold storage, and agent routing.
 
-**GitHub description:** GitHub intake + capability routing for Obsidian/Codex/Claude Code｜GitHub项目自动入库 + Agent能力冷库与调用路由
+**Positioning:** Prompt-triggered GitHub intake + capability routing for Obsidian/Codex/Claude Code｜发命令后由 Agent 自动入库 + 能力冷库与薄路由
 
-This repository is a Markdown-first starter kit. It does not ship an automation engine, and it does not ask you to install more tools by default. It gives you a small set of bilingual rules, templates, and prompts that help Codex, Claude Code, or another coding agent maintain your knowledge base with evidence, privacy boundaries, and clear update points.
+This repository is a Markdown-first, prompt-triggered, agent-executed workflow. Give Codex, Claude Code, or another coding agent the repository URL or local Markdown files plus one command; the agent reads the SOP, performs the checks, creates the requested records, and writes meaningful results back to your vault.
+
+No Skill or Plugin installation is required. This is not a standalone CLI or background service, and it does not change agent configuration by itself. All work happens inside the agent session and remains subject to your permission, confirmation, privacy, and rollback gates.
 
 Use it when you want your AI assistant to stop leaving GitHub repos, prompts, tools, and project notes scattered across temporary context, and start maintaining them as a reusable personal knowledge workbench.
 
 ## Design Principle: Own the First Routing Layer
 
-By default, coding agents discover capabilities by reading a pile of skill / plugin / MCP descriptions. Whoever writes the broadest description grabs the entry point; when descriptions overflow the budget they get cut mid-sentence, and triggering becomes unstable. This kit replaces that default discovery layer with a thin router you own:
+Coding agents can discover capabilities from exposed skill / plugin / MCP metadata. Broad descriptions can win ambiguous routing; when a client truncates exposed text to fit its budget, restrictions placed at the end can disappear. This kit lets you put a thin router you own in front of that discovery layer:
 
 ```text
 The default mechanism lays every tool out on the table and lets the agent pick.
@@ -20,13 +22,15 @@ A thin router hands the agent the thinnest possible map
 and opens one drawer at a time.
 ```
 
-This kit is not a skill storage box — it is routing-power governance: deciding what the agent sees by default, when, how much, and who qualifies for the first layer. The mechanism (context injection, truncation, manager-type capabilities) is explained in [What Your Agent Actually Sees](docs/context-and-routing.md).
+The repository does not override native discovery on its own. Persistent routing starts only after you add a short rule to your `AGENTS.md`, `CLAUDE.md`, or equivalent guidance file that points the agent to your generated Level-1 router.
+
+This kit is not a skill storage box — it is routing-power governance: deciding what the agent sees by default, when, how much, and who qualifies for the first layer. Exact loading and truncation behavior varies by client and version. [Codex officially documents](https://developers.openai.com/codex/concepts/customization) metadata-first Skill discovery and progressive disclosure; [Claude Code documents](https://code.claude.com/docs/en/context-window) its own startup-context and compaction behavior. The mechanism, official sources, cross-client inferences, and local-measurement boundaries are separated in [What Your Agent Actually Sees](docs/context-and-routing.md).
 
 ## What It Solves
 
-- Automatically turns GitHub links, READMEs, or saved repos into structured project cards, candidate/rejection records, capability-slot updates, and maintenance logs.
+- After you trigger it, guides the coding agent to turn GitHub links, READMEs, or saved repos into structured project cards, candidate/rejection records, capability-slot updates, and maintenance logs.
 - Screens existing Skills, Plugins, MCP servers, scripts, and CLIs into an inventory/cold-storage system instead of letting every tool compete for context.
-- Replaces default capability discovery with a layered router (thin router -> registry rows -> capability card -> capability itself), so the agent reads the minimum instead of scanning every description.
+- Lets you place a user-controlled layered router (thin router -> registry rows -> capability card -> capability itself) in front of native discovery once it is wired into agent guidance, so the agent reads the minimum instead of scanning the whole library.
 - Keeps every exposed routing entry truncation-safe: purpose and restrictions up front, so budget cuts cannot silently delete the "do not use for..." half.
 - Flags manager-type capabilities (startup-wide triggers, session-start hook injections) that grab the first routing layer, and governs them unbundled instead of allowing whole packages by name.
 - Distills reusable ideas from retained projects into existing workflow, concept, or project pages instead of creating duplicate project summaries.
@@ -99,6 +103,23 @@ See [How It Works](docs/how-it-works.md) for the full bilingual explanation, and
 
 ## Quick Start
 
+### Fastest path: give the Markdown to your agent
+
+No installation is required. Give your agent this repository URL or a local copy and send:
+
+```text
+Read this repository's README, docs/context-and-routing.md, docs/how-it-works.md,
+templates/capability-router.md, and templates/capability-manifest.md.
+Using those rules, inspect my current agent environment and create a first-pass
+capability ledger, Level-1 thin router, and capability manifests in <OUTPUT_DIR>.
+Do not modify any existing configuration. Ask before installation, login,
+external publishing, deletion, or configuration changes.
+```
+
+This is the zero-install route and the repository's primary promise: the Markdown is the workflow. A Skill or Plugin may provide a convenient trigger later, but it must not become a second source of truth.
+
+### Persistent setup
+
 1. Copy the template files into your own Obsidian vault.
 2. Replace placeholder paths:
    - `{{VAULT_PATH}}`
@@ -111,6 +132,15 @@ See [How It Works](docs/how-it-works.md) for the full bilingual explanation, and
 6. If the project produces a reusable idea, update an existing workflow, concept, or project page. Create a new distillation page only when it introduces a genuinely new method.
 7. For existing tools, ask your agent to screen installed Skills, Plugins, MCP servers, scripts, or CLIs into capability manifests before adding them to the active registry.
 8. Build your thin router from `templates/capability-router.md`: define under ten task categories, keep every exposed entry truncation-safe, and point your agent rules at the router instead of full-library scans.
+
+Add one short routing rule to `AGENTS.md`, `CLAUDE.md`, or your client's equivalent guidance file:
+
+```text
+When a task may need an extra Skill, Plugin, MCP server, CLI, or script,
+read {{CAPABILITY_LIBRARY}}/router/level1-router.md first.
+Read only the matching category and the Top-1 capability card; never scan the whole library.
+Ask before installation, login, external publishing, deletion, or configuration changes.
+```
 
 Example first prompt:
 
@@ -179,28 +209,32 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 
 这是一个基于 Obsidian LLM Wiki + coding agent 的 AI 知识库工作流模板，用来把 GitHub 项目自动入库、Agent 能力冷库和能力调用路由整理成一个可维护、可验证、可复用的工作台。
 
-**GitHub 简介：** GitHub intake + capability routing for Obsidian/Codex/Claude Code｜GitHub项目自动入库 + Agent能力冷库与调用路由
+**定位：** Prompt-triggered GitHub intake + capability routing for Obsidian/Codex/Claude Code｜发命令后由 Agent 自动入库 + 能力冷库与薄路由
 
-这个仓库是 Markdown-first starter kit，不是自动化引擎，也不是让你默认安装更多工具。它提供一组中英双语规则、模板和提示词，让 Codex、Claude Code 或其他 coding agent 可以用更稳的方式维护你的知识库。
+这是一套 Markdown-first、命令触发、由 Agent 执行的自动化工作流。把仓库链接或本地 Markdown 加一句命令交给 Codex、Claude Code 等 coding agent，它会读取 SOP、完成检查、生成所需记录，并把有长期价值的结果写回知识库。
+
+这条路线不要求安装 Skill 或 Plugin。它不是独立 CLI 或后台服务，也不会自己修改 Agent 配置；所有工作都发生在 Agent 会话里，并继续受权限、确认、隐私和回滚门禁约束。
 
 当你不想再让 GitHub repo、提示词、工具和项目笔记散落在临时上下文里，而是希望 AI 助手把它们维护成一个可复用的个人知识工作台时，可以使用这套模板。
 
 ## 设计原则：自己掌握第一层路由
 
-默认机制下，coding agent 靠读一堆 Skill / Plugin / MCP 的 description 来发现能力：谁描述写得泛，谁就抢到入口；描述挤爆预算时会被拦腰截断，触发随之变得不稳定。这套模板用一张你自己掌握的薄路由，替代默认发现层：
+coding agent 可以通过暴露的 Skill / Plugin / MCP metadata 发现能力。描述过宽时可能抢到模糊任务入口；客户端为控制预算裁剪暴露文本时，放在末尾的限制可能丢失。这套模板让你可以在原生发现层前面放一张自己掌握的薄路由：
 
 ```text
 默认机制是把所有工具摆在桌上，让 Agent 自己挑；
 薄路由是先给 Agent 一张极薄的地图，一次只开一个抽屉。
 ```
 
-这套模板不是 Skill 收纳箱，而是路由权治理：决定 Agent 默认看见什么、什么时候看见、看见多少，以及谁有资格进入第一层。机制细节（上下文注入、截断、总管型能力）见 [Agent 实际看到什么](docs/context-and-routing.md)。
+仓库本身不会自动覆盖原生发现层。只有当你在 `AGENTS.md`、`CLAUDE.md` 或对应客户端的持久规则里加一条短指令，让 Agent 先读生成后的一级路由表，长期路由才真正接通。
+
+这套模板不是 Skill 收纳箱，而是路由权治理：决定 Agent 默认看见什么、什么时候看见、看见多少，以及谁有资格进入第一层。不同客户端和版本的加载、截断行为并不完全相同：[Codex 官方文档](https://developers.openai.com/codex/concepts/customization)确认 Skill 采用 metadata 优先与渐进加载，[Claude Code 官方文档](https://code.claude.com/docs/en/context-window)则公开了自己的启动上下文和压缩行为。机制、官方来源、跨客户端推断和本机实测边界统一见 [Agent 实际看到什么](docs/context-and-routing.md)。
 
 ## 它解决什么问题
 
-- 把 GitHub URL、README 或收藏项目自动整理成结构化项目卡、候选/否决记录、能力槽更新和维护日志。
+- 用户触发后，引导 coding agent 把 GitHub URL、README 或收藏项目自动整理成结构化项目卡、候选/否决记录、能力槽更新和维护日志。
 - 把已有 Skill、Plugin、MCP、脚本、CLI 先筛查入库，而不是让所有工具都挤进上下文里互相抢触发。
-- 用分层路由（薄路由 -> Registry 行 -> 能力卡 -> 能力本体）替代默认能力发现，Agent 每次只读最小必要信息，不扫描全部 description。
+- 在写入 Agent 持久规则后，用用户掌握的分层路由（薄路由 -> Registry 行 -> 能力卡 -> 能力本体）接管第一层能力选择，让 Agent 每次只读最小必要信息，不扫描整库。
 - 所有暴露给 Agent 的路由入口保持截断安全：用途和限制前置，预算裁剪不会悄悄删掉"不要用于……"那一半。
 - 识别并标记总管型能力（启动型宽触发、SessionStart Hook 注入这类抢占第一层路由的能力），拆包治理，不因包名放行整包。
 - 把正式保留项目里的可复用方法提炼进已有工作流页、概念页或具体项目页，而不是重复写一份项目介绍。
@@ -273,6 +307,22 @@ Need Gate：是否需要额外能力
 
 ## 快速开始
 
+### 最快路线：直接把 Markdown 给 Agent
+
+不需要安装。把本仓库链接或本地副本交给 Agent，再发送：
+
+```text
+请阅读本仓库的 README、docs/context-and-routing.md、docs/how-it-works.md、
+templates/capability-router.md 和 templates/capability-manifest.md。
+按这些规则盘点我当前的 Agent 环境，把第一版能力账本、一级薄路由和能力卡
+全部写到 <输出目录>。不要修改任何现有配置；涉及安装、登录、外发、删除、
+改配置时先停下来问我。
+```
+
+这是零安装路线，也是本仓库的主要承诺：Markdown 本身就是工作流。以后可以用 Skill / Plugin 提供更方便的触发入口，但不能让它们变成第二份方法事实源。
+
+### 长期使用
+
 1. 把模板文件复制到你自己的 Obsidian vault。
 2. 替换占位符路径：
    - `{{VAULT_PATH}}`
@@ -285,6 +335,15 @@ Need Gate：是否需要额外能力
 6. 如果项目产出可复用方法，优先更新已有工作流页、概念页或项目页。只有真的形成新方法时，才新建提炼页。
 7. 对已有工具，让 Agent 先把已安装或已保存的 Skill、Plugin、MCP、脚本、CLI 筛查成能力 manifest，再决定是否进入 active Registry。
 8. 用 `templates/capability-router.md` 搭你的薄路由：定义十个以内的任务分类，所有暴露条目保持截断安全，并把 Agent 规则指向薄路由，不做整库扫描。
+
+在 `AGENTS.md`、`CLAUDE.md` 或对应客户端的持久规则里增加一条短路由：
+
+```text
+任务可能需要额外 Skill、Plugin、MCP、CLI 或脚本时，先读
+{{CAPABILITY_LIBRARY}}/router/level1-router.md。
+只读取命中类别和 Top-1 能力卡，不扫描整库；涉及安装、登录、外发、删除、
+改配置时先停下来确认。
+```
 
 第一条提示词示例：
 
