@@ -13,6 +13,12 @@
 - When registry rows change, update the Level-1 candidate lists in the same edit. / Registry 行变化时，同一次编辑里同步一级路由的候选列。
 - "Use no extra tool" is always a legitimate route. / "不调用额外工具"永远是合法路由。
 
+## Level 0: Native visibility policy / L0 客户端原生可见性策略
+
+The thin router guides the agent's decision, but it does not hide native Skills, Plugins, MCP tools, or Hooks by itself. Record client-specific visibility and invocation controls separately. Disabling a capability, changing implicit invocation, editing Hooks, or changing client configuration requires explicit user approval.
+
+薄路由负责引导 Agent 决策，但本身不会隐藏客户端原生的 Skill、Plugin、MCP 工具或 Hook。客户端可见性和调用策略要单独记录；禁用能力、改变隐式调用、修改 Hook 或客户端配置，都必须先获得用户明确批准。
+
 ## Level 1: Thin router / 一级薄路由
 
 Replace the example rows with your own task categories. Keep this table under roughly 10 rows.
@@ -41,6 +47,7 @@ One row per routable capability. Keep the whole table small (a few dozen rows at
 | Type & platform / 类型与平台 | Skill / Plugin / MCP / CLI / Script; which client / 所属客户端 |
 | Deploy & health / 部署与健康 | installed / configured; healthy / unverified / degraded / broken / missing |
 | Invocation / 调用策略 | auto / conditional / explicit-only / disabled |
+| Authorization / 授权级别 | ordinary record / lifecycle update / routing proposal / configuration change / 普通记录、生命周期更新、路由提案、配置修改 |
 | Trigger + do-not-use / 触发与禁用 | Truncation-safe: purpose and restrictions up front / 截断安全：用途和限制前置 |
 | Risk & fallback / 风险与回退 | low / medium / high; what to fall back to / 回退到什么 |
 | Card link / 详情卡 | Link to the capability manifest / 指向能力 manifest |
@@ -83,8 +90,8 @@ If a capability matches any of these, mark it `manager-type` in its registry row
 
 命中任一特征就在 Registry 行标 `manager-type`，并要求显式 allowlist 决策（识别标准见 [context-and-routing.md](../docs/context-and-routing.md#6-总管型能力识别路由权抢占)）：启动型宽触发、改默认流程、自我强化、SessionStart Hook 注入。
 
-Governance: allow only the smallest verified sub-capability, never the whole package because of its name.
-治理原则：只放行已验证的最小子能力，绝不因包名放行整包。
+Governance: propose only the smallest verified sub-capability, never the whole package because of its name. Promotion into Registry/L1 or automatic invocation requires explicit human approval.
+治理原则：只提议放行已验证的最小子能力，绝不因包名放行整包；进入 Registry/L1 或自动调用前必须获得人工明确批准。
 
 ## Recycle / 任务后回收
 
@@ -94,6 +101,6 @@ After a task that temporarily enabled anything, return it to its pre-task state 
 
 ## Always-visible budget / 常驻层预算
 
-Everything that stays visible in every session (rules files, active skill descriptions, hook injections, MCP schemas) shares one budget. Review it periodically with clean new-session token measurements; do not let it grow silently.
+Everything that actually stays visible in every session (rules files, active Skill descriptions, hook injections, and any MCP instructions or schemas the client loads up front) shares one budget. Some clients defer MCP tool definitions, so measure the real startup context instead of assuming every schema is always resident. Review it periodically with clean new-session measurements; do not let it grow silently.
 
-所有每次会话常驻可见的内容（规则文件、active Skill 描述、Hook 注入、MCP schema）共享一份预算。定期用干净新会话的 token 实测复查，不让它悄悄膨胀。
+所有实际在每次会话常驻可见的内容（规则文件、active Skill 描述、Hook 注入，以及客户端启动时直接加载的 MCP instructions/schema）共享一份预算。部分客户端会延迟加载 MCP 工具定义，因此必须测真实启动上下文，不能默认所有 schema 都常驻。定期用干净新会话实测复查，不让它悄悄膨胀。

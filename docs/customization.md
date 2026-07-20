@@ -159,8 +159,8 @@ Customize the thin router in [capability-router.md](../templates/capability-rout
 
 - Task categories: rename and regroup Level-1 rows to match your actual work; keep the table under roughly ten rows.
 - Entry length caps: the defaults (Level-1 about 30-50 characters, Level-2 about 80-120) are starting points; tighten them if your client truncates aggressively.
-- Native-auto vs. router-only: decide which few capabilities stay natively auto-discoverable (high-frequency, low-risk, truncation-safe descriptions) and which are found only through the router. Automation survives in the first lane; noise control lives in the second.
-- Manager-type policy: decide your own allowlist bar for capabilities with startup-wide triggers or session-start hook injections. The safe default is explicit-only until reviewed.
+- Native-auto vs. router-preferred: decide which few capabilities stay natively auto-discoverable (high-frequency, low-risk, truncation-safe descriptions) and which the router should prefer. A capability becomes truly router-only only when client-native visibility or invocation settings enforce it; changing those settings requires approval.
+- Manager-type policy: decide your own allowlist bar for capabilities with startup-wide triggers or session-start hook injections. The safe default is explicit-only until reviewed, and promotion requires explicit human approval.
 - Always-visible budget: pick a review cadence (for example monthly) to re-measure clean new-session cost of rules files, active descriptions, and hook injections.
 
 ## 中文
@@ -322,6 +322,6 @@ Registry 应该很薄。它回答：
 
 - 任务分类：把一级路由的行改成你自己的真实工作分类，整表保持十行以内。
 - 条目长度上限：默认值（一级约 30-50 字、二级约 80-120 字）只是起点；如果你的客户端截断更激进，就收得更紧。
-- 原生自动 vs 只走路由：决定哪几个能力保留原生自动发现（高频、低风险、描述截断安全），哪些只通过薄路由找到。自动化留在第一条通道，噪声控制在第二条。
-- 总管型策略：对启动型宽触发、SessionStart Hook 注入的能力，自己定 allowlist 门槛。安全默认值是审查前一律仅显式调用。
+- 原生自动 vs 路由优先：决定哪几个能力保留原生自动发现（高频、低风险、描述截断安全），哪些由薄路由优先推荐。只有客户端原生可见性或调用设置真正限制后，能力才算“只走路由”；修改这些设置必须先确认。
+- 总管型策略：对启动型宽触发、SessionStart Hook 注入的能力，自己定 allowlist 门槛。安全默认值是审查前一律仅显式调用，晋升前必须获得人工明确批准。
 - 常驻层预算：定一个复查节奏（比如每月），用干净新会话重测规则文件、active 描述和 Hook 注入的成本。

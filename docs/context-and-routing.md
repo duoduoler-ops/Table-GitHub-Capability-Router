@@ -65,10 +65,11 @@ Let the agent find capabilities by itself
 inside a pile of skill / plugin / MCP descriptions.
 ```
 
-Under that mechanism, whoever writes the broadest description and grabs the entry point gets invoked. The fix is not "write better descriptions for everything". The fix is to own the first routing layer yourself:
+Under that mechanism, broader descriptions can win ambiguous entry points and get invoked more often. The fix is not "write better descriptions for everything". The fix is to add a user-owned decision layer:
 
 ```text
-Replace the default discovery layer with your own thin router.
+Add your own thin router above native discovery.
+The router guides the decision; it does not hide native capabilities by itself.
 The agent reads the thinnest possible map first,
 then opens exactly one drawer when needed.
 ```
@@ -81,11 +82,13 @@ One sentence:
 
 | Layer | Content | Residency | Artifact in this kit |
 | --- | --- | --- | --- |
-| L0 Always-visible | Rules files + discovery info of a few active capabilities | Every session | Your rules files |
+| L0 Native visibility policy | Client settings + always-visible rules determine what is exposed and what may auto-invoke | Every session | Client-specific controls + a short rules pointer |
 | L1 Thin router | Task-category entry points, each truncation-safe | Read first when routing | [Capability Router template](../templates/capability-router.md) |
 | L2 Category index | Candidates per category + trigger / do-not-use conditions | Read only matching rows | Thin registry rows |
 | L3 Capability card | Full description of one capability | Read only the top candidate | [Capability Manifest template](../templates/capability-manifest.md) |
 | L4 Capability itself | Full SKILL.md / MCP server / repo | Enters context only when enabled | Cold storage + external clones |
+
+L1 is **soft governance** when it exists only as an instruction in `AGENTS.md`, `CLAUDE.md`, or an equivalent rules file. Stronger isolation requires L0 client controls such as disabling a capability, removing it from implicit discovery, or requiring explicit invocation. Those controls are client-specific configuration and must not be changed without user approval.
 
 The executable loop stays the same, with one added step:
 
@@ -149,9 +152,9 @@ When you talk about such capabilities publicly, describe the mechanism, not the 
 | | Default mechanism | Thin router |
 | --- | --- | --- |
 | Discovery | Agent searches all descriptions | Classify first, route, then enable on demand |
-| Entry point | Broadest description wins | Your router decides who is visible |
+| Entry point | Broad descriptions can win ambiguous routing | Your router chooses preferred candidates; L0 still decides actual native visibility |
 | Main risks | Truncated descriptions, crowded-out key tools, over-broad triggers, manager-type grabs, post-invocation pollution, oversized MCP returns | Maintenance cost; a stale router misroutes |
-| Lever | Only "write good descriptions" | Control what is seen, when, how much, and who enters layer one |
+| Lever | Mostly description quality and client defaults | Combine L0 visibility controls with an L1 user-owned decision path |
 
 Two metaphors that summarize the whole design:
 
@@ -170,9 +173,12 @@ Whoever stands on the first routing layer shapes how your agent thinks.
 
 Injection order, budgets, and truncation behavior vary by client and version. This document freezes the mechanism, not the numbers. Before quoting specific token budgets or thresholds, check current official docs and measure clean new sessions on your own machine.
 
+Last verified 2026-07-21: Codex documents metadata-first Skill discovery, progressive disclosure, implicit-invocation control, and per-Skill enablement. Claude Code documents Skill invocation controls and default MCP Tool Search that defers tool definitions until needed. These facts support the L0/L1 distinction; they do not make this repository a configuration controller.
+
 - Claude Code skills: <https://code.claude.com/docs/en/skills>
 - Claude Code MCP: <https://code.claude.com/docs/en/mcp>
-- Codex skills: <https://developers.openai.com/codex/skills>
+- Codex skills: <https://learn.chatgpt.com/docs/build-skills>
+- Codex configuration: <https://learn.chatgpt.com/docs/config-file/config-reference>
 - Codex MCP: <https://developers.openai.com/codex/mcp>
 
 ## 中文
@@ -239,10 +245,11 @@ description 太多、挤爆发现层时，客户端会裁剪。结果出现三�
 让 Agent 在一堆 Skill / Plugin / MCP 的 description 里自己找能力。
 ```
 
-在这种机制下，谁的描述写得泛、谁会抢入口，谁就更容易被调用。解法不是"把所有 description 都写好"，而是自己掌握第一层路由：
+在这种机制下，描述越宽的能力越可能抢到模糊入口，也更容易被调用。解法不是"把所有 description 都写好"，而是增加一层用户自己掌握的决策入口：
 
 ```text
-用自建薄路由替代默认能力发现层。
+在原生发现层之上增加自建薄路由。
+薄路由负责引导决策，本身不会隐藏客户端原生能力。
 Agent 先读最薄的一张地图，
 需要时才打开对应的那一个抽屉。
 ```
@@ -255,11 +262,13 @@ Agent 先读最薄的一张地图，
 
 | 层 | 内容 | 常驻性 | 本套模板对应 |
 | --- | --- | --- | --- |
-| L0 常驻层 | 规则文件 + 少量 active 能力的发现信息 | 每次会话都在 | 你的规则文件 |
+| L0 原生可见性策略 | 客户端设置 + 常驻规则共同决定哪些能力可见、哪些可自动调用 | 每次会话都在 | 客户端原生控制 + 规则里的短指针 |
 | L1 一级薄路由 | 任务分类入口，每项截断安全 | 路由时先看 | [能力路由模板](../templates/capability-router.md) |
 | L2 二级索引 | 分类内候选 + 触发 / 禁用条件 | 只读相关行 | 薄 Registry 行 |
 | L3 能力卡 | 单个能力的完整说明 | 只读 Top-1 那张 | [能力 Manifest 模板](../templates/capability-manifest.md) |
 | L4 能力本体 | SKILL.md 全文 / MCP server / repo | 启用才进入 | 冷库 + 外部 clone |
+
+如果 L1 只是写在 `AGENTS.md`、`CLAUDE.md` 或同类规则文件里的指令，它属于**软治理**。更强隔离需要配合 L0 客户端控制，例如禁用能力、移出隐式发现或改为仅显式调用。这些操作属于客户端配置修改，未经用户确认不得执行。
 
 可执行闭环不变，只加一步：
 
@@ -321,9 +330,9 @@ Need Gate：是否需要额外能力
 | | 默认机制 | 薄路由 |
 | --- | --- | --- |
 | 发现方式 | Agent 在全部 description 里自己找 | 先分类，再路由，再按需启用 |
-| 入口归属 | 谁描述写得泛谁赢 | 你的路由表决定谁被看见 |
+| 入口归属 | 宽描述可能抢到模糊入口 | 路由表选择优先候选；实际原生可见性仍由 L0 决定 |
 | 主要风险 | description 被截、关键工具被挤掉、泛化误触发、总管型抢入口、调用后污染会话、MCP 返回膨胀 | 维护成本；路由表过期会导错路 |
-| 治理抓手 | 只能"把 description 写好" | 控制看见什么、何时看见、看见多少、谁进第一层 |
+| 治理抓手 | 主要依赖 description 质量与客户端默认值 | L0 可见性控制 + L1 用户决策入口组合治理 |
 
 两句收束整套设计的话：
 
@@ -341,7 +350,10 @@ Need Gate：是否需要额外能力
 
 注入顺序、预算数值和截断行为随客户端和版本变化。本文档固化的是机制，不是数字。引用具体 token 预算或阈值前，先查当前官方文档，并在自己机器上用干净新会话实测。
 
+最近核实于 2026-07-21：Codex 官方说明了 Skill metadata 优先、渐进加载、隐式调用控制和按 Skill 启停；Claude Code 官方说明了 Skill 调用控制，以及默认通过 MCP Tool Search 延迟加载工具定义。这些事实支撑 L0/L1 分层，但不代表本仓库能直接控制客户端配置。
+
 - Claude Code Skills：<https://code.claude.com/docs/en/skills>
 - Claude Code MCP：<https://code.claude.com/docs/en/mcp>
-- Codex Skills：<https://developers.openai.com/codex/skills>
+- Codex Skills：<https://learn.chatgpt.com/docs/build-skills>
+- Codex 配置：<https://learn.chatgpt.com/docs/config-file/config-reference>
 - Codex MCP：<https://developers.openai.com/codex/mcp>

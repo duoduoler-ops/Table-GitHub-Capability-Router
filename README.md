@@ -16,7 +16,7 @@ Use it when you want your AI assistant to stop leaving GitHub repos, prompts, to
 
 ## Design Principle: Own the First Routing Layer
 
-Coding agents can discover capabilities from exposed skill / plugin / MCP metadata. Broad descriptions can win ambiguous routing; when a client truncates exposed text to fit its budget, restrictions placed at the end can disappear. This kit lets you put a thin router you own in front of that discovery layer:
+Coding agents can discover capabilities from exposed skill / plugin / MCP metadata. Broad descriptions can win ambiguous routing; when a client truncates exposed text to fit its budget, restrictions placed at the end can disappear. This kit adds a user-owned decision entry above that native discovery layer; it does not hide or disable native capabilities by itself:
 
 ```text
 The default mechanism lays every tool out on the table and lets the agent pick.
@@ -24,7 +24,7 @@ A thin router hands the agent the thinnest possible map
 and opens one drawer at a time.
 ```
 
-The repository does not override native discovery on its own. Persistent routing starts only after you add a short rule to your `AGENTS.md`, `CLAUDE.md`, or equivalent guidance file that points the agent to your generated Level-1 router.
+The repository does not override native discovery on its own. Persistent routing starts only after you add a short rule to your `AGENTS.md`, `CLAUDE.md`, or equivalent guidance file that points the agent to your generated Level-1 router. Stronger isolation additionally requires client-native visibility and invocation controls, and changing those controls remains a configuration change that requires your approval.
 
 This kit is not a skill storage box — it is routing-power governance: deciding what the agent sees by default, when, how much, and who qualifies for the first layer. Exact loading and truncation behavior varies by client and version. [Codex officially documents](https://developers.openai.com/codex/concepts/customization) metadata-first Skill discovery and progressive disclosure; [Claude Code documents](https://code.claude.com/docs/en/context-window) its own startup-context and compaction behavior. The mechanism, official sources, cross-client inferences, and local-measurement boundaries are separated in [What Your Agent Actually Sees](docs/context-and-routing.md).
 
@@ -32,7 +32,7 @@ This kit is not a skill storage box — it is routing-power governance: deciding
 
 - After you trigger it, guides the coding agent to turn GitHub links, READMEs, or saved repos into structured project cards, candidate/rejection records, capability-slot updates, and maintenance logs.
 - Screens existing Skills, Plugins, MCP servers, scripts, and CLIs into an inventory/cold-storage system instead of letting every tool compete for context.
-- Lets you place a user-controlled layered router (thin router -> registry rows -> capability card -> capability itself) in front of native discovery once it is wired into agent guidance, so the agent reads the minimum instead of scanning the whole library.
+- Lets you add a user-controlled layered decision path (thin router -> registry rows -> capability card -> capability itself) above native discovery once it is wired into agent guidance, so the agent reads the minimum instead of scanning the whole library.
 - Keeps every exposed routing entry truncation-safe: purpose and restrictions up front, so budget cuts cannot silently delete the "do not use for..." half.
 - Flags manager-type capabilities (startup-wide triggers, session-start hook injections) that grab the first routing layer, and governs them unbundled instead of allowing whole packages by name.
 - Distills reusable ideas from retained projects into existing workflow, concept, or project pages instead of creating duplicate project summaries.
@@ -94,12 +94,14 @@ Need gate
 Routing is layered so the agent never scans the whole library:
 
 ```text
-Rules files (always visible, kept thin)
+Level-0 native visibility policy + short rules pointer
 -> Level-1 thin router: task categories, truncation-safe one-liners
 -> Level-2 registry rows: triggers and do-not-use conditions
 -> Level-3 capability card: full detail of one capability
 -> Level-4 the capability itself: loaded only when enabled
 ```
+
+Level 1 is a **soft decision layer** until the client is also configured to hide, disable, or require explicit invocation for capabilities. This kit documents that boundary but never changes client configuration without approval.
 
 See [How It Works](docs/how-it-works.md) for the full bilingual explanation, and [What Your Agent Actually Sees](docs/context-and-routing.md) for why the router is layered this way.
 
@@ -197,8 +199,8 @@ See [Privacy and Sanitization](docs/privacy-and-sanitization.md).
 - `docs/context-and-routing.md`: first principles — what the agent actually sees, truncation, routing power, manager-type capabilities.
 - `docs/how-it-works.md`: the end-to-end workflow.
 - `docs/customization.md`: what users should modify.
-- `docs/privacy-and-sanitization.md`: what not to publish.
-- `templates/capability-router.md`: thin router template (Level-1 categories + Level-2 registry rows + writing rules).
+- `docs/privacy-and-sanitization.md`: untrusted-source boundary and what not to publish.
+- `templates/capability-router.md`: native visibility boundary + Level-1 categories + Level-2 registry rows + writing rules.
 - `templates/github-project-card.md`: project evaluation template.
 - `templates/capability-manifest.md`: cold-storage capability manifest template.
 - `prompts/github-intake-prompt.md`: copy-paste prompts for intake, capability screening, and always-visible layer audits.
@@ -223,14 +225,14 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 
 ## 设计原则：自己掌握第一层路由
 
-coding agent 可以通过暴露的 Skill / Plugin / MCP metadata 发现能力。描述过宽时可能抢到模糊任务入口；客户端为控制预算裁剪暴露文本时，放在末尾的限制可能丢失。这套模板让你可以在原生发现层前面放一张自己掌握的薄路由：
+coding agent 可以通过暴露的 Skill / Plugin / MCP metadata 发现能力。描述过宽时可能抢到模糊任务入口；客户端为控制预算裁剪暴露文本时，放在末尾的限制可能丢失。这套模板在原生发现层之上增加一张用户掌握的决策入口；它本身不会隐藏或禁用客户端原生能力：
 
 ```text
 默认机制是把所有工具摆在桌上，让 Agent 自己挑；
 薄路由是先给 Agent 一张极薄的地图，一次只开一个抽屉。
 ```
 
-仓库本身不会自动覆盖原生发现层。只有当你在 `AGENTS.md`、`CLAUDE.md` 或对应客户端的持久规则里加一条短指令，让 Agent 先读生成后的一级路由表，长期路由才真正接通。
+仓库本身不会自动覆盖原生发现层。只有当你在 `AGENTS.md`、`CLAUDE.md` 或对应客户端的持久规则里加一条短指令，让 Agent 先读生成后的一级路由表，长期路由才真正接通。要形成更强隔离，还需配合客户端原生的可见性、禁用和显式调用设置；这些都属于配置修改，必须先获得用户确认。
 
 这套模板不是 Skill 收纳箱，而是路由权治理：决定 Agent 默认看见什么、什么时候看见、看见多少，以及谁有资格进入第一层。不同客户端和版本的加载、截断行为并不完全相同：[Codex 官方文档](https://developers.openai.com/codex/concepts/customization)确认 Skill 采用 metadata 优先与渐进加载，[Claude Code 官方文档](https://code.claude.com/docs/en/context-window)则公开了自己的启动上下文和压缩行为。机制、官方来源、跨客户端推断和本机实测边界统一见 [Agent 实际看到什么](docs/context-and-routing.md)。
 
@@ -238,7 +240,7 @@ coding agent 可以通过暴露的 Skill / Plugin / MCP metadata 发现能力。
 
 - 用户触发后，引导 coding agent 把 GitHub URL、README 或收藏项目自动整理成结构化项目卡、候选/否决记录、能力槽更新和维护日志。
 - 把已有 Skill、Plugin、MCP、脚本、CLI 先筛查入库，而不是让所有工具都挤进上下文里互相抢触发。
-- 在写入 Agent 持久规则后，用用户掌握的分层路由（薄路由 -> Registry 行 -> 能力卡 -> 能力本体）接管第一层能力选择，让 Agent 每次只读最小必要信息，不扫描整库。
+- 在写入 Agent 持久规则后，用用户掌握的分层决策路径（薄路由 -> Registry 行 -> 能力卡 -> 能力本体）优先引导能力选择，让 Agent 每次只读最小必要信息，不扫描整库。
 - 所有暴露给 Agent 的路由入口保持截断安全：用途和限制前置，预算裁剪不会悄悄删掉"不要用于……"那一半。
 - 识别并标记总管型能力（启动型宽触发、SessionStart Hook 注入这类抢占第一层路由的能力），拆包治理，不因包名放行整包。
 - 把正式保留项目里的可复用方法提炼进已有工作流页、概念页或具体项目页，而不是重复写一份项目介绍。
@@ -300,12 +302,14 @@ Need Gate：是否需要额外能力
 路由是分层的，Agent 从不扫描整库：
 
 ```text
-规则文件（常驻可见，保持薄）
--> 一级薄路由：任务分类，每项截断安全的一句话
+L0 客户端原生可见性策略 + 常驻规则里的短指针
+-> L1 一级薄路由：任务分类，每项截断安全的一句话
 -> 二级 Registry 行：触发与禁用条件
 -> 三级能力卡：单个能力的完整说明
 -> 四级能力本体：启用时才进入上下文
 ```
+
+在没有配合客户端禁用、隐藏或显式调用设置时，L1 只是**软决策层**。本仓库会说明这条边界，但未经用户确认绝不修改客户端配置。
 
 完整说明见 [How It Works](docs/how-it-works.md)；为什么这样分层，见 [Agent 实际看到什么](docs/context-and-routing.md)。
 
@@ -402,8 +406,8 @@ rg -n "C:\\Users|D:\\|API[_ -]?KEY|TOKEN|COOKIE|SECRET|Bearer|password|email|pho
 - `docs/context-and-routing.md`：第一性原理——Agent 实际看到什么、截断机制、路由权、总管型能力。
 - `docs/how-it-works.md`：端到端工作流说明。
 - `docs/customization.md`：哪些地方应该自行修改。
-- `docs/privacy-and-sanitization.md`：哪些内容不要公开。
-- `templates/capability-router.md`：薄路由模板（一级分类 + 二级 Registry 行 + 写作规则）。
+- `docs/privacy-and-sanitization.md`：不可信来源边界与哪些内容不要公开。
+- `templates/capability-router.md`：原生可见性边界 + 一级分类 + 二级 Registry 行 + 写作规则。
 - `templates/github-project-card.md`：项目评价模板。
 - `templates/capability-manifest.md`：能力冷库 manifest 模板。
 - `prompts/github-intake-prompt.md`：入库、能力筛查与常驻层体检提示词。

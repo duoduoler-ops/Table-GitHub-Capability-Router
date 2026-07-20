@@ -17,14 +17,14 @@ The main design goal is to keep the hot context small. Full clones, raw logs, ru
 Capability discovery is layered instead of flat. The agent never scans the whole library:
 
 ```text
-Rules files (always visible, kept thin)
+Level-0 native visibility policy + short rules pointer
 -> Level-1 thin router: task categories, truncation-safe one-liners
 -> Level-2 registry rows: triggers and do-not-use conditions
 -> Level-3 capability card: full detail of one capability
 -> Level-4 the capability itself: loaded only when enabled
 ```
 
-Every entry that stays exposed to the agent must be truncation-safe: purpose first, do-not-use conditions early, nothing critical at the end of the line. After a task, temporarily enabled capabilities are recycled back to their pre-task state.
+Level 1 guides routing but does not replace native discovery by itself. Actual visibility and automatic invocation remain controlled by Level 0 client settings. Every entry that stays exposed to the agent must be truncation-safe: purpose first, do-not-use conditions early, nothing critical at the end of the line. After a task, temporarily enabled capabilities are recycled back to their pre-task state.
 
 Why the layers exist — context injection, truncation behavior, and manager-type capabilities — is explained in [What Your Agent Actually Sees](context-and-routing.md). The concrete template is [Capability Router](../templates/capability-router.md).
 
@@ -176,6 +176,16 @@ Write useful conclusions back into:
 
 Keep raw logs, full clones, runtime files, and model caches outside the Obsidian vault.
 
+### Minimum write protocol
+
+1. Normalize the GitHub URL and resolve a canonical project/capability ID before creating files.
+2. Search for existing records and re-read every target file immediately before editing. Existing records are updated; equivalent duplicates are not created.
+3. Build a change set that separates ordinary records from protected routing or configuration changes. Project cards, evidence, candidate/rejection records, and maintenance logs are ordinary write-back; Registry/L1 promotion, automatic invocation, Hooks, and client configuration require explicit approval.
+4. Apply source records first, then rebuild or check derived indexes, then append one maintenance event. Do not treat a partially updated index as the source of truth.
+5. Validate duplicate IDs, links, state combinations, intended file scope, and `git diff`. If a conflict or partial failure appears, stop and report the exact completed and incomplete files instead of continuing blindly.
+
+Idempotency rule: running the same canonical URL twice must update the same record, keep the same ID, and avoid duplicate evidence or Registry rows.
+
 ## 中文
 
 这套工作流把三层系统连起来：
@@ -193,14 +203,14 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 能力发现是分层的，不是平铺的。Agent 从不扫描整库：
 
 ```text
-规则文件（常驻可见，保持薄）
--> 一级薄路由：任务分类，每项截断安全的一句话
+L0 客户端原生可见性策略 + 常驻规则里的短指针
+-> L1 一级薄路由：任务分类，每项截断安全的一句话
 -> 二级 Registry 行：触发与禁用条件
 -> 三级能力卡：单个能力的完整说明
 -> 四级能力本体：启用时才进入上下文
 ```
 
-所有常驻暴露给 Agent 的条目必须截断安全：用途先行，禁止场景前置，关键限制不放行尾。任务结束后，临时启用的能力回收到任务前状态。
+L1 负责引导路由，但本身不会替代原生发现；实际可见性和自动调用仍由 L0 客户端设置控制。所有常驻暴露给 Agent 的条目必须截断安全：用途先行，禁止场景前置，关键限制不放行尾。任务结束后，临时启用的能力回收到任务前状态。
 
 为什么要这样分层——上下文注入、截断行为、总管型能力——见 [Agent 实际看到什么](context-and-routing.md)；具体模板见 [能力路由模板](../templates/capability-router.md)。
 
@@ -351,3 +361,13 @@ retired：不再使用
 - 维护日志。
 
 原始日志、完整 clone、运行时文件和模型缓存不要放进 Obsidian vault。
+
+### 最小写回协议
+
+1. 新建文件前先规范化 GitHub URL，并解析唯一的项目/能力 canonical ID。
+2. 查找已有记录，编辑前立即重读所有目标文件；已有记录只更新，不创建等价重复项。
+3. 先列变更清单，并把普通记录与受保护的路由/配置修改分开。项目卡、证据、候选/否决记录和维护日志可普通写回；Registry/L1 晋升、自动调用、Hook 和客户端配置必须先获得明确批准。
+4. 先改源记录，再重建或校验派生索引，最后追加一条维护事件；半更新的索引不能反过来充当事实源。
+5. 检查重复 ID、链接、状态组合、文件范围和 `git diff`。发现冲突或半完成状态就停止，明确报告哪些文件已完成、哪些未完成，不盲目继续。
+
+幂等规则：同一个 canonical URL 连续执行两次，必须更新同一份记录、保持同一个 ID，并避免重复证据或重复 Registry 行。
