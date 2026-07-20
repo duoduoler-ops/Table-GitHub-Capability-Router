@@ -12,6 +12,8 @@ No Skill or Plugin installation is required. This is not a standalone CLI or bac
 
 Use it when you want your AI assistant to stop leaving GitHub repos, prompts, tools, and project notes scattered across temporary context, and start maintaining them as a reusable personal knowledge workbench.
 
+**Companion videos (中文):** [Part 1 · Why you shouldn't install every "must-have" AI tool](https://www.youtube.com/watch?v=c4d23apzOEY) · [Part 2 · The capability cold-vault workflow behind this repo](https://www.youtube.com/watch?v=juIsuIy55mQ)
+
 ## Design Principle: Own the First Routing Layer
 
 Coding agents can discover capabilities from exposed skill / plugin / MCP metadata. Broad descriptions can win ambiguous routing; when a client truncates exposed text to fit its budget, restrictions placed at the end can disappear. This kit lets you put a thin router you own in front of that discovery layer:
@@ -216,6 +218,8 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 这条路线不要求安装 Skill 或 Plugin。它不是独立 CLI 或后台服务，也不会自己修改 Agent 配置；所有工作都发生在 Agent 会话里，并继续受权限、确认、隐私和回滚门禁约束。
 
 当你不想再让 GitHub repo、提示词、工具和项目笔记散落在临时上下文里，而是希望 AI 助手把它们维护成一个可复用的个人知识工作台时，可以使用这套模板。
+
+**配套视频：** [上集 · 你收藏的 GitHub 神器，真的值得装吗](https://www.youtube.com/watch?v=c4d23apzOEY) · [下集 · 这个仓库背后的 Agent 能力冷库工作流](https://www.youtube.com/watch?v=juIsuIy55mQ)
 
 ## 设计原则：自己掌握第一层路由
 
