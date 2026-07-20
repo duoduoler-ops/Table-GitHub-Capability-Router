@@ -10,6 +10,8 @@ This repository is a Markdown-first, prompt-triggered, agent-executed workflow. 
 
 No Skill or Plugin installation is required. This is not a standalone CLI or background service, and it does not change agent configuration by itself. All work happens inside the agent session and remains subject to your permission, confirmation, privacy, and rollback gates.
 
+For a compact Chinese entry, start with [5 分钟快速开始](QUICKSTART.zh-CN.md). A fully fictional, publish-safe output example is available in [examples/sanitized-demo](examples/sanitized-demo/README.md).
+
 Use it when you want your AI assistant to stop leaving GitHub repos, prompts, tools, and project notes scattered across temporary context, and start maintaining them as a reusable personal knowledge workbench.
 
 **Companion videos (中文):** [Part 1 · Why you shouldn't install every "must-have" AI tool](https://www.youtube.com/watch?v=c4d23apzOEY) · [Part 2 · The capability cold-vault workflow behind this repo](https://www.youtube.com/watch?v=juIsuIy55mQ)
@@ -109,7 +111,7 @@ See [How It Works](docs/how-it-works.md) for the full bilingual explanation, and
 
 ### Fastest path: give the Markdown to your agent
 
-No installation is required. Give your agent this repository URL or a local copy and send:
+No installation is required. Chinese users can give the agent this repository URL and ask it to read only `QUICKSTART.zh-CN.md` first. For the full English route, send:
 
 ```text
 Read this repository's README, docs/context-and-routing.md, docs/how-it-works.md,
@@ -136,6 +138,8 @@ This is the zero-install route and the repository's primary promise: the Markdow
 6. If the project produces a reusable idea, update an existing workflow, concept, or project page. Create a new distillation page only when it introduces a genuinely new method.
 7. For existing tools, ask your agent to screen installed Skills, Plugins, MCP servers, scripts, or CLIs into capability manifests before adding them to the active registry.
 8. Build your thin router from `templates/capability-router.md`: define under ten task categories, keep every exposed entry truncation-safe, and point your agent rules at the router instead of full-library scans.
+
+Before connecting the generated router to persistent rules, compare its shape with the [sanitized demo](examples/sanitized-demo/README.md). The demo is fictional evidence of the output structure, not proof that any client setting has changed.
 
 Add one short routing rule to `AGENTS.md`, `CLAUDE.md`, or your client's equivalent guidance file:
 
@@ -196,6 +200,7 @@ See [Privacy and Sanitization](docs/privacy-and-sanitization.md).
 ## Included Files
 
 - `LICENSE`: MIT license.
+- `QUICKSTART.zh-CN.md`: compact Chinese entry that avoids reading the whole repository up front.
 - `docs/context-and-routing.md`: first principles — what the agent actually sees, truncation, routing power, manager-type capabilities.
 - `docs/how-it-works.md`: the end-to-end workflow.
 - `docs/customization.md`: what users should modify.
@@ -204,6 +209,7 @@ See [Privacy and Sanitization](docs/privacy-and-sanitization.md).
 - `templates/github-project-card.md`: project evaluation template.
 - `templates/capability-manifest.md`: cold-storage capability manifest template.
 - `prompts/github-intake-prompt.md`: copy-paste prompts for intake, capability screening, and always-visible layer audits.
+- `examples/sanitized-demo/`: fictional, publish-safe input and expected output for a first routing pass.
 
 ## License
 
@@ -218,6 +224,8 @@ MIT. You can use, modify, and redistribute this starter kit. If you adapt it for
 这是一套 Markdown-first、命令触发、由 Agent 执行的自动化工作流。把仓库链接或本地 Markdown 加一句命令交给 Codex、Claude Code 等 coding agent，它会读取 SOP、完成检查、生成所需记录，并把有长期价值的结果写回知识库。
 
 这条路线不要求安装 Skill 或 Plugin。它不是独立 CLI 或后台服务，也不会自己修改 Agent 配置；所有工作都发生在 Agent 会话里，并继续受权限、确认、隐私和回滚门禁约束。
+
+想少读上下文，直接从 [5 分钟快速开始](QUICKSTART.zh-CN.md) 开始；想先看产物长什么样，可查看完全虚构、可公开的 [脱敏演示](examples/sanitized-demo/README.md)。
 
 当你不想再让 GitHub repo、提示词、工具和项目笔记散落在临时上下文里，而是希望 AI 助手把它们维护成一个可复用的个人知识工作台时，可以使用这套模板。
 
@@ -317,7 +325,7 @@ L0 客户端原生可见性策略 + 常驻规则里的短指针
 
 ### 最快路线：直接把 Markdown 给 Agent
 
-不需要安装。把本仓库链接或本地副本交给 Agent，再发送：
+不需要安装。优先把本仓库链接交给 Agent，让它先只读 `QUICKSTART.zh-CN.md`；需要完整背景时再发送下面这份长版提示词：
 
 ```text
 请阅读本仓库的 README、docs/context-and-routing.md、docs/how-it-works.md、
@@ -343,6 +351,8 @@ templates/capability-router.md 和 templates/capability-manifest.md。
 6. 如果项目产出可复用方法，优先更新已有工作流页、概念页或项目页。只有真的形成新方法时，才新建提炼页。
 7. 对已有工具，让 Agent 先把已安装或已保存的 Skill、Plugin、MCP、脚本、CLI 筛查成能力 manifest，再决定是否进入 active Registry。
 8. 用 `templates/capability-router.md` 搭你的薄路由：定义十个以内的任务分类，所有暴露条目保持截断安全，并把 Agent 规则指向薄路由，不做整库扫描。
+
+接入持久规则前，先用 [脱敏演示](examples/sanitized-demo/README.md) 核对输出结构。演示只证明 Markdown 产物的形状，不代表任何客户端配置已经生效。
 
 在 `AGENTS.md`、`CLAUDE.md` 或对应客户端的持久规则里增加一条短路由：
 
@@ -403,6 +413,7 @@ rg -n "C:\\Users|D:\\|API[_ -]?KEY|TOKEN|COOKIE|SECRET|Bearer|password|email|pho
 ## 包含文件
 
 - `LICENSE`：MIT 许可证。
+- `QUICKSTART.zh-CN.md`：中文低上下文入口，避免开工时一次读完整仓库。
 - `docs/context-and-routing.md`：第一性原理——Agent 实际看到什么、截断机制、路由权、总管型能力。
 - `docs/how-it-works.md`：端到端工作流说明。
 - `docs/customization.md`：哪些地方应该自行修改。
@@ -411,6 +422,7 @@ rg -n "C:\\Users|D:\\|API[_ -]?KEY|TOKEN|COOKIE|SECRET|Bearer|password|email|pho
 - `templates/github-project-card.md`：项目评价模板。
 - `templates/capability-manifest.md`：能力冷库 manifest 模板。
 - `prompts/github-intake-prompt.md`：入库、能力筛查与常驻层体检提示词。
+- `examples/sanitized-demo/`：完全虚构、可公开的首次路由输入与预期输出。
 
 ## 许可证
 
