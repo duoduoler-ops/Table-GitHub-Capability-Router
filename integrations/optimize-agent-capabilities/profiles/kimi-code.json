@@ -1,0 +1,10 @@
+{
+  "id": "kimi-code",
+  "support": "audit-only",
+  "commands": ["kimi"],
+  "markers": ["${HOME}/.kimi", "${HOME}/.kimi-code"],
+  "skillRoots": ["${HOME}/.kimi/skills", "${HOME}/.claude/skills", "${HOME}/.codex/skills", "${HOME}/.config/agents/skills", "${HOME}/.agents/skills", "${CWD}/.kimi/skills", "${CWD}/.agents/skills"],
+  "rules": ["${CWD}/AGENTS.md", "${CWD}/CLAUDE.md"],
+  "explicitInvocation": "Use /skill:<name>; no per-Skill implicit-invocation write adapter is verified",
+  "adapter": null
+}

@@ -205,11 +205,13 @@ See [Privacy and Sanitization](docs/privacy-and-sanitization.md).
 - `docs/how-it-works.md`: the end-to-end workflow.
 - `docs/customization.md`: what users should modify.
 - `docs/privacy-and-sanitization.md`: untrusted-source boundary and what not to publish.
+- `docs/optional-capability-optimizer.md`: optional cross-client audit Skill and adapter boundary.
 - `templates/capability-router.md`: native visibility boundary + Level-1 categories + Level-2 registry rows + writing rules.
 - `templates/github-project-card.md`: project evaluation template.
 - `templates/capability-manifest.md`: cold-storage capability manifest template.
 - `prompts/github-intake-prompt.md`: copy-paste prompts for intake, capability screening, and always-visible layer audits.
 - `examples/sanitized-demo/`: fictional, publish-safe input and expected output for a first routing pass.
+- `integrations/optimize-agent-capabilities/`: explicit, optional cross-client capability audit entry.
 
 ## License
 
@@ -418,11 +420,13 @@ rg -n "C:\\Users|D:\\|API[_ -]?KEY|TOKEN|COOKIE|SECRET|Bearer|password|email|pho
 - `docs/how-it-works.md`：端到端工作流说明。
 - `docs/customization.md`：哪些地方应该自行修改。
 - `docs/privacy-and-sanitization.md`：不可信来源边界与哪些内容不要公开。
+- `docs/optional-capability-optimizer.md`：可选的跨客户端审计 Skill 与 adapter 边界。
 - `templates/capability-router.md`：原生可见性边界 + 一级分类 + 二级 Registry 行 + 写作规则。
 - `templates/github-project-card.md`：项目评价模板。
 - `templates/capability-manifest.md`：能力冷库 manifest 模板。
 - `prompts/github-intake-prompt.md`：入库、能力筛查与常驻层体检提示词。
 - `examples/sanitized-demo/`：完全虚构、可公开的首次路由输入与预期输出。
+- `integrations/optimize-agent-capabilities/`：显式、可选的跨客户端能力审计入口。
 
 ## 许可证
 
