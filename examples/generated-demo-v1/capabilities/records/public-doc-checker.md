@@ -1,25 +1,27 @@
 ---
-schema_version: {{SCHEMA_VERSION}}
+schema_version: 1
 record_type: capability
-id: {{CAPABILITY_ID}}
-revision: {{REVISION}}
-management_state: {{MANAGEMENT_STATE}}
-health_state: {{HEALTH_STATE}}
-risk: {{RISK}}
-invocation: {{INVOCATION}}
-authorization: {{AUTHORIZATION}}
-manager_type: {{MANAGER_TYPE}}
-route_category: {{ROUTE_CATEGORY}}
-updated_at: {{UPDATED_AT}}
+id: public-doc-checker
+revision: 3
+management_state: active
+health_state: healthy
+risk: low
+invocation: conditional
+authorization: routing-proposal
+manager_type: false
+route_category: public-research
+updated_at: 2026-07-21T00:42:01Z
+health_evidence: Fictional isolated one-sample smoke test passed.
+approved_by: demo-user
 ---
 
 # Capability Manifest / 能力冷库 Manifest
 
 ## Basic Info / 基本信息
 
-- Capability ID / 能力 ID: {{CAPABILITY_ID}}
-- Name / 名称: {{CAPABILITY_NAME}}
-- Type / 类型: {{CAPABILITY_TYPE}}
+- Capability ID / 能力 ID: public-doc-checker
+- Name / 名称: Fictional Public Docs Checker
+- Type / 类型: Skill
 - Platform / 平台: Codex / Claude / Shared / Other
 - Source / 来源:
 - Version or commit / 版本或 commit:
@@ -31,9 +33,9 @@ updated_at: {{UPDATED_AT}}
 ## Storage Decision / 冷库处置
 
 - Asset form / 资产形态: runtime / skill / plugin / mcp-config / script / reference / source-pointer
-- Canonical state / 权威状态: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
-- Risk / 风险: {{RISK}}
-- Manager type / 是否总管型: see `manager_type` in frontmatter / 见 frontmatter 的 `manager_type`
+- Canonical state / 权威状态: see frontmatter; current demo state is `active / healthy / conditional` / 见 frontmatter；本演示当前为 `active / healthy / conditional`
+- Risk / 风险: low
+- Manager type / 是否总管型: false
 - Quarantine / 隔离: true / false
 - Canonical path / canonical 路径:
 - Source pointer / 源码指针:

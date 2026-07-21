@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/duoduoler-ops/Table-GitHub-Capability-Router/main/schemas/project-card.schema.json",
+  "title": "GitHub Project Card Frontmatter",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "id",
+    "revision",
+    "status",
+    "grade",
+    "canonical_url",
+    "evidence_level",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "record_type": {"const": "github-project"},
+    "id": {"type": "string", "pattern": "^gh-[a-z0-9-]+$"},
+    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+    "status": {"enum": ["candidate", "evaluated", "retained", "reference", "rejected", "archived"]},
+    "grade": {"enum": ["ungraded", "S", "A", "B", "C", "D"]},
+    "canonical_url": {"type": "string", "pattern": "^https://github\\.com/[a-z0-9_.-]+/[a-z0-9_.-]+$"},
+    "evidence_level": {"enum": ["unverified", "author-claim", "online-check", "static-check", "T0", "T1", "T2", "T3"]},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "approved_by": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"enum": ["retained", "reference"]}}},
+      "then": {
+        "required": ["approved_by"],
+        "properties": {"grade": {"enum": ["S", "A", "B"]}}
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "rejected"}}},
+      "then": {"properties": {"grade": {"enum": ["C", "D"]}}}
+    }
+  ],
+  "additionalProperties": true
+}

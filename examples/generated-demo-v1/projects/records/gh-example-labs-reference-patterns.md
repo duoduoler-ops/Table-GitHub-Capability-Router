@@ -1,29 +1,30 @@
 ---
-schema_version: {{SCHEMA_VERSION}}
+schema_version: 1
 record_type: github-project
-id: {{PROJECT_ID}}
-revision: {{REVISION}}
-status: {{PROJECT_STATUS}}
-grade: {{PROJECT_GRADE}}
-canonical_url: {{CANONICAL_URL}}
-evidence_level: {{EVIDENCE_LEVEL}}
-updated_at: {{UPDATED_AT}}
+id: gh-example-labs-reference-patterns
+revision: 3
+status: reference
+grade: B
+canonical_url: https://github.com/example-labs/reference-patterns
+evidence_level: unverified
+updated_at: 2026-07-21T00:42:00Z
+approved_by: demo-user
 ---
 
 # GitHub Project Card / GitHub 项目卡
 
 ## Basic Info / 基本信息
 
-- Stable ID / 稳定 ID: {{PROJECT_ID}}
-- GitHub: {{CANONICAL_URL}}
-- Check date / 核查日期: {{CHECK_DATE}}
+- Stable ID / 稳定 ID: gh-example-labs-reference-patterns
+- GitHub: https://github.com/example-labs/reference-patterns
+- Check date / 核查日期: 2026-07-21
 - Version or commit / 版本或 commit:
 - Evaluation mode / 评价模式: lightweight / full / install test
 - Project type / 项目类型:
 - Capability chain / 能力链:
 - Capability slot / 能力槽:
 - Distillation page / 提炼页:
-- Canonical status, grade, and evidence / 权威状态、等级与证据: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
+- Canonical status, grade, and evidence / 权威状态、等级与证据: see frontmatter; current demo state is `reference / B / unverified` / 见 frontmatter；本演示当前为 `reference / B / unverified`
 
 ## 30-Second Positioning / 30 秒定位
 
@@ -31,7 +32,7 @@ updated_at: {{UPDATED_AT}}
 - It enhances / 它增强:
 - It produces / 它产出:
 - Next 30-day use case / 未来 30 天使用场景:
-- If B reference, reusable takeaway / 若为 B reference，提炼产物:
+- If B reference, reusable takeaway / 若为 B reference，提炼产物: fictional routing checklist / 虚构路由检查表
 - Distillation destination / 提炼落点: workflow / concept / own project / none
 
 ## Quick Rejection / 快速否决

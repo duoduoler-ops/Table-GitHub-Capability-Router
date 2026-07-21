@@ -1,0 +1,7 @@
+interface:
+  display_name: "GitHub Vault Router"
+  short_description: "Bootstrap and maintain GitHub intake plus capability cold storage"
+  default_prompt: "Initialize or update the GitHub intake and capability-routing vault, then validate it."
+
+policy:
+  allow_implicit_invocation: true

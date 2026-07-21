@@ -1,29 +1,30 @@
 ---
-schema_version: {{SCHEMA_VERSION}}
+schema_version: 1
 record_type: github-project
-id: {{PROJECT_ID}}
-revision: {{REVISION}}
-status: {{PROJECT_STATUS}}
-grade: {{PROJECT_GRADE}}
-canonical_url: {{CANONICAL_URL}}
-evidence_level: {{EVIDENCE_LEVEL}}
-updated_at: {{UPDATED_AT}}
+id: gh-example-labs-reference-patterns
+revision: 2
+status: evaluated
+grade: B
+canonical_url: https://github.com/example-labs/reference-patterns
+evidence_level: unverified
+updated_at: 2026-07-21T00:41:59Z
 ---
 
 # GitHub Project Card / GitHub 项目卡
 
 ## Basic Info / 基本信息
 
-- Stable ID / 稳定 ID: {{PROJECT_ID}}
-- GitHub: {{CANONICAL_URL}}
-- Check date / 核查日期: {{CHECK_DATE}}
+- Stable ID / 稳定 ID: gh-example-labs-reference-patterns
+- GitHub: https://github.com/example-labs/reference-patterns
+- Check date / 核查日期: 2026-07-21
 - Version or commit / 版本或 commit:
 - Evaluation mode / 评价模式: lightweight / full / install test
 - Project type / 项目类型:
 - Capability chain / 能力链:
 - Capability slot / 能力槽:
 - Distillation page / 提炼页:
-- Canonical status, grade, and evidence / 权威状态、等级与证据: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
+- Current evidence / 当前证据: unverified
+- Retention grade / 入库等级: ungraded
 
 ## 30-Second Positioning / 30 秒定位
 

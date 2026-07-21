@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260721T004202Z-1a2df0b3",
+  "action": "capability-transition",
+  "created_at": "2026-07-21T00:42:02Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "capabilities/records/session-manager.md",
+      "existed": true,
+      "before_sha256": "a89a0fc3c2061921e93c8e924f8bcbb0ac7a12dc4028ddefb768bf51982e225e",
+      "after_sha256": "8ab9b73bf25c429c4f9e05a3ef2c0d53854580b94a62cf5e3cded502f45284fb"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "da25b7b86f2665ee1d546e8b8b7dec4399db3164308956a33bb8b97777c7f8b4",
+      "after_sha256": "3c3df9a49c158853002093513150f48c1aae8b120d37cafa0a04dc2cdc31eaa9"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "625a510bd0768db7c7d8a43d3008cccca6efd10d0dc380db7805b2d34c229f90",
+      "after_sha256": "85822ee85386b43b609024669ce1e94b8c2d9771b774e049a0c9e3e343c28236"
+    }
+  ],
+  "committed_at": "2026-07-21T00:42:02Z"
+}

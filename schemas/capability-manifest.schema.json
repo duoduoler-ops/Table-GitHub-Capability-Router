@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/duoduoler-ops/Table-GitHub-Capability-Router/main/schemas/capability-manifest.schema.json",
+  "title": "Capability Manifest Frontmatter",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "id",
+    "revision",
+    "management_state",
+    "health_state",
+    "risk",
+    "invocation",
+    "authorization",
+    "manager_type",
+    "route_category",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "record_type": {"const": "capability"},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+    "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+    "management_state": {"enum": ["candidate", "active", "cold", "disabled", "reference", "retired", "quarantine"]},
+    "health_state": {"enum": ["healthy", "unverified", "degraded", "broken", "missing"]},
+    "risk": {"enum": ["low", "medium", "high"]},
+    "invocation": {"enum": ["auto", "conditional", "explicit-only", "disabled"]},
+    "authorization": {"enum": ["ordinary-record", "lifecycle-update", "routing-proposal", "configuration-change"]},
+    "manager_type": {"enum": ["true", "false"]},
+    "route_category": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "approved_by": {"type": "string", "minLength": 1},
+    "health_evidence": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"management_state": {"const": "active"}}},
+      "then": {
+        "required": ["approved_by"],
+        "properties": {
+          "health_state": {"const": "healthy"},
+          "invocation": {"enum": ["auto", "conditional", "explicit-only"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"management_state": {"enum": ["candidate", "cold", "reference"]}}},
+      "then": {"properties": {"invocation": {"const": "explicit-only"}}}
+    },
+    {
+      "if": {"properties": {"management_state": {"enum": ["disabled", "retired", "quarantine"]}}},
+      "then": {"properties": {"invocation": {"const": "disabled"}}}
+    },
+    {
+      "if": {"properties": {"manager_type": {"const": "true"}}},
+      "then": {"not": {"properties": {"invocation": {"const": "auto"}}, "required": ["invocation"]}}
+    }
+  ],
+  "additionalProperties": true
+}

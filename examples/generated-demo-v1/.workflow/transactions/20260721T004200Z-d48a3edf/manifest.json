@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260721T004200Z-d48a3edf",
+  "action": "new-project",
+  "created_at": "2026-07-21T00:42:00Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "projects/records/gh-example-labs-all-tools-manager.md",
+      "existed": false,
+      "before_sha256": null,
+      "after_sha256": "de5dbe80eca3e3c505cfc307f9965a92dfb9e72e873fcb2e867e7fe8b64388d2"
+    },
+    {
+      "path": "indexes/github-project-index.md",
+      "existed": true,
+      "before_sha256": "6f0c5f21a39d6a659ffc5e4777b6b634bde4d38dfbb4c9166fc3e9ce30f99847",
+      "after_sha256": "a22388ed646197cf268964f8c9037ecf71adf028f34fec9c7a4372c2a13dc65b"
+    },
+    {
+      "path": "projects/candidate-pool.md",
+      "existed": true,
+      "before_sha256": "611a7f83f2c92af0080d5b0ae65bb69cb2ea4d4f1f1c4ec51c3becc0818d2872",
+      "after_sha256": "45d786a52356d138c6b65b488a4d90a2d9ffc3294bf6b47ac312c4bd0b2dd6ba"
+    },
+    {
+      "path": "projects/rejection-log.md",
+      "existed": true,
+      "before_sha256": "43803247f370b5190c8366440ae434cf9706c3c0d31d719c0ae40e01062d2eae",
+      "after_sha256": "43803247f370b5190c8366440ae434cf9706c3c0d31d719c0ae40e01062d2eae"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "a621bab547f4fcbe7e8ef220d0a012861932d17d80113d434cc7c3938faed0c9",
+      "after_sha256": "89db040caa1ee4bdb53a6e59006580a39573b5b52ca1b97e9e5c6c2e1e6e801b"
+    }
+  ],
+  "committed_at": "2026-07-21T00:42:00Z"
+}
