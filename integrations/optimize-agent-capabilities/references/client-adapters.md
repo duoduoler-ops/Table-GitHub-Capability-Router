@@ -1,6 +1,8 @@
 # Client adapter contract
 
-The optimizer separates shared routing policy from client-specific configuration.
+The audit separates shared routing policy from client-specific configuration. This repository does
+not currently ship a write-capable adapter; the contract below defines the evidence required for a
+future, separately reviewed contribution.
 
 | Operation | Requirement |
 | --- | --- |
@@ -12,7 +14,7 @@ The optimizer separates shared routing policy from client-specific configuration
 
 Support levels:
 
-- `managed`: all five operations are implemented and tested.
+- `managed`: reserved for a future adapter with all five operations implemented and tested.
 - `audit-only`: detection and inventory are reliable; configuration remains advisory.
 - `unknown`: only shared filesystem conventions are inspected.
 
@@ -20,5 +22,5 @@ Profiles describe evidence and discovery locations. They are not permission to w
 to `managed` only after its adapter has fixtures, idempotency tests, rollback coverage, and a clean
 process verification method.
 
-Do not create one monolithic adapter with branches for every product. Each write-capable client
-adapter owns only its native settings and delegates shared L1-L4 artifacts to the core workflow.
+Do not create one monolithic adapter with branches for every product. A future write-capable client
+adapter should own only its native settings and delegate shared L1-L4 artifacts to the core workflow.

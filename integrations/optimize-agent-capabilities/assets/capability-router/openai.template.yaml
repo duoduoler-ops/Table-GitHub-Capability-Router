@@ -1,6 +1,0 @@
-interface:
-  display_name: "Capability Router"
-  short_description: "只为当前任务选择一个额外能力"
-
-policy:
-  allow_implicit_invocation: true

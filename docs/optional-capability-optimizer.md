@@ -12,7 +12,7 @@ prove that a guessed config key is valid. The optimizer therefore separates:
 
 1. Shared policy: L0-L4 routing, need gates, status classes, permissions, rollback, and verification.
 2. Client profiles: discovery paths, rules files, explicit invocation mechanisms, and support level.
-3. Managed adapters: deterministic configuration changes for one verified client.
+3. Future adapters: separately reviewed, deterministic configuration changes for one verified client.
 
 Unknown clients use the generic profile. They can read the goal and adapter contract, inventory
 their environment, and propose a native implementation. They must not mutate configuration until
@@ -22,13 +22,14 @@ their client mechanism is documented and the user explicitly approves the diff.
 
 | Client | Level | Behavior |
 | --- | --- | --- |
-| Codex | `managed` | Audit plus an opt-in, backed-up explicit-invocation adapter. |
+| Codex | `audit-only` | Discover native Skill locations and report the documented invocation control. |
 | Claude Code | `audit-only` | Discover native Skill locations and report the documented invocation control. |
 | Kimi Code | `audit-only` | Account for merged Kimi, Claude, Codex, and generic Skill roots. |
 | Other agents | `unknown` | Inspect generic Agent Skills and produce an adapter plan without config writes. |
 
-The profile format is intentionally small. OpenCode, Pi, Warp, and future agents should begin as
-`audit-only` or `unknown`; promote them to `managed` only after all adapter operations are tested.
+The profile format is intentionally small. This contribution performs no configuration writes.
+OpenCode, Pi, Warp, and future agents should begin as `audit-only` or `unknown`; any promotion to
+`managed` belongs in a separate PR after all adapter operations are tested.
 
 ## Run
 
@@ -58,7 +59,7 @@ Agent Skills 的指令格式可以通用，但能力发现目录、Plugin 结构
 
 1. 通用规则：L0-L4 路由、Need Gate、状态分类、权限、回滚和验收。
 2. 客户端 profile：发现路径、规则文件、显式调用机制和支持级别。
-3. managed adapter：只负责一个经过验证的客户端，执行确定性的配置修改。
+3. future adapter：单独审查，只负责一个经过验证的客户端，执行确定性的配置修改。
 
 未知客户端使用 `generic-agent` profile。它可以理解目标、盘点本机并提出原生适配方案，但在机制未经
 官方文档和本机测试确认前，不得修改配置。
@@ -67,13 +68,13 @@ Agent Skills 的指令格式可以通用，但能力发现目录、Plugin 结构
 
 | 客户端 | 级别 | 行为 |
 | --- | --- | --- |
-| Codex | `managed` | 审计，并在用户明确批准后执行带备份的显式调用适配。 |
+| Codex | `audit-only` | 识别原生 Skill 路径并报告官方调用控制，不自动改配置。 |
 | Claude Code | `audit-only` | 识别原生 Skill 路径并报告官方调用控制，不自动改配置。 |
 | Kimi Code | `audit-only` | 处理 Kimi、Claude、Codex 和 generic Skill 根目录合并。 |
 | 其他 Agent | `unknown` | 盘点通用 Agent Skills，只生成 adapter 方案。 |
 
-OpenCode、Pi、Warp 和未来客户端都先从 profile 开始。只有 `detect`、`inventory`、`plan`、`apply`、
-`verify` 全部有测试后，才升级为 `managed`。
+本次贡献不执行任何配置写入。OpenCode、Pi、Warp 和未来客户端都先从 profile 开始；只有
+`detect`、`inventory`、`plan`、`apply`、`verify` 全部有测试后，才在单独 PR 中讨论 `managed`。
 
 ```bash
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json

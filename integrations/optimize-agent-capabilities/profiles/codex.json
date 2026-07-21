@@ -1,10 +1,10 @@
 {
   "id": "codex",
-  "support": "managed",
+  "support": "audit-only",
   "commands": ["codex"],
   "markers": ["${HOME}/.codex"],
   "skillRoots": ["${HOME}/.codex/skills", "${HOME}/.agents/skills", "${CWD}/.codex/skills", "${CWD}/.agents/skills"],
   "rules": ["${HOME}/.codex/AGENTS.md", "${CWD}/AGENTS.md"],
   "explicitInvocation": "agents/openai.yaml policy.allow_implicit_invocation=false",
-  "adapter": "scripts/reconcile-codex.mjs"
+  "adapter": null
 }

@@ -1,7 +1,7 @@
 interface:
-  display_name: "Optimize Agent Capabilities"
-  short_description: "Audit and reduce agent capability noise"
-  default_prompt: "Audit this agent's capability routing and propose the smallest safe optimization."
+  display_name: "Audit Agent Capabilities"
+  short_description: "Read-only agent capability inventory"
+  default_prompt: "Run a read-only audit of this agent's capability routing. Do not modify files or configuration."
 
 policy:
   allow_implicit_invocation: false

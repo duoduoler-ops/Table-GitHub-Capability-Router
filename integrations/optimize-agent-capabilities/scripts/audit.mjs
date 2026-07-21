@@ -74,7 +74,7 @@ const result = {
   mode: "audit-only",
   cwd,
   clients,
-  nextStep: "Read one matching profile and produce a reversible plan before any configuration change.",
+  nextStep: "Read one matching profile and produce a plan. This audit performs no configuration changes.",
 };
 
 if (jsonOutput) {

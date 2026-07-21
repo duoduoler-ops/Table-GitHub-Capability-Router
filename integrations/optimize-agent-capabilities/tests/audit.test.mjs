@@ -12,6 +12,7 @@ test("detects profiles and inventories shared Skill roots without writing", () =
   const home = path.join(fixture, "home");
   const cwd = path.join(fixture, "project");
   fs.mkdirSync(path.join(home, ".kimi-code"), { recursive: true });
+  fs.mkdirSync(path.join(home, ".codex"), { recursive: true });
   fs.mkdirSync(path.join(home, ".agents/skills/shared"), { recursive: true });
   fs.mkdirSync(path.join(home, ".kimi/skills/native"), { recursive: true });
   fs.mkdirSync(path.join(home, ".agents/skills/shared/.venv/bin"), { recursive: true });
@@ -31,5 +32,8 @@ test("detects profiles and inventories shared Skill roots without writing", () =
   assert.equal(report.mode, "audit-only");
   assert.ok(report.clients.some((client) => client.id === "kimi-code"));
   assert.ok(report.clients.some((client) => client.id === "generic-agent"));
-  assert.equal(fs.existsSync(path.join(home, ".codex")), false);
+  const codex = report.clients.find((client) => client.id === "codex");
+  assert.equal(codex.support, "audit-only");
+  assert.equal(codex.adapter, null);
+  assert.equal(fs.existsSync(path.join(home, ".codex/config.toml")), false);
 });

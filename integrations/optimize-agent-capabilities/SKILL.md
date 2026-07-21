@@ -1,9 +1,9 @@
 ---
 name: optimize-agent-capabilities
 description: >-
-  Explicitly audit and optimize Skill, Plugin, MCP, hook, and rules visibility across coding-agent
-  clients. Use only when the user requests capability cleanup, routing optimization, or a repeat
-  audit after client or extension updates. Never change client configuration implicitly.
+  Read-only audit of Skill, Plugin, MCP, hook, and rules visibility across coding-agent clients.
+  Use when the user requests capability inventory, routing analysis, or a repeat audit after client
+  or extension updates. Never change files or client configuration.
 ---
 
 # Optimize Agent Capabilities
@@ -21,24 +21,14 @@ optional execution entry, not a second routing specification.
 
 2. Read only the matching profile in `profiles/`.
 3. Classify every detected client:
-   - `managed`: a tested adapter may apply reversible changes after explicit approval.
    - `audit-only`: report findings and a client-specific plan; do not edit client configuration.
    - `unknown`: use the generic profile and do not infer configuration keys or paths.
-4. Build or update the shared L1-L4 router before changing L0 visibility.
-5. For Codex, use the bundled adapter only after the user approves configuration changes:
-
-   ```bash
-   node <skill-dir>/scripts/reconcile-codex.mjs --check
-   node <skill-dir>/scripts/reconcile-codex.mjs --apply
-   node <skill-dir>/scripts/reconcile-codex.mjs --verify
-   ```
-
-6. Report changed files, backup paths, verification evidence, and restart requirements.
+4. Compare findings with the shared L0-L4 model and propose the smallest useful routing plan.
+5. Report detected roots, counts, support boundaries, unsupported assumptions, and next steps.
 
 ## Safety
 
-- Start every run in audit mode.
-- Never install, uninstall, enable, disable, or rewrite configuration without explicit approval.
+- This integration is read-only. Do not install, uninstall, enable, disable, or rewrite anything.
 - Do not edit extension caches directly.
 - Do not claim support from format similarity alone; client discovery and invocation controls differ.
 - Preserve explicit invocation wherever the client supports it.
@@ -46,5 +36,6 @@ optional execution entry, not a second routing specification.
 
 ## Extending Clients
 
-Add a profile first. Add a write-capable adapter only when all five operations are deterministic and
-tested: `detect`, `inventory`, `plan`, `apply`, and `verify`. See `references/client-adapters.md`.
+Add a profile first. A future PR may propose a write-capable adapter only when all five operations
+are deterministic and tested: `detect`, `inventory`, `plan`, `apply`, and `verify`. See
+`references/client-adapters.md`.
