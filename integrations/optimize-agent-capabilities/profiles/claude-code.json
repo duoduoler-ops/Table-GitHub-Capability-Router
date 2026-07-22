@@ -1,0 +1,10 @@
+{
+  "id": "claude-code",
+  "support": "audit-only",
+  "commands": ["claude"],
+  "markers": ["${HOME}/.claude"],
+  "skillRoots": ["${HOME}/.claude/skills", "${CWD}/.claude/skills"],
+  "rules": ["${HOME}/.claude/CLAUDE.md", "${CWD}/CLAUDE.md"],
+  "explicitInvocation": "SKILL.md frontmatter disable-model-invocation=true",
+  "adapter": null
+}
