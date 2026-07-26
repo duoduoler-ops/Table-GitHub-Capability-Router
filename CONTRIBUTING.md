@@ -7,8 +7,8 @@ Contributions should improve deterministic GitHub intake, capability cold storag
 ## Change rules
 
 1. Keep canonical Markdown frontmatter flat and compatible with schema version 1.
-2. Do not hand-edit generated router/index examples; regenerate them with the CLI.
-3. Add or update tests for state transitions, idempotency, security boundaries, or generated output changes.
+2. Do not hand-edit generated capability routers, project semantic-reference tables, or index examples; regenerate them with the CLI.
+3. Add or update tests for state transitions, semantic eligibility/uniqueness, idempotency, security boundaries, or generated output changes.
 4. Keep the CLI dependency-free unless a dependency is essential and separately approved.
 5. Update `CHANGELOG.md` and add a migration note for breaking schema changes.
 
@@ -17,6 +17,7 @@ Contributions should improve deterministic GitHub intake, capability cold storag
 ```text
 python scripts/workflow.py validate-repo --root .
 python -m unittest discover -s tests -v
+node --test integrations/optimize-agent-capabilities/tests/audit.test.mjs
 ```
 
 Use synthetic repository names and reserved example domains in tests and examples.

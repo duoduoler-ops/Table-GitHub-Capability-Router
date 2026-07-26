@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+if command -v python3 >/dev/null 2>&1 && python3 -c "import sys" >/dev/null 2>&1; then
+  exec python3 scripts/workflow.py validate-repo
+fi
+
+if command -v python >/dev/null 2>&1 && python -c "import sys" >/dev/null 2>&1; then
+  exec python scripts/workflow.py validate-repo
+fi
+
+if command -v py >/dev/null 2>&1 && py -3 -c "import sys" >/dev/null 2>&1; then
+  exec py -3 scripts/workflow.py validate-repo
+fi
+
+echo "No existing Python 3 interpreter was found; repository validation did not run." >&2
+echo "Install nothing automatically. Run validation with an approved existing interpreter." >&2
+exit 1

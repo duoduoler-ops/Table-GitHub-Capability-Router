@@ -19,6 +19,9 @@ Invariants:
 - `retained` requires grade S/A/B and explicit approval.
 - `rejected` requires grade C/D.
 - `reference` promotion requires explicit approval.
+- Every `retained` or `reference` project requires at least two ordinary-language semantic examples, one `high_confidence/gated/explicit_only` trigger level, and non-empty negative routing.
+- Candidate, evaluated, rejected, archived, C, and D projects cannot carry semantic routing metadata and never enter the generated semantic project-reference table.
+- The semantic table is a read-only suggestion layer, separate from the executable capability router.
 - Re-evaluation updates the same canonical record and increments `revision`.
 - Canonical GitHub URL and stable ID must agree.
 
@@ -45,6 +48,6 @@ Invariants:
 
 ## 中文
 
-项目使用稳定 `gh-owner-repo` ID。`retained` 必须是 S/A/B 且经人工批准；`rejected` 必须是 C/D；重新评价更新同一记录并递增 `revision`。
+项目使用稳定 `gh-owner-repo` ID。`retained/reference` 必须是 S/A/B、经人工批准，并包含至少两条日常语义示例、合法命中级别和非空禁止命中条件；候选、评价中、否决、归档和 C/D 项目不得进入生成的项目语义命中表。该表只是只读建议层，不进入可执行能力路由。重新评价更新同一记录并递增 `revision`。
 
 能力初始状态固定为 `candidate / unverified / explicit-only`。只有 `active/cold/reference` 能进入派生路由；`candidate/disabled/quarantine/retired` 不进入。晋升 `active` 必须先有 `healthy` 证据并获得批准；schema v1 禁止总管型能力自动调用。active 能力健康降级时会自动隔离并移出路由。记录状态变化不等于真实客户端已经安装、启用或改配置。

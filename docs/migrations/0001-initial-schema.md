@@ -1,13 +1,15 @@
 # Migration 0001: Initial deterministic schema
 
-Schema version 1 introduces flat YAML frontmatter for canonical project and capability records, plus `workflow.json` for routing categories and output paths.
+Schema version 1 introduces flat YAML frontmatter for canonical project and capability records, plus `workflow.json` for routing categories and output paths. Because the deterministic schema first ships with v0.2.0, semantic project-reference fields are included in schema v1 rather than requiring an immediate schema bump.
 
 ## New canonical rules
 
 - One GitHub repository maps to one `gh-owner-repo` project ID.
 - One capability maps to one lowercase hyphenated capability ID.
 - Project and capability records carry `revision` and `updated_at`.
-- Indexes, candidate/rejection views, and router are generated outputs.
+- Indexes, semantic project references, candidate/rejection views, and the capability router are generated outputs.
+- Approved S/A/B `retained/reference` projects require at least two semantic examples, one trigger level, and negative routing.
+- Candidate, evaluated, rejected, archived, C, and D projects use `none / explicit_only / none` and never enter semantic routing.
 - Old Markdown without versioned frontmatter remains reference material until explicitly migrated; the CLI never rewrites it automatically.
 
 ## Migration procedure

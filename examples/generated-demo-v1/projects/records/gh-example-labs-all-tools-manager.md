@@ -7,6 +7,9 @@ status: rejected
 grade: D
 canonical_url: https://github.com/example-labs/all-tools-manager
 evidence_level: unverified
+semantic_examples: none
+trigger_level: explicit_only
+negative_routing: none
 updated_at: 2026-07-21T00:42:00Z
 ---
 

@@ -6,6 +6,7 @@
     "project_records": "projects/records",
     "capability_records": "capabilities/records",
     "project_index": "indexes/github-project-index.md",
+    "semantic_router": "indexes/project-semantic-routing.md",
     "candidate_pool": "projects/candidate-pool.md",
     "rejection_log": "projects/rejection-log.md",
     "router": "router/level1-router.md",

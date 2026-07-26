@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -16,7 +15,27 @@ function expand(value) {
 }
 
 function commandExists(command) {
-  return spawnSync("sh", ["-lc", `command -v ${command}`], { stdio: "ignore" }).status === 0;
+  const pathValue = process.env.PATH || "";
+  const directories = pathValue.split(path.delimiter).filter(Boolean);
+  const suffixes = process.platform === "win32"
+    ? (process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD").split(";")
+    : [""];
+  const names = path.extname(command)
+    ? [command]
+    : suffixes.map((suffix) => `${command}${suffix.toLowerCase()}`);
+  for (const directory of directories) {
+    for (const name of names) {
+      const candidate = path.join(directory, name);
+      try {
+        if (!fs.statSync(candidate).isFile()) continue;
+        if (process.platform !== "win32") fs.accessSync(candidate, fs.constants.X_OK);
+        return true;
+      } catch {
+        // Missing or unreadable PATH entries are simply not matches.
+      }
+    }
+  }
+  return false;
 }
 
 function loadProfiles() {

@@ -42,7 +42,7 @@ Canonical project and capability records are the source of truth. Indexes, the s
 | Schema-driven canonical records | Prevents IDs, URLs, approval state, and generated views from drifting apart |
 | Semantic project-reference routing | Lets everyday user wording suggest one relevant retained/reference GitHub project while keeping the no-extra-project option |
 | Positive and negative routing evidence | Requires at least two ordinary-language examples plus explicit do-not-route conditions |
-| Automatic consistency checks | Catches missing, duplicate, ineligible, and stale semantic routing records |
+| Automatic consistency checks + optional pre-commit gate | Catches missing, duplicate, ineligible, and stale semantic routing records before release or, when explicitly enabled, before commit |
 | Repo-scoped Codex and Claude Code Skills | Shares the workflow rules without forcing identical client-specific configuration |
 | Optional read-only capability audit | Preserves PR #1's cross-client inventory for Codex, Claude Code, Kimi Code, and generic agents |
 | Transactional writes and validation | Adds locking, backups, atomic replacement, rollback, repository validation, and history privacy scans |
@@ -78,6 +78,7 @@ See [Optional capability optimizer](docs/optional-capability-optimizer.md). Than
 - [Deterministic write protocol](docs/write-protocol.md) / 确定性写回协议
 - [Client profiles](docs/client-profiles/generic-agent.md) / 客户端接入边界
 - [Optional capability audit](docs/optional-capability-optimizer.md) / 可选能力审计
+- [Optional pre-commit gate](docs/optional-pre-commit.md) / 可选提交前门禁
 - `python -m unittest discover -s tests -v`
 - `node --test integrations/optimize-agent-capabilities/tests/audit.test.mjs`
 - `python scripts/workflow.py validate-repo`
@@ -96,6 +97,7 @@ This is strong workflow automation, not an unattended service. Target repository
 - [中文说明](README.zh-CN.md)
 - [5 分钟快速开始](QUICKSTART.zh-CN.md)
 - [Privacy and sanitization](docs/privacy-and-sanitization.md)
+- [Migrate v0.1.0 to v0.2.0](docs/migrations/v0.1-to-v0.2.md)
 - [上集 · 你收藏的 GitHub 神器，真的值得装吗](https://www.youtube.com/watch?v=c4d23apzOEY)
 - [下集 · 这个仓库背后的 Agent 能力冷库工作流](https://www.youtube.com/watch?v=juIsuIy55mQ)
 

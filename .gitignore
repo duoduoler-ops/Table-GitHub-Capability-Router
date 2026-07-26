@@ -26,10 +26,11 @@ build/
 .next/
 .vite/
 coverage/
+__pycache__/
+*.py[cod]
 
 # Test logs and cloned source repos should stay outside the vault
 _test-logs/
 github-repos/
 runtime/
 cache/
-

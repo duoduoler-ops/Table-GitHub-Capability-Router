@@ -108,7 +108,7 @@ class WorkflowCLITests(unittest.TestCase):
         )
         self.assertEqual(code, 2)
         self.assertIn("approval", blocked["error"].lower())
-        code, promoted = self.invoke(
+        code, blocked = self.invoke(
             "project-transition",
             "--root",
             str(self.root),
@@ -122,9 +122,258 @@ class WorkflowCLITests(unittest.TestCase):
             "--approved-by",
             "demo-user",
         )
+        self.assertEqual(code, 2)
+        self.assertIn("semantic routing", blocked["error"].lower())
+        code, promoted = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-project",
+            "--to",
+            "retained",
+            "--grade",
+            "A",
+            "--approved",
+            "--approved-by",
+            "demo-user",
+            "--semantic-example",
+            "Help me compare project patterns",
+            "--semantic-example",
+            "Suggest a reusable GitHub reference",
+            "--trigger-level",
+            "high_confidence",
+            "--negative-routing",
+            "Do not route when the user already selected an implementation",
+        )
         self.assertEqual(code, 0, promoted)
+        semantic_router = (self.root / "indexes" / "project-semantic-routing.md").read_text(encoding="utf-8")
+        matching_rows = [
+            line for line in semantic_router.splitlines() if line.startswith("| [gh-example-project]")
+        ]
+        self.assertEqual(len(matching_rows), 1)
+        self.assertIn("Help me compare project patterns", semantic_router)
         code, validation = self.invoke("validate", "--root", str(self.root))
         self.assertEqual(code, 0, validation)
+        self.assertEqual(validation["semantic_projects"], 1)
+
+    def test_semantic_routing_update_and_stale_table_rebuild(self) -> None:
+        self.initialize()
+        self.invoke("new-project", "--root", str(self.root), "--url", "example/reference")
+        self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-reference",
+            "--to",
+            "evaluated",
+        )
+        code, promoted = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-reference",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--semantic-example",
+            "Make this workflow easier to reuse",
+            "--semantic-example",
+            "Show me one relevant reference project",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route for a simple direct answer",
+        )
+        self.assertEqual(code, 0, promoted)
+        code, updated = self.invoke(
+            "project-routing",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-reference",
+            "--semantic-example",
+            "Compare an ordinary approach with a project-informed approach",
+            "--semantic-example",
+            "Which saved project can improve this workflow",
+            "--trigger-level",
+            "high_confidence",
+            "--negative-routing",
+            "Do not route when no extra project is needed",
+        )
+        self.assertEqual(code, 0, updated)
+        self.assertEqual(updated["semantic_examples"], 2)
+        semantic_router = self.root / "indexes" / "project-semantic-routing.md"
+        self.assertIn("Compare an ordinary approach", semantic_router.read_text(encoding="utf-8"))
+        semantic_router.write_text(
+            semantic_router.read_text(encoding="utf-8") + "manual drift\n",
+            encoding="utf-8",
+        )
+        code, stale = self.invoke("validate", "--root", str(self.root))
+        self.assertEqual(code, 2)
+        self.assertIn("stale", stale["error"].lower())
+        code, rebuilt = self.invoke("rebuild", "--root", str(self.root))
+        self.assertEqual(code, 0, rebuilt)
+        code, validation = self.invoke("validate", "--root", str(self.root))
+        self.assertEqual(code, 0, validation)
+
+    def test_ineligible_project_is_excluded_from_semantic_routing(self) -> None:
+        self.initialize()
+        self.invoke("new-project", "--root", str(self.root), "--url", "example/rejected")
+        code, rejected = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-rejected",
+            "--to",
+            "rejected",
+            "--grade",
+            "D",
+        )
+        self.assertEqual(code, 0, rejected)
+        semantic_router = (self.root / "indexes" / "project-semantic-routing.md").read_text(encoding="utf-8")
+        self.assertNotIn("gh-example-rejected", semantic_router)
+        code, blocked = self.invoke(
+            "project-routing",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-rejected",
+            "--semantic-example",
+            "This should stay excluded",
+            "--semantic-example",
+            "Do not route a rejected project",
+            "--trigger-level",
+            "high_confidence",
+            "--negative-routing",
+            "Rejected projects are never eligible",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("only retained/reference", blocked["error"].lower())
+
+    def test_missing_semantic_metadata_is_reported_without_crashing(self) -> None:
+        self.initialize()
+        self.invoke("new-project", "--root", str(self.root), "--url", "example/missing-routing")
+        card = self.root / "projects" / "records" / "gh-example-missing-routing.md"
+        card.write_text(
+            card.read_text(encoding="utf-8").replace("semantic_examples: none\n", ""),
+            encoding="utf-8",
+        )
+        code, result = self.invoke("validate", "--root", str(self.root))
+        self.assertEqual(code, 2)
+        self.assertIn("semantic_examples", result["error"])
+
+    def test_duplicate_semantic_example_across_projects_is_blocked(self) -> None:
+        self.initialize()
+        shared = "Use the same everyday wording"
+        for slug in ("first", "second"):
+            self.invoke("new-project", "--root", str(self.root), "--url", f"example/{slug}")
+            self.invoke(
+                "project-transition",
+                "--root",
+                str(self.root),
+                "--id",
+                f"gh-example-{slug}",
+                "--to",
+                "evaluated",
+            )
+        code, first = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-first",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--semantic-example",
+            shared,
+            "--semantic-example",
+            "First project specific wording",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route outside the first project scope",
+        )
+        self.assertEqual(code, 0, first)
+        code, duplicate = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-second",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--semantic-example",
+            shared,
+            "--semantic-example",
+            "Second project specific wording",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route outside the second project scope",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("duplicate semantic example", duplicate["error"].lower())
+        data, _ = workflow.parse_frontmatter(
+            (self.root / "projects" / "records" / "gh-example-second.md").read_text(encoding="utf-8")
+        )
+        self.assertEqual(data["status"], "evaluated")
+
+    def test_invalid_semantic_trigger_is_reported_without_crashing(self) -> None:
+        self.initialize()
+        self.invoke("new-project", "--root", str(self.root), "--url", "example/invalid-trigger")
+        self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-invalid-trigger",
+            "--to",
+            "evaluated",
+        )
+        code, promoted = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-invalid-trigger",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--semantic-example",
+            "Find one relevant reference",
+            "--semantic-example",
+            "Use a saved project for this task",
+            "--trigger-level",
+            "high_confidence",
+            "--negative-routing",
+            "Do not route when the ordinary answer is enough",
+        )
+        self.assertEqual(code, 0, promoted)
+        card = self.root / "projects" / "records" / "gh-example-invalid-trigger.md"
+        card.write_text(
+            card.read_text(encoding="utf-8").replace(
+                "trigger_level: high_confidence",
+                "trigger_level: invalid",
+            ),
+            encoding="utf-8",
+        )
+        code, result = self.invoke("validate", "--root", str(self.root))
+        self.assertEqual(code, 2)
+        self.assertIn("invalid trigger_level", result["error"].lower())
 
     def test_reviewed_project_update_preserves_protected_state(self) -> None:
         self.initialize()

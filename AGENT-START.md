@@ -56,8 +56,20 @@ Then:
 python scripts/workflow.py update-project --root <OUTPUT_DIR> --id <PROJECT_ID> --from-file <REVIEWED_DRAFT> --evidence-level online-check
 ```
 
-5. The update command rejects changes to ID, URL, status, grade, and approval metadata. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval and the `--approved` flag.
+5. The update command rejects changes to ID, URL, status, grade, approval, and semantic-routing metadata. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval, the `--approved` flag, at least two `--semantic-example` values, `--trigger-level`, and `--negative-routing`.
 6. Run `rebuild`, then `validate`.
+
+Example promotion:
+
+```powershell
+python scripts/workflow.py project-transition --root <OUTPUT_DIR> --id <PROJECT_ID> --to reference --grade B --approved `
+  --semantic-example "Help me choose a reference workflow" `
+  --semantic-example "Which saved GitHub project can improve this task" `
+  --trigger-level gated `
+  --negative-routing "Do not route for a simple direct answer or when the implementation is already fixed"
+```
+
+Use `project-routing` with the same three semantic arguments to revise a retained/reference project's wording later. The generated `indexes/project-semantic-routing.md` contains exactly one row per eligible project. Candidate, rejected, archived, C, and D projects are excluded.
 
 The same canonical GitHub URL always maps to the same `gh-owner-repo` ID. Repeating `new-project` returns the existing record.
 
@@ -81,6 +93,8 @@ python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILIT
 
 - When this repository is cloned and opened in Codex, `.agents/skills/github-vault-router/` is a repo-scoped Skill and may be invoked automatically when the task matches its description.
 - When opened in Claude Code, `.claude/skills/github-vault-router/` provides the equivalent project Skill.
+- When everyday task wording matches `indexes/project-semantic-routing.md`, suggest at most one retained/reference project and keep the ordinary `no-extra-project` route. Respect `high_confidence`, `gated`, `explicit_only`, and every negative-routing condition.
+- Semantic project matching is a read-only candidate layer. It does not enter the executable capability router and never authorizes clone, installation, login, unknown script execution, client configuration, or publishing.
 - If the repository was cloned during an already-running session, read the appropriate `SKILL.md` directly for this turn. Automatic discovery is guaranteed only after the client has discovered the new project Skill; Claude Code may need a restart when the top-level skills directory did not exist at session start.
 - A user-owned output directory receives `AGENT-ROUTER.md`. Making that pointer persistent in another project or in global client configuration is a separate configuration change and requires approval.
 
@@ -88,7 +102,8 @@ python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILIT
 
 - `workflow.json` exists and has `schema_version: 1`.
 - `projects/records/` and `capabilities/records/` are canonical sources.
-- Project index, candidate pool, rejection log, and L1/L2 router are generated—not manually maintained.
+- Project index, semantic project-reference table, candidate pool, rejection log, and L1/L2 capability router are generated—not manually maintained.
+- Every retained/reference S/A/B project has at least two semantic examples, one valid trigger level, and non-empty negative routing; every ineligible project is absent from the semantic table.
 - Transaction manifests exist under `.workflow/transactions/` for every mutation.
 - Canonical evidence/body updates were applied through `update-project` or `update-capability`, not direct edits.
 - No duplicate canonical URL or stable ID exists.
