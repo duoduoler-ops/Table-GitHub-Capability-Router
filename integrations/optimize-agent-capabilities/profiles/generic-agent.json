@@ -1,0 +1,10 @@
+{
+  "id": "generic-agent",
+  "support": "unknown",
+  "commands": [],
+  "markers": [],
+  "skillRoots": ["${HOME}/.config/agents/skills", "${HOME}/.agents/skills", "${CWD}/.agents/skills"],
+  "rules": ["${CWD}/AGENTS.md", "${CWD}/CLAUDE.md"],
+  "explicitInvocation": "unknown; inspect official client documentation before proposing changes",
+  "adapter": null
+}
