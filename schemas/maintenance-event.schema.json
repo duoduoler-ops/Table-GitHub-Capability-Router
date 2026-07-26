@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/duoduoler-ops/Table-GitHub-Capability-Router/main/schemas/maintenance-event.schema.json",
+  "title": "Workflow Transaction Manifest",
+  "type": "object",
+  "required": ["schema_version", "transaction_id", "action", "created_at", "status", "files"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "transaction_id": {"type": "string", "minLength": 8},
+    "action": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "committed_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["prepared", "committed", "rolled_back"]},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "existed", "before_sha256", "after_sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "existed": {"type": "boolean"},
+          "before_sha256": {"type": ["string", "null"]},
+          "after_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

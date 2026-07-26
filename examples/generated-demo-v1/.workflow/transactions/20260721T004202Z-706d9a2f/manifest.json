@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260721T004202Z-706d9a2f",
+  "action": "new-capability",
+  "created_at": "2026-07-21T00:42:02Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "capabilities/records/session-manager.md",
+      "existed": false,
+      "before_sha256": null,
+      "after_sha256": "a89a0fc3c2061921e93c8e924f8bcbb0ac7a12dc4028ddefb768bf51982e225e"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "0cc6d3d9a1e64439c0fd082dd320328a51d638dfd5d97b322de10a655875ffc9",
+      "after_sha256": "da25b7b86f2665ee1d546e8b8b7dec4399db3164308956a33bb8b97777c7f8b4"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "fa0b97a2a84dbc932df1a29b9afd470c91a220a7db310ca79fad628a715a787d",
+      "after_sha256": "625a510bd0768db7c7d8a43d3008cccca6efd10d0dc380db7805b2d34c229f90"
+    }
+  ],
+  "committed_at": "2026-07-21T00:42:02Z"
+}

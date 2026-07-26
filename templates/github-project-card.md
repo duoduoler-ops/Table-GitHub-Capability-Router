@@ -1,17 +1,44 @@
+---
+schema_version: {{SCHEMA_VERSION}}
+record_type: github-project
+id: {{PROJECT_ID}}
+revision: {{REVISION}}
+status: {{PROJECT_STATUS}}
+grade: {{PROJECT_GRADE}}
+canonical_url: {{CANONICAL_URL}}
+evidence_level: {{EVIDENCE_LEVEL}}
+semantic_examples: {{SEMANTIC_EXAMPLES}}
+trigger_level: {{TRIGGER_LEVEL}}
+negative_routing: {{NEGATIVE_ROUTING}}
+updated_at: {{UPDATED_AT}}
+---
+
 # GitHub Project Card / GitHub 项目卡
 
 ## Basic Info / 基本信息
 
-- GitHub:
-- Check date / 核查日期:
+- Stable ID / 稳定 ID: {{PROJECT_ID}}
+- GitHub: {{CANONICAL_URL}}
+- Check date / 核查日期: {{CHECK_DATE}}
 - Version or commit / 版本或 commit:
 - Evaluation mode / 评价模式: lightweight / full / install test
 - Project type / 项目类型:
 - Capability chain / 能力链:
 - Capability slot / 能力槽:
 - Distillation page / 提炼页:
-- Current evidence / 当前证据:
-- Retention grade / 入库等级: S / A / B / C / D
+- Canonical status, grade, and evidence / 权威状态、等级与证据: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
+
+## Semantic Reference Routing / 项目语义命中
+
+Only `retained` and `reference` projects with grade S/A/B may enter the generated semantic table. Supply at least two ordinary-language examples, one trigger level, and a clear negative-routing boundary during promotion. Candidate, rejected, archived, C, and D projects remain `none / explicit_only / none`.
+
+只有 S/A/B 且状态为 `retained` 或 `reference` 的项目可以进入生成的语义命中表。晋级时必须填写至少两条日常说法、一个命中级别和明确的禁止命中边界。候选、否决、归档、C/D 项目保持 `none / explicit_only / none`。
+
+- Everyday wording / 用户日常说法（至少两条）:
+- Trigger level / 命中级别: high_confidence / gated / explicit_only
+- Do not route or prefer another path / 禁止命中或优先分流:
+- Visible increment over the normal approach / 相比普通方案的可见增量:
+- When matched, propose normal vs project-informed routes / 命中后是否提供普通方案与项目方案对比:
 
 ## 30-Second Positioning / 30 秒定位
 

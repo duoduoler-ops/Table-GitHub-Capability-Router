@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260721T004201Z-04ba8caf",
+  "action": "new-capability",
+  "created_at": "2026-07-21T00:42:01Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "capabilities/records/unsafe-importer.md",
+      "existed": false,
+      "before_sha256": null,
+      "after_sha256": "0bc88c9da66b75ef357087f183c6235143ab15e22d81158ca94a8849fb988e78"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "0cc6d3d9a1e64439c0fd082dd320328a51d638dfd5d97b322de10a655875ffc9",
+      "after_sha256": "ac6679ae90b8846a15415dabbcb4cd31d107448a157283e4257e6ce01372f801"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "6e59eb599a9631d07447ac39c2b57e1783d399b42ab7435714d195fe317bd277",
+      "after_sha256": "27d7f78241bfece099f734b707c85d831212bf5f387c83120f290b886c1950db"
+    }
+  ],
+  "committed_at": "2026-07-21T00:42:01Z"
+}

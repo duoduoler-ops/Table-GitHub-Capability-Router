@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260721T004201Z-e78040d9",
+  "action": "capability-transition",
+  "created_at": "2026-07-21T00:42:01Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "capabilities/records/public-doc-checker.md",
+      "existed": true,
+      "before_sha256": "f3c04745acf42138d6eee722b732df7017d4bda905ff7daa5ffc9f06834edcf9",
+      "after_sha256": "89f2dd3278e6bb04037afebe11b368d88ac5f1171ffd8b772f2f1b3685cc9ad3"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "877d8e6e6b7e405080df10499834b2a20c77a7d300484a9344fbd3265f6a8103",
+      "after_sha256": "0cc6d3d9a1e64439c0fd082dd320328a51d638dfd5d97b322de10a655875ffc9"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "aab915c6ebfa035dba74ea4f469355cd998489fd978ab24501033d0f2d53e118",
+      "after_sha256": "6e59eb599a9631d07447ac39c2b57e1783d399b42ab7435714d195fe317bd277"
+    }
+  ],
+  "committed_at": "2026-07-21T00:42:01Z"
+}

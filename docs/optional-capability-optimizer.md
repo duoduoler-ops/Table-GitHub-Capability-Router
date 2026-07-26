@@ -1,6 +1,6 @@
 # Optional cross-client capability optimizer
 
-The repository remains Markdown-first and zero-install. The optional
+The repository remains zero-third-party-dependency and Markdown-readable. Canonical project and capability records are the source of truth; deterministic scripts generate and validate derived views. The optional
 [`optimize-agent-capabilities`](../integrations/optimize-agent-capabilities/SKILL.md) Skill adds a
 repeatable audit entry for users who maintain several coding-agent clients.
 
@@ -37,8 +37,8 @@ OpenCode, Pi, Warp, and future agents should begin as `audit-only` or `unknown`;
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 ```
 
-Install or explicitly invoke the Skill only when a repeatable command is useful. The original
-Markdown workflow remains the source of truth.
+Install or explicitly invoke the Skill only when a repeatable command is useful. This read-only audit
+does not replace the canonical records, generated routers, or shared workflow rules.
 
 Official references used for the initial profiles:
 
@@ -48,7 +48,7 @@ Official references used for the initial profiles:
 
 ## 中文
 
-本仓库仍以 Markdown-first、零安装为默认路线。可选的
+本仓库仍保持零第三方依赖，所有记录都可直接阅读。项目卡和能力记录是事实源，确定性脚本负责生成并校验派生视图。可选的
 [`optimize-agent-capabilities`](../integrations/optimize-agent-capabilities/SKILL.md) Skill 只为需要维护多个
 coding-agent 客户端的用户提供可重复审计入口。
 
@@ -80,4 +80,4 @@ Agent Skills 的指令格式可以通用，但能力发现目录、Plugin 结构
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 ```
 
-只有确实需要固定触发入口时才安装或显式调用这个 Skill；原始 Markdown 工作流始终是唯一事实源。
+只有确实需要固定触发入口时才安装或显式调用这个 Skill；这项只读审计不会替代事实源记录、生成路由或共享工作流规则。命令发现不依赖 `sh`，支持原生 Windows、macOS 和 Linux 的 PATH。

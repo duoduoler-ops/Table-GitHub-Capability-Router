@@ -125,7 +125,20 @@ Recommended mapping:
 
 Avoid one-project-one-distillation-page by default. Update an existing page when the new project strengthens an existing method. Create a new page only when the project introduces a reusable method that does not have a natural home yet.
 
-## 7. Registry Scope
+## 7. Semantic Project Reference Scope
+
+Semantic project references are not executable capabilities. Keep the generated table limited to approved S/A/B projects in `retained` or `reference` state.
+
+For every eligible project, customize:
+
+- at least two phrases a non-expert might actually say;
+- `high_confidence`, `gated`, or `explicit_only`;
+- a concrete negative-routing boundary;
+- the visible increment over the ordinary no-extra-project approach.
+
+Avoid generic examples such as "help with AI" or "make it better." If two projects share the exact same example, make the wording more specific instead of creating ambiguous routing. Always keep `no-extra-project` as a valid route and return at most one project reference.
+
+## 8. Registry Scope
 
 Your registry should stay small. It answers:
 
@@ -142,7 +155,7 @@ It should include:
 
 It should not include every project you ever bookmarked.
 
-## 8. Language
+## 9. Language
 
 You can run the vault in:
 
@@ -153,7 +166,7 @@ You can run the vault in:
 
 Keep commands, paths, API names, model names, and library names exact.
 
-## 9. Router Layers and Entry Budgets
+## 10. Router Layers and Entry Budgets
 
 Customize the thin router in [capability-router.md](../templates/capability-router.md):
 
@@ -288,7 +301,20 @@ low / medium / high
 
 默认不要变成“一个项目一个提炼页”。如果新项目只是强化已有方法，就更新已有页面。只有项目带来了一个没有自然归属的新方法，才新建提炼页。
 
-## 7. Registry 范围
+## 7. 项目语义参考范围
+
+项目语义参考不是可执行能力。生成表只收经批准的 S/A/B `retained/reference` 项目。
+
+每个合格项目需要按自己的实际使用方式填写：
+
+- 至少两句非专业用户日常会说的话；
+- `high_confidence`、`gated` 或 `explicit_only`；
+- 明确的禁止命中或优先分流边界；
+- 相比“不调用额外项目”普通方案能带来的可见增量。
+
+不要写“帮我做 AI”“优化一下”这类过宽示例。两个项目若出现完全相同的语义示例，应改得更具体，避免歧义。始终保留 `no-extra-project`，并且一次最多返回一个项目参考。
+
+## 8. Registry 范围
 
 Registry 应该很薄。它回答：
 
@@ -305,7 +331,7 @@ Registry 应该很薄。它回答：
 
 它不应该包含你收藏过的所有项目。
 
-## 8. 语言
+## 9. 语言
 
 你的 vault 可以使用：
 
@@ -316,7 +342,7 @@ Registry 应该很薄。它回答：
 
 命令、路径、API 名、模型名和库名要保持精确。
 
-## 9. 路由分层与条目预算
+## 10. 路由分层与条目预算
 
 在 [capability-router.md](../templates/capability-router.md) 里自定义薄路由：
 

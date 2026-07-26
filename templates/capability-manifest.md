@@ -1,10 +1,25 @@
+---
+schema_version: {{SCHEMA_VERSION}}
+record_type: capability
+id: {{CAPABILITY_ID}}
+revision: {{REVISION}}
+management_state: {{MANAGEMENT_STATE}}
+health_state: {{HEALTH_STATE}}
+risk: {{RISK}}
+invocation: {{INVOCATION}}
+authorization: {{AUTHORIZATION}}
+manager_type: {{MANAGER_TYPE}}
+route_category: {{ROUTE_CATEGORY}}
+updated_at: {{UPDATED_AT}}
+---
+
 # Capability Manifest / 能力冷库 Manifest
 
 ## Basic Info / 基本信息
 
-- Capability ID / 能力 ID:
-- Name / 名称:
-- Type / 类型: Skill / Plugin / MCP / Script / Runtime / Reference / Source pointer
+- Capability ID / 能力 ID: {{CAPABILITY_ID}}
+- Name / 名称: {{CAPABILITY_NAME}}
+- Type / 类型: {{CAPABILITY_TYPE}}
 - Platform / 平台: Codex / Claude / Shared / Other
 - Source / 来源:
 - Version or commit / 版本或 commit:
@@ -16,9 +31,9 @@
 ## Storage Decision / 冷库处置
 
 - Asset form / 资产形态: runtime / skill / plugin / mcp-config / script / reference / source-pointer
-- Management status / 管理状态: active / cold / disabled / reference / retired
-- Health status / 健康状态: healthy / unverified / degraded / broken / missing
-- Risk / 风险: low / medium / high
+- Canonical state / 权威状态: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
+- Risk / 风险: {{RISK}}
+- Manager type / 是否总管型: see `manager_type` in frontmatter / 见 frontmatter 的 `manager_type`
 - Quarantine / 隔离: true / false
 - Canonical path / canonical 路径:
 - Source pointer / 源码指针:

@@ -24,6 +24,8 @@ Rules:
 - Do not give S/A in lightweight mode unless the vault rules explicitly allow it.
 - Capability duplication is not an automatic rejection. Decide whether the project keeps, complements, challenges, replaces, or falls back from the current solution.
 - If the project is retained as a reference, distill only the reusable method into an existing workflow, concept, or project page. Create a new distillation page only if no natural page exists.
+- If S/A/B retained/reference promotion is recommended, propose at least two phrases the user might actually say, one `high_confidence/gated/explicit_only` trigger level, a negative-routing boundary, and the visible increment over `no-extra-project`.
+- Do not add candidate, rejected, archived, C, or D projects to semantic routing. Do not hand-edit the generated semantic table.
 - Do not repeat the project card inside the distillation page. The project card keeps evidence; the distillation page keeps reusable knowledge.
 - Scores are optional and only compare similar candidates. They do not automatically decide S/A/B/C/D.
 - Project cards, evidence, candidate/rejection records, and maintenance logs are ordinary write-back. Promotion into the Registry or L1, automatic invocation, and any client configuration change are proposals only until the user explicitly approves them.
@@ -34,6 +36,7 @@ Write back:
 - update the candidate/rejection/index page as needed;
 - add a short maintenance-log entry;
 - if it becomes S/A/B, write the cold-storage decision;
+- after explicit promotion approval, use `project-transition` with the semantic fields, then rebuild and validate the generated semantic table;
 - if it is a reference, make the manifest point to the project card, the distillation page, and the minimum read scope.
 
 Project URL:
@@ -101,6 +104,8 @@ Capability name or path:
 - 轻量评估阶段不要直接给 S/A，除非 vault 规则明确允许。
 - 能力重复不等于自动淘汰。必须判断它是保留现有、互补组合、挑战者测试、替换现有，还是回退轻量方案。
 - 如果项目作为 reference 保留，只把可复用方法提炼进已有工作流页、概念页或项目页。没有自然归属时才新建提炼页。
+- 如果建议将项目晋级为 S/A/B `retained/reference`，先提出至少两句用户日常会说的话、一个 `high_confidence/gated/explicit_only` 命中级别、禁止命中边界，以及相比 `no-extra-project` 普通方案的可见增量。
+- 候选、否决、归档和 C/D 项目不得进入语义命中表；生成表不得手改。
 - 不要在提炼页里重复项目卡。项目卡保存证据，提炼页保存可复用知识。
 - 评分是可选项，只用于同类候选比较，不能自动决定 S/A/B/C/D。
 - 项目卡、证据、候选/否决记录和维护日志属于普通写回；进入 Registry/L1、自动调用或修改客户端配置只能先给提案，必须等用户明确批准后再执行。
@@ -111,6 +116,7 @@ Capability name or path:
 - 按需要更新候选池、否决记录或索引页；
 - 追加一条简短维护日志；
 - 如果成为 S/A/B，写明冷库处置；
+- 获得明确晋级批准后，用 `project-transition` 原子写入语义字段，再重建并校验生成表；
 - 如果它是 reference，让 manifest 指向项目卡、提炼页和最小读取范围。
 
 项目 URL：

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/duoduoler-ops/Table-GitHub-Capability-Router/main/schemas/router.schema.json",
+  "title": "Route Category",
+  "type": "object",
+  "required": ["id", "label", "boundary"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+    "label": {"type": "string", "minLength": 1},
+    "boundary": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}
