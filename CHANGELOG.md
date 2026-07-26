@@ -4,6 +4,8 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
+## 0.2.0 - 2026-07-26
+
 ### New in v0.2.0
 
 - Add one-link Agent bootstrap entry.
