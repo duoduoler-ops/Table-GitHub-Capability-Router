@@ -4,9 +4,9 @@
 >
 > 这个文件的作用：Agent 不扫描全量能力库，先读这张薄路由（L1），再只读命中的 Registry 行（L2），最后只读一张能力卡（L3）。原理见 [Agent 实际看到什么](../docs/context-and-routing.md)。
 
-GitHub project references belong in the separate generated `indexes/project-semantic-routing.md`. They are read-only suggestions, never executable capability rows. A project match keeps `no-extra-project` as an alternative and cannot authorize clone, installation, login, script execution, configuration changes, or publishing.
+GitHub project references belong in the separate generated `indexes/project-semantic-routing.md`, which contains a mandatory thin discovery table followed by full semantic details. For each substantive deliverable, read the thin table once, select at most Top-1 when meaning matches, and keep `no-extra-project`. Discovery is a reminder, never an executable capability row or permission to clone, install, log in, run scripts, change configuration, or publish.
 
-GitHub 项目参考进入单独生成的 `indexes/project-semantic-routing.md`，只提供只读建议，不能写进可执行能力 Registry。项目命中始终保留 `no-extra-project`，也不能授权 clone、安装、登录、运行脚本、改配置或发布。
+GitHub 项目参考进入单独生成的 `indexes/project-semantic-routing.md`，其中先放 Agent 必读的薄发现表，再放完整语义详情。每类实质产物先查一次薄表，语义命中最多选 Top-1，并保留 `no-extra-project`。发现只代表提醒，不能写进可执行能力 Registry，也不授权 clone、安装、登录、运行脚本、改配置或发布。
 
 ## Writing rules / 写作规则
 

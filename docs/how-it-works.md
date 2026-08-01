@@ -8,7 +8,7 @@ This workflow connects four layers:
 | --- | --- | --- |
 | Obsidian LLM Wiki | Stores rules, notes, indexes, decisions, and summaries | Does not run tools or replace permissions |
 | GitHub Project Intake | Decides whether a project is useful, redundant, risky, or worth testing | Does not prove runtime success by itself |
-| Semantic Project References | Maps ordinary task wording to at most one approved retained/reference project | Does not execute the project or replace the no-extra-project route |
+| Semantic Project References | Thin-discovers at most one approved retained/reference project before full semantic detail | Does not read or execute the project or replace the no-extra-project route |
 | Capability Inventory & Cold Storage | Screens existing Skills, Plugins, MCP servers, scripts, and CLIs; tracks manifests, health checks, risk, and rollback | Does not mean every tool is enabled by default |
 
 The main design goal is to keep the hot context small. Full clones, raw logs, runtime folders, and long tool descriptions stay outside the Obsidian hot layer. The agent reads short indexes and manifests first, then opens only the minimum detail needed for the current task.
@@ -31,9 +31,11 @@ Why the layers exist — context injection, truncation behavior, and manager-typ
 
 ### Semantic project references are separate
 
-`indexes/project-semantic-routing.md` is generated from canonical project cards. Only approved S/A/B projects in `retained` or `reference` state qualify. Every eligible card supplies at least two ordinary-language examples, one trigger level, and negative routing.
+`indexes/project-semantic-routing.md` is generated from canonical project cards. Only approved S/A/B projects in `retained` or `reference` state qualify. Every eligible card supplies one distinct capability summary, at least two ordinary-language examples, one trigger level, and negative routing.
 
-The Agent uses approximate meaning, not exact professional keywords. It returns at most one project-informed reference and keeps `no-extra-project` as the normal alternative. `high_confidence` can be suggested automatically, `gated` requires its stated condition, and `explicit_only` requires the user to name or clearly request the project.
+The generated file has two layers. For every substantive task with a clear object, action, or deliverable, the Agent reads the thin discovery table once per deliverable type before concluding that no saved project is relevant. If meaning matches, it selects at most Top-1 and reads only that project's full semantic row. Workflow guidance and project reference are parallel, and `no-extra-project` remains the normal alternative.
+
+`high_confidence` and `gated` both allow a reminder. `gated` controls later repository reading or runtime execution, not whether the project may be mentioned. `explicit_only` requires the user to name or clearly request the project. A reminder offers the ordinary route, minimum Markdown reading only after the user chooses it, and installation or enablement only after separate approval when runtime is required.
 
 This table never enters the executable capability router. A match cannot authorize clone, installation, login, unknown script execution, configuration changes, or publishing.
 
@@ -47,7 +49,7 @@ Do not put every retained GitHub project into a separate standalone knowledge pa
 | General architecture, concept, or decision model | Concept page |
 | Notes that only matter inside one of your own projects | That project page |
 | Source evidence, grade, risk, and test decision | GitHub project card |
-| Ordinary-language examples, trigger level, and negative routing | Canonical project card; generated semantic table for eligible projects |
+| Capability summary, ordinary-language examples, trigger level, and negative routing | Canonical project card; generated thin discovery + full semantic table for eligible projects |
 | Agent-readable rediscovery and read-scope metadata | Reference manifest |
 | Executable routing option | Thin registry, only if eligible |
 
@@ -58,7 +60,7 @@ GitHub project card
 -> update or create the smallest useful distillation page
 -> reference manifest points to that page and its read scope
 -> capability-slot index records the relationship to current options
--> eligible retained/reference card generates one semantic reference row
+-> eligible retained/reference card generates one thin-discovery row and one full semantic row
 -> thin registry only includes executable and eligible capabilities
 ```
 
@@ -180,7 +182,7 @@ Write useful conclusions back into:
 - project card;
 - workflow, concept, or project distillation page;
 - capability-slot index;
-- generated semantic project-reference table;
+- generated thin discovery + full semantic project-reference table;
 - candidate pool or rejection log;
 - cold-storage manifest;
 - thin registry entry or explicit non-entry;
@@ -192,7 +194,7 @@ Keep raw logs, full clones, runtime files, and model caches outside the Obsidian
 
 1. Normalize the GitHub URL and resolve a canonical project/capability ID before creating files.
 2. Search for existing records and re-read every target file immediately before editing. Existing records are updated; equivalent duplicates are not created.
-3. Build a change set that separates ordinary records from protected routing or configuration changes. Project cards, evidence, candidate/rejection records, and maintenance logs are ordinary write-back; retained/reference promotion, Registry/L1 promotion, automatic invocation, Hooks, and client configuration require explicit approval. Project promotion atomically records semantic examples, trigger level, and negative routing.
+3. Build a change set that separates ordinary records from protected routing or configuration changes. Project cards, evidence, candidate/rejection records, and maintenance logs are ordinary write-back; retained/reference promotion, Registry/L1 promotion, automatic invocation, Hooks, and client configuration require explicit approval. Project promotion atomically records the capability summary, semantic examples, trigger level, and negative routing.
 4. Apply source records first, then rebuild or check derived indexes, then append one maintenance event. Do not treat a partially updated index as the source of truth.
 5. Validate duplicate IDs, links, state combinations, intended file scope, and `git diff`. If a conflict or partial failure appears, stop and report the exact completed and incomplete files instead of continuing blindly.
 
@@ -206,7 +208,7 @@ Idempotency rule: running the same canonical URL twice must update the same reco
 | --- | --- | --- |
 | Obsidian LLM Wiki | 保存规则、笔记、索引、决策和摘要 | 不直接运行工具，不替代权限控制 |
 | GitHub 项目入库 | 判断项目是否有用、重复、风险高、值得测试 | 不单独证明项目能跑通 |
-| 项目语义参考 | 把用户日常说法映射到最多一个经批准的正式项目 | 不执行项目，也不替代普通方案 |
+| 项目语义参考 | 先薄发现、再把用户日常说法映射到最多一个经批准的正式项目 | 不读取或执行项目，也不替代普通方案 |
 | 能力盘点与冷库 | 筛查已有 Skill、Plugin、MCP、脚本和 CLI；记录 manifest、健康检查、风险和回滚 | 不等于默认启用所有工具 |
 
 核心设计目标是让热层上下文保持小而稳定。完整 clone、原始日志、运行时目录和很长的工具说明都留在 Obsidian 热层之外。Agent 先读取短索引和 manifest，再按当前任务打开最小必要详情。
@@ -229,9 +231,11 @@ L1 负责引导路由，但本身不会替代原生发现；实际可见性和�
 
 ### 项目语义参考单独分层
 
-`indexes/project-semantic-routing.md` 从项目卡事实源自动生成。只有经批准的 S/A/B `retained/reference` 项目可以进入；每个合格项目必须提供至少两条日常说法、一个命中级别和禁止命中条件。
+`indexes/project-semantic-routing.md` 从项目卡事实源自动生成。只有经批准的 S/A/B `retained/reference` 项目可以进入；每个合格项目必须提供一条可区分的能力摘要、至少两条日常说法、一个命中级别和禁止命中条件。
 
-Agent 按大概意思匹配，不要求用户说出专业关键词。最多建议一个项目参考，并保留 `no-extra-project` 普通方案。`high_confidence` 可自动建议，`gated` 必须满足表中条件，`explicit_only` 仅在用户点名或明确要求时建议。
+生成文件分成两层。凡任务已有明确对象、动作或产物，Agent 每类产物先读一次薄发现表；命中大概意思时最多选择 Top-1，再只读该项目的完整语义行。工作流与项目 reference 并行，并始终保留 `no-extra-project` 普通方案。
+
+`high_confidence` 与 `gated` 都允许先提醒；`gated` 只控制后续仓库读取或运行时执行，不控制是否可以提及项目。`explicit_only` 仍要求用户点名或明确要求。提醒时提供普通方案、用户选择后只读最小 Markdown、确需运行时再单独询问安装或启用。
 
 该表不进入可执行能力路由。命中不能授权 clone、安装、登录、运行未知脚本、修改配置或对外发布。
 
@@ -245,7 +249,7 @@ Agent 按大概意思匹配，不要求用户说出专业关键词。最多建�
 | 通用架构、概念或决策模型 | 概念页 |
 | 只服务某个自有项目的笔记 | 对应项目页 |
 | 来源证据、等级、风险和测试决策 | GitHub 项目卡 |
-| 日常语义示例、命中级别和禁止命中条件 | 项目卡事实源；合格项目进入生成语义表 |
+| 能力摘要、日常语义示例、命中级别和禁止命中条件 | 项目卡事实源；合格项目进入生成的薄发现表与完整语义表 |
 | 给 Agent 以后重新发现和限定读取范围的 metadata | reference manifest |
 | 可执行路由选项 | 薄 Registry，仅限符合条件的能力 |
 
@@ -256,7 +260,7 @@ GitHub 项目卡
 -> 更新或创建最小有用提炼页
 -> reference manifest 指向该提炼页和最小读取范围
 -> 能力槽索引记录它与当前方案的关系
--> 合格的 retained/reference 项目生成一行语义参考
+-> 合格的 retained/reference 项目生成一行薄发现记录和一行完整语义记录
 -> 薄 Registry 只收可执行且符合条件的能力
 ```
 
@@ -378,7 +382,7 @@ retired：不再使用
 - 项目卡；
 - 工作流、概念或项目提炼页；
 - 能力槽索引；
-- 自动生成的项目语义命中表；
+- 自动生成的薄发现表与完整项目语义命中表；
 - 候选池或否决记录；
 - 冷库 manifest；
 - 薄 Registry 条目，或明确不进入 Registry；
@@ -390,7 +394,7 @@ retired：不再使用
 
 1. 新建文件前先规范化 GitHub URL，并解析唯一的项目/能力 canonical ID。
 2. 查找已有记录，编辑前立即重读所有目标文件；已有记录只更新，不创建等价重复项。
-3. 先列变更清单，并把普通记录与受保护的路由/配置修改分开。项目卡、证据、候选/否决记录和维护日志可普通写回；项目 `retained/reference` 晋级、Registry/L1 晋升、自动调用、Hook 和客户端配置必须先获得明确批准。项目晋级时原子写入日常示例、命中级别和禁止命中条件。
+3. 先列变更清单，并把普通记录与受保护的路由/配置修改分开。项目卡、证据、候选/否决记录和维护日志可普通写回；项目 `retained/reference` 晋级、Registry/L1 晋升、自动调用、Hook 和客户端配置必须先获得明确批准。项目晋级时原子写入能力摘要、日常示例、命中级别和禁止命中条件。
 4. 先改源记录，再重建或校验派生索引，最后追加一条维护事件；半更新的索引不能反过来充当事实源。
 5. 检查重复 ID、链接、状态组合、文件范围和 `git diff`。发现冲突或半完成状态就停止，明确报告哪些文件已完成、哪些未完成，不盲目继续。
 

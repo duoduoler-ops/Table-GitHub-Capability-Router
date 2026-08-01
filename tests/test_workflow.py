@@ -54,6 +54,10 @@ class WorkflowCLITests(unittest.TestCase):
         self.assertEqual(code, 0, validation)
         self.assertEqual(validation["projects"], 0)
         self.assertEqual(validation["capabilities"], 0)
+        self.assertEqual(validation["schema_version"], 2)
+        agent_router = (self.root / "AGENT-ROUTER.md").read_text(encoding="utf-8")
+        self.assertIn("For every substantive task", agent_router)
+        self.assertIn("high_confidence` and `gated` both allow a reminder", agent_router)
         again = self.initialize("codex")
         self.assertEqual(again["result"], "already_initialized")
 
@@ -137,6 +141,8 @@ class WorkflowCLITests(unittest.TestCase):
             "--approved",
             "--approved-by",
             "demo-user",
+            "--capability-summary",
+            "Compare repository patterns and produce one reusable reference decision",
             "--semantic-example",
             "Help me compare project patterns",
             "--semantic-example",
@@ -151,7 +157,9 @@ class WorkflowCLITests(unittest.TestCase):
         matching_rows = [
             line for line in semantic_router.splitlines() if line.startswith("| [gh-example-project]")
         ]
-        self.assertEqual(len(matching_rows), 1)
+        self.assertEqual(len(matching_rows), 2)
+        self.assertIn("Thin Discovery / 薄发现表", semantic_router)
+        self.assertIn("Compare repository patterns and produce one reusable reference decision", semantic_router)
         self.assertIn("Help me compare project patterns", semantic_router)
         code, validation = self.invoke("validate", "--root", str(self.root))
         self.assertEqual(code, 0, validation)
@@ -180,6 +188,8 @@ class WorkflowCLITests(unittest.TestCase):
             "--grade",
             "B",
             "--approved",
+            "--capability-summary",
+            "Compare workflow references and produce one reusable recommendation",
             "--semantic-example",
             "Make this workflow easier to reuse",
             "--semantic-example",
@@ -196,6 +206,8 @@ class WorkflowCLITests(unittest.TestCase):
             str(self.root),
             "--id",
             "gh-example-reference",
+            "--capability-summary",
+            "Compare saved projects and produce one workflow improvement reference",
             "--semantic-example",
             "Compare an ordinary approach with a project-informed approach",
             "--semantic-example",
@@ -207,8 +219,13 @@ class WorkflowCLITests(unittest.TestCase):
         )
         self.assertEqual(code, 0, updated)
         self.assertEqual(updated["semantic_examples"], 2)
+        self.assertEqual(
+            updated["capability_summary"],
+            "Compare saved projects and produce one workflow improvement reference",
+        )
         semantic_router = self.root / "indexes" / "project-semantic-routing.md"
         self.assertIn("Compare an ordinary approach", semantic_router.read_text(encoding="utf-8"))
+        self.assertIn("remind / 先提醒", semantic_router.read_text(encoding="utf-8"))
         semantic_router.write_text(
             semantic_router.read_text(encoding="utf-8") + "manual drift\n",
             encoding="utf-8",
@@ -244,6 +261,8 @@ class WorkflowCLITests(unittest.TestCase):
             str(self.root),
             "--id",
             "gh-example-rejected",
+            "--capability-summary",
+            "Route a rejected project and produce an invalid suggestion",
             "--semantic-example",
             "This should stay excluded",
             "--semantic-example",
@@ -293,6 +312,8 @@ class WorkflowCLITests(unittest.TestCase):
             "--grade",
             "B",
             "--approved",
+            "--capability-summary",
+            "Compare the first pattern and produce a bounded reference",
             "--semantic-example",
             shared,
             "--semantic-example",
@@ -314,6 +335,8 @@ class WorkflowCLITests(unittest.TestCase):
             "--grade",
             "B",
             "--approved",
+            "--capability-summary",
+            "Compare the second pattern and produce a bounded reference",
             "--semantic-example",
             shared,
             "--semantic-example",
@@ -329,6 +352,159 @@ class WorkflowCLITests(unittest.TestCase):
             (self.root / "projects" / "records" / "gh-example-second.md").read_text(encoding="utf-8")
         )
         self.assertEqual(data["status"], "evaluated")
+
+    def test_duplicate_capability_summary_across_projects_is_blocked(self) -> None:
+        self.initialize()
+        shared_summary = "Compare repository patterns and produce one reusable implementation guide"
+        for slug in ("alpha", "beta"):
+            self.invoke("new-project", "--root", str(self.root), "--url", f"example/{slug}")
+            self.invoke(
+                "project-transition",
+                "--root",
+                str(self.root),
+                "--id",
+                f"gh-example-{slug}",
+                "--to",
+                "evaluated",
+            )
+        code, first = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-alpha",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--capability-summary",
+            shared_summary,
+            "--semantic-example",
+            "Use the alpha pattern",
+            "--semantic-example",
+            "Compare the alpha reference",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route outside alpha scope",
+        )
+        self.assertEqual(code, 0, first)
+        code, duplicate = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-beta",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--capability-summary",
+            shared_summary,
+            "--semantic-example",
+            "Use the beta pattern",
+            "--semantic-example",
+            "Compare the beta reference",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route outside beta scope",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("duplicate capability summary", duplicate["error"].lower())
+
+    def test_schema_v1_migration_requires_summaries_and_is_idempotent(self) -> None:
+        self.initialize()
+        self.invoke("new-project", "--root", str(self.root), "--url", "example/migrate-reference")
+        self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-migrate-reference",
+            "--to",
+            "evaluated",
+        )
+        code, promoted = self.invoke(
+            "project-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "gh-example-migrate-reference",
+            "--to",
+            "reference",
+            "--grade",
+            "B",
+            "--approved",
+            "--capability-summary",
+            "Compare migration patterns and produce a reusable upgrade plan",
+            "--semantic-example",
+            "Help me migrate this routing vault",
+            "--semantic-example",
+            "Show one saved migration reference",
+            "--trigger-level",
+            "gated",
+            "--negative-routing",
+            "Do not route for an unrelated one-line answer",
+        )
+        self.assertEqual(code, 0, promoted)
+
+        config_path = self.root / "workflow.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config["schema_version"] = 1
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        card = self.root / "projects" / "records" / "gh-example-migrate-reference.md"
+        card.write_text(
+            card.read_text(encoding="utf-8")
+            .replace("schema_version: 2", "schema_version: 1")
+            .replace(
+                "capability_summary: Compare migration patterns and produce a reusable upgrade plan\n",
+                "",
+            ),
+            encoding="utf-8",
+        )
+
+        broken_config = dict(config)
+        broken_config["route_categories"] = [*config["route_categories"], config["route_categories"][0]]
+        config_path.write_text(
+            json.dumps(broken_config, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        code, broken = self.invoke(
+            "migrate-v2",
+            "--root",
+            str(self.root),
+            "--capability-summary",
+            "gh-example-migrate-reference=Compare migration patterns and produce a reusable upgrade plan",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("route_categories", broken["error"])
+        self.assertEqual(json.loads(config_path.read_text(encoding="utf-8"))["schema_version"], 1)
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+        code, blocked = self.invoke("migrate-v2", "--root", str(self.root))
+        self.assertEqual(code, 2)
+        self.assertIn("missing", blocked["error"].lower())
+        self.assertEqual(json.loads(config_path.read_text(encoding="utf-8"))["schema_version"], 1)
+
+        code, migrated = self.invoke(
+            "migrate-v2",
+            "--root",
+            str(self.root),
+            "--capability-summary",
+            "gh-example-migrate-reference=Compare migration patterns and produce a reusable upgrade plan",
+        )
+        self.assertEqual(code, 0, migrated)
+        self.assertEqual(migrated["result"], "migrated")
+        self.assertEqual(migrated["schema_version"], 2)
+        router = (self.root / "indexes" / "project-semantic-routing.md").read_text(encoding="utf-8")
+        self.assertIn("Thin Discovery / 薄发现表", router)
+        self.assertIn("gate before read or run", router)
+        code, again = self.invoke("migrate-v2", "--root", str(self.root))
+        self.assertEqual(code, 0, again)
+        self.assertEqual(again["result"], "already_migrated")
 
     def test_invalid_semantic_trigger_is_reported_without_crashing(self) -> None:
         self.initialize()
@@ -353,6 +529,8 @@ class WorkflowCLITests(unittest.TestCase):
             "--grade",
             "B",
             "--approved",
+            "--capability-summary",
+            "Find one relevant project and produce a reference suggestion",
             "--semantic-example",
             "Find one relevant reference",
             "--semantic-example",
@@ -681,6 +859,8 @@ class WorkflowCLITests(unittest.TestCase):
         code, result = self.invoke("validate-repo", "--root", str(REPO_ROOT))
         self.assertEqual(code, 0, result)
         self.assertEqual(result["errors"], 0)
+        if (REPO_ROOT / ".git").exists() and workflow.shutil.which("git"):
+            self.assertTrue(result["history_scanned"])
 
     def test_generated_demo_is_valid(self) -> None:
         demo = REPO_ROOT / "examples" / "generated-demo-v1"

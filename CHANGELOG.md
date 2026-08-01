@@ -4,6 +4,20 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
+## 0.3.0 - 2026-07-31
+
+### Focus: discover first, activate only when chosen
+
+- Replace the single-stage semantic suggestion flow with one generated file containing a mandatory thin discovery table and a full semantic-routing table.
+- Require each substantive task with a clear object, action, or deliverable to check the thin table once per deliverable type before concluding that no saved project is relevant.
+- Let both `high_confidence` and `gated` projects be mentioned during discovery; keep `gated` as the boundary for later repository reading or runtime execution.
+- Keep workflow guidance and GitHub project references parallel, return at most Top-1, and preserve `no-extra-project` as the ordinary route.
+- Add schema v2 `capability_summary` to canonical project records and block exact duplicate summaries across eligible projects.
+- Add the transactional `migrate-v2` command. It requires one explicit capability summary for every retained/reference project, migrates project and capability records, rebuilds derived files, and validates the result atomically.
+- Update repository-scoped Codex and Claude Code Skills, templates, schemas, bilingual guides, quickstart, generated demo, and migration documentation.
+- Expand the Python suite from 18 to 20 tests with duplicate-summary and v1-to-v2 migration coverage.
+- Scan Git history in both normal clones and linked Git worktrees during repository validation.
+
 ## 0.2.0 - 2026-07-26
 
 ### New in v0.2.0
