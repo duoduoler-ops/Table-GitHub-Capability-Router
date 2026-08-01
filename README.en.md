@@ -23,6 +23,23 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Transactional `migrate-v2` | Upgrades v0.2 roots after summaries are supplied for retained/reference projects, then rebuilds and validates atomically |
 | Three-route reminder | Keeps `no-extra-project`, offers minimum Markdown reading after the user chooses, and asks before installation or enablement only when runtime is required |
 
+## What's new in v0.2.0
+
+| New capability | What it solves |
+| --- | --- |
+| Dependency-free deterministic Python CLI | Initializes, updates, transitions, rebuilds, validates, and rolls back without relying on prompt memory |
+| Schema-driven canonical records | Prevents IDs, URLs, lifecycle state, approvals, and generated views from drifting apart |
+| Semantic GitHub project references | Maps ordinary user wording to one relevant retained/reference project |
+| Positive examples, negative routing, and trigger levels | Introduces `high_confidence`, `gated`, and explicit-only evidence as the source for later discovery behavior |
+| Automatic consistency validation + optional pre-commit gate | Blocks missing metadata, duplicate examples, ineligible rows, and stale generated tables before release or, when explicitly enabled, before commit |
+| Repo-scoped Codex and Claude Code Skills | Shares workflow facts while preserving client-specific invocation mechanisms |
+| Optional read-only capability audit from PR #1 | Inventories Codex, Claude Code, Kimi Code, and generic agent capability visibility without configuration writes |
+| Transactional writes | Adds locking, before backups, atomic replacement, rollback, and Git-history privacy scans |
+
+> Historical note: v0.2.0 introduced trigger levels. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. Current behavior is defined in the v0.3.0 section above.
+
+## Quick start
+
 ```text
 Use this repository to establish a GitHub intake, capability cold-storage, and agent-routing workflow:
 https://github.com/duoduoler-ops/Table-GitHub-Capability-Router
