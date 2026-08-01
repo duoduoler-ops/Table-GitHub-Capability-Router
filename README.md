@@ -56,6 +56,21 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Transactional `migrate-v2` | Upgrades v0.2 workflow roots only after the user supplies summaries for retained/reference projects, then rebuilds and validates atomically |
 | Three-route reminder | Keeps `no-extra-project`, offers minimum Markdown reading after the user chooses, and asks before installation or enablement only when runtime is required |
 
+## What's new in v0.2.0 / v0.2.0 新增内容
+
+| New in v0.2.0 | What it changes |
+| --- | --- |
+| Deterministic, dependency-free Python CLI | Initializes, updates, transitions, rebuilds, validates, and rolls back workflow data |
+| Schema-driven canonical records | Prevents IDs, URLs, approval state, and generated views from drifting apart |
+| Semantic project-reference routing | Lets everyday user wording suggest one relevant retained/reference GitHub project while keeping the no-extra-project option |
+| Positive and negative routing evidence | Requires at least two ordinary-language examples plus explicit do-not-route conditions |
+| Automatic consistency checks + optional pre-commit gate | Catches missing, duplicate, ineligible, and stale semantic routing records before release or, when explicitly enabled, before commit |
+| Repo-scoped Codex and Claude Code Skills | Shares the workflow rules without forcing identical client-specific configuration |
+| Optional read-only capability audit | Preserves PR #1's cross-client inventory for Codex, Claude Code, Kimi Code, and generic agents |
+| Transactional writes and validation | Adds locking, backups, atomic replacement, rollback, repository validation, and history privacy scans |
+
+> Historical note / 历史说明：v0.2.0 introduced `high_confidence`, `gated`, and explicit-only routing evidence. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. Current behavior is defined in the v0.3.0 section above. / v0.2.0 引入了 `high_confidence`、`gated` 和仅点名路由证据；v0.3.0 已改为 `gated` 项目可先提醒，后续读取或执行仍受门禁约束。当前行为以上方 v0.3.0 说明为准。
+
 ## Deterministic core / 确定性核心
 
 ```powershell
