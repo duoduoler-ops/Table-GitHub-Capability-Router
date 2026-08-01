@@ -7,6 +7,7 @@ status: {{PROJECT_STATUS}}
 grade: {{PROJECT_GRADE}}
 canonical_url: {{CANONICAL_URL}}
 evidence_level: {{EVIDENCE_LEVEL}}
+capability_summary: {{CAPABILITY_SUMMARY}}
 semantic_examples: {{SEMANTIC_EXAMPLES}}
 trigger_level: {{TRIGGER_LEVEL}}
 negative_routing: {{NEGATIVE_ROUTING}}
@@ -24,18 +25,19 @@ updated_at: {{UPDATED_AT}}
 - Evaluation mode / 评价模式: lightweight / full / install test
 - Project type / 项目类型:
 - Capability chain / 能力链:
-- Capability slot / 能力槽:
+- Capability summary / 能力摘要: see `capability_summary` in frontmatter; use one distinct verb + object + output sentence / 见 frontmatter；使用一条可区分的“动词 + 对象 + 产物”句子
 - Distillation page / 提炼页:
 - Canonical status, grade, and evidence / 权威状态、等级与证据: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
 
 ## Semantic Reference Routing / 项目语义命中
 
-Only `retained` and `reference` projects with grade S/A/B may enter the generated semantic table. Supply at least two ordinary-language examples, one trigger level, and a clear negative-routing boundary during promotion. Candidate, rejected, archived, C, and D projects remain `none / explicit_only / none`.
+Only `retained` and `reference` projects with grade S/A/B may enter the generated discovery and semantic tables. Supply one distinct capability summary, at least two ordinary-language examples, one trigger level, and a clear negative-routing boundary during promotion. Candidate, rejected, archived, C, and D projects remain `none / none / explicit_only / none`.
 
-只有 S/A/B 且状态为 `retained` 或 `reference` 的项目可以进入生成的语义命中表。晋级时必须填写至少两条日常说法、一个命中级别和明确的禁止命中边界。候选、否决、归档、C/D 项目保持 `none / explicit_only / none`。
+只有 S/A/B 且状态为 `retained` 或 `reference` 的项目可以进入生成的薄发现表与完整语义表。晋级时必须填写一条可区分的能力摘要、至少两条日常说法、一个命中级别和明确的禁止命中边界。候选、否决、归档、C/D 项目保持 `none / none / explicit_only / none`。
 
+- Capability summary / 能力摘要（唯一一句话，动词 + 对象 + 产物）:
 - Everyday wording / 用户日常说法（至少两条）:
-- Trigger level / 命中级别: high_confidence / gated / explicit_only
+- Trigger level / 命中级别: high_confidence / gated / explicit_only（high_confidence 与 gated 都先提醒；gated 只限制后续读取或执行）
 - Do not route or prefer another path / 禁止命中或优先分流:
 - Visible increment over the normal approach / 相比普通方案的可见增量:
 - When matched, propose normal vs project-informed routes / 命中后是否提供普通方案与项目方案对比:

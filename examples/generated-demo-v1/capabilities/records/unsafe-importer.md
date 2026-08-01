@@ -1,8 +1,8 @@
 ---
-schema_version: 1
+schema_version: 2
 record_type: capability
 id: unsafe-importer
-revision: 2
+revision: 3
 management_state: quarantine
 health_state: unverified
 risk: high
@@ -10,7 +10,7 @@ invocation: disabled
 authorization: routing-proposal
 manager_type: false
 route_category: governance
-updated_at: 2026-07-21T00:42:02Z
+updated_at: 2026-07-31T16:04:06Z
 ---
 
 # Capability Manifest / 能力冷库 Manifest

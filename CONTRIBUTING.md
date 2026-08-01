@@ -6,9 +6,9 @@ Contributions should improve deterministic GitHub intake, capability cold storag
 
 ## Change rules
 
-1. Keep canonical Markdown frontmatter flat and compatible with schema version 1.
+1. Keep canonical Markdown frontmatter flat and compatible with schema version 2. Do not remove v1 migration coverage.
 2. Do not hand-edit generated capability routers, project semantic-reference tables, or index examples; regenerate them with the CLI.
-3. Add or update tests for state transitions, semantic eligibility/uniqueness, idempotency, security boundaries, or generated output changes.
+3. Add or update tests for state transitions, thin discovery, semantic eligibility/uniqueness, migration idempotency, security boundaries, or generated output changes.
 4. Keep the CLI dependency-free unless a dependency is essential and separately approved.
 5. Update `CHANGELOG.md` and add a migration note for breaking schema changes.
 

@@ -47,3 +47,7 @@
 ## 2026-07-21
 
 - Capability `session-manager` transitioned candidate -> disabled; invocation=disabled. This records routing state only and does not alter client configuration.
+
+## 2026-07-31
+
+- Migrated workflow schema v1 -> v2; added canonical capability summaries and rebuilt the thin discovery plus full semantic routing table.

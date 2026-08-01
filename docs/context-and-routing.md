@@ -88,7 +88,7 @@ One sentence:
 | L3 Capability card | Full description of one capability | Read only the top candidate | [Capability Manifest template](../templates/capability-manifest.md) |
 | L4 Capability itself | Full SKILL.md / MCP server / repo | Enters context only when enabled | Cold storage + external clones |
 
-Project semantic references run beside this executable L1-L4 chain, not inside it. The generated table maps ordinary wording to at most one approved project reference, preserves `no-extra-project`, and grants no execution permission.
+Project semantic references run beside this executable L1-L4 chain, not inside it. The generated file first provides a mandatory thin discovery table for substantive tasks, then full semantic details. A meaning match selects at most one approved project reference, preserves `no-extra-project`, and grants no repository-reading or execution permission. `high_confidence` and `gated` both allow a reminder; `gated` controls later reading or execution.
 
 L1 is **soft governance** when it exists only as an instruction in `AGENTS.md`, `CLAUDE.md`, or an equivalent rules file. Stronger isolation requires L0 client controls such as disabling a capability, removing it from implicit discovery, or requiring explicit invocation. Those controls are client-specific configuration and must not be changed without user approval.
 
@@ -270,7 +270,7 @@ Agent 先读最薄的一张地图，
 | L3 能力卡 | 单个能力的完整说明 | 只读 Top-1 那张 | [能力 Manifest 模板](../templates/capability-manifest.md) |
 | L4 能力本体 | SKILL.md 全文 / MCP server / repo | 启用才进入 | 冷库 + 外部 clone |
 
-项目语义参考与这条可执行 L1-L4 链并列，不进入链内。生成表只把日常说法映射到最多一个经批准的项目参考，保留 `no-extra-project`，且不授予执行权限。
+项目语义参考与这条可执行 L1-L4 链并列，不进入链内。生成文件先提供实质任务必查的薄发现表，再提供完整语义详情；语义命中最多选择一个经批准的项目参考，保留 `no-extra-project`，且不授予仓库读取或执行权限。`high_confidence` 与 `gated` 都可先提醒，`gated` 只限制后续读取或执行。
 
 如果 L1 只是写在 `AGENTS.md`、`CLAUDE.md` 或同类规则文件里的指令，它属于**软治理**。更强隔离需要配合 L0 客户端控制，例如禁用能力、移出隐式发现或改为仅显式调用。这些操作属于客户端配置修改，未经用户确认不得执行。
 

@@ -127,16 +127,17 @@ Avoid one-project-one-distillation-page by default. Update an existing page when
 
 ## 7. Semantic Project Reference Scope
 
-Semantic project references are not executable capabilities. Keep the generated table limited to approved S/A/B projects in `retained` or `reference` state.
+Semantic project references are not executable capabilities. Keep both generated sections limited to approved S/A/B projects in `retained` or `reference` state. The thin discovery section is mandatory for substantive tasks; full semantic details are read only after a Top-1 meaning match.
 
 For every eligible project, customize:
 
+- one distinct verb + object + output capability summary;
 - at least two phrases a non-expert might actually say;
 - `high_confidence`, `gated`, or `explicit_only`;
 - a concrete negative-routing boundary;
 - the visible increment over the ordinary no-extra-project approach.
 
-Avoid generic examples such as "help with AI" or "make it better." If two projects share the exact same example, make the wording more specific instead of creating ambiguous routing. Always keep `no-extra-project` as a valid route and return at most one project reference.
+Avoid generic summaries or examples such as "help with AI" or "make it better." Exact duplicate capability summaries or semantic examples across projects fail validation. `high_confidence` and `gated` both allow a reminder; use `gated` for later reading or execution boundaries. Always keep `no-extra-project` as a valid route and return at most one project reference.
 
 ## 8. Registry Scope
 
@@ -303,16 +304,17 @@ low / medium / high
 
 ## 7. 项目语义参考范围
 
-项目语义参考不是可执行能力。生成表只收经批准的 S/A/B `retained/reference` 项目。
+项目语义参考不是可执行能力。薄发现表和完整语义表都只收经批准的 S/A/B `retained/reference` 项目。实质任务必须先查薄发现表，命中 Top-1 后才读完整语义详情。
 
 每个合格项目需要按自己的实际使用方式填写：
 
+- 一条可区分的“动词 + 对象 + 产物”能力摘要；
 - 至少两句非专业用户日常会说的话；
 - `high_confidence`、`gated` 或 `explicit_only`；
 - 明确的禁止命中或优先分流边界；
 - 相比“不调用额外项目”普通方案能带来的可见增量。
 
-不要写“帮我做 AI”“优化一下”这类过宽示例。两个项目若出现完全相同的语义示例，应改得更具体，避免歧义。始终保留 `no-extra-project`，并且一次最多返回一个项目参考。
+不要写“帮我做 AI”“优化一下”这类过宽摘要或示例。两个项目若出现完全相同的能力摘要或语义示例，校验会直接失败。`high_confidence` 与 `gated` 都允许先提醒，`gated` 只限制后续读取或执行。始终保留 `no-extra-project`，并且一次最多返回一个项目参考。
 
 ## 8. Registry 范围
 

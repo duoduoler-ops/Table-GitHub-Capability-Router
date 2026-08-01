@@ -37,6 +37,8 @@ python scripts/workflow.py validate --root <OUTPUT_DIR>
 
 Initialization is idempotent: rerunning it against a valid initialized directory returns `already_initialized` and does not duplicate files.
 
+If an existing workflow reports schema version 1, do not edit generated files or silently invent capability summaries. Follow [v0.2 to v0.3 migration](docs/migrations/v0.2-to-v0.3.md) and run `migrate-v2` with one user-reviewed summary for every retained/reference project.
+
 ## First GitHub project intake / 第一条 GitHub 项目入库
 
 Create the canonical candidate before browsing the target repository:
@@ -56,20 +58,21 @@ Then:
 python scripts/workflow.py update-project --root <OUTPUT_DIR> --id <PROJECT_ID> --from-file <REVIEWED_DRAFT> --evidence-level online-check
 ```
 
-5. The update command rejects changes to ID, URL, status, grade, approval, and semantic-routing metadata. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval, the `--approved` flag, at least two `--semantic-example` values, `--trigger-level`, and `--negative-routing`.
+5. The update command rejects changes to ID, URL, status, grade, approval, and semantic-routing metadata. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval, the `--approved` flag, one distinct `--capability-summary`, at least two `--semantic-example` values, `--trigger-level`, and `--negative-routing`.
 6. Run `rebuild`, then `validate`.
 
 Example promotion:
 
 ```powershell
 python scripts/workflow.py project-transition --root <OUTPUT_DIR> --id <PROJECT_ID> --to reference --grade B --approved `
+  --capability-summary "Compare saved projects and produce one reusable reference recommendation" `
   --semantic-example "Help me choose a reference workflow" `
   --semantic-example "Which saved GitHub project can improve this task" `
   --trigger-level gated `
   --negative-routing "Do not route for a simple direct answer or when the implementation is already fixed"
 ```
 
-Use `project-routing` with the same three semantic arguments to revise a retained/reference project's wording later. The generated `indexes/project-semantic-routing.md` contains exactly one row per eligible project. Candidate, rejected, archived, C, and D projects are excluded.
+Use `project-routing` with the capability summary and the same three semantic arguments to revise a retained/reference project's routing later. The generated `indexes/project-semantic-routing.md` contains one thin-discovery row and one full-semantic row per eligible project. Candidate, rejected, archived, C, and D projects are excluded from both sections.
 
 The same canonical GitHub URL always maps to the same `gh-owner-repo` ID. Repeating `new-project` returns the existing record.
 
@@ -87,23 +90,26 @@ To add reviewed source, permission, activation, rollback, or test notes, edit a 
 python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILITY_ID> --from-file <REVIEWED_DRAFT>
 ```
 
-`candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v1. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
+`candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v2. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
 
 ## Automatic routing after bootstrap / 初始化后的自动路由
 
 - When this repository is cloned and opened in Codex, `.agents/skills/github-vault-router/` is a repo-scoped Skill and may be invoked automatically when the task matches its description.
 - When opened in Claude Code, `.claude/skills/github-vault-router/` provides the equivalent project Skill.
-- When everyday task wording matches `indexes/project-semantic-routing.md`, suggest at most one retained/reference project and keep the ordinary `no-extra-project` route. Respect `high_confidence`, `gated`, `explicit_only`, and every negative-routing condition.
-- Semantic project matching is a read-only candidate layer. It does not enter the executable capability router and never authorizes clone, installation, login, unknown script execution, client configuration, or publishing.
+- For every substantive task with a clear object, action, or deliverable, read the thin discovery section of `indexes/project-semantic-routing.md` once per deliverable type before concluding that no saved project is relevant. Pure chat, emotional conversation, and one-line questions with no action are exempt.
+- If meaning matches, select at most Top-1, then read only that project's row in the full semantic section. Keep the ordinary `no-extra-project` route. Workflow guidance and project reference are parallel and neither replaces the other.
+- `high_confidence` and `gated` both allow a reminder; `gated` controls later reading or execution, not discovery. `explicit_only` requires the user to name or clearly request the project.
+- Discovery is a reminder, not repository use. Offer the normal route, minimum Markdown reading only after the user chooses it, and installation or enablement only after separate approval when runtime execution is required.
+- Semantic project matching is a read-only candidate layer. It does not enter the executable capability router and never authorizes repository reading, clone, installation, login, unknown script execution, client configuration, or publishing.
 - If the repository was cloned during an already-running session, read the appropriate `SKILL.md` directly for this turn. Automatic discovery is guaranteed only after the client has discovered the new project Skill; Claude Code may need a restart when the top-level skills directory did not exist at session start.
 - A user-owned output directory receives `AGENT-ROUTER.md`. Making that pointer persistent in another project or in global client configuration is a separate configuration change and requires approval.
 
 ## Completion checklist / 完成检查
 
-- `workflow.json` exists and has `schema_version: 1`.
+- `workflow.json` exists and has `schema_version: 2`.
 - `projects/records/` and `capabilities/records/` are canonical sources.
-- Project index, semantic project-reference table, candidate pool, rejection log, and L1/L2 capability router are generated—not manually maintained.
-- Every retained/reference S/A/B project has at least two semantic examples, one valid trigger level, and non-empty negative routing; every ineligible project is absent from the semantic table.
+- Project index, thin discovery + full semantic project-reference table, candidate pool, rejection log, and L1/L2 capability router are generated—not manually maintained.
+- Every retained/reference S/A/B project has one distinct capability summary, at least two semantic examples, one valid trigger level, and non-empty negative routing; every ineligible project is absent from both generated sections.
 - Transaction manifests exist under `.workflow/transactions/` for every mutation.
 - Canonical evidence/body updates were applied through `update-project` or `update-capability`, not direct edits.
 - No duplicate canonical URL or stable ID exists.

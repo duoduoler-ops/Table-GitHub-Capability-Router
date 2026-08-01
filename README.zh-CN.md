@@ -2,18 +2,26 @@
 
 这套仓库的目标很直接：你把一个 GitHub 链接交给 Agent，Agent 不再只在聊天里随口评价，而是把它变成可追踪的项目记录；如果项目能沉淀成 Skill、Plugin、MCP、CLI、脚本或方法论，再进入能力冷库和薄路由。
 
-## v0.2.0 新增内容
+## 版本重点
+
+以后每次发布都在这里补一行重点；完整实现细节统一写入 [CHANGELOG.md](CHANGELOG.md)。
+
+| 版本 | 本次重点 | 用户能感知到的变化 |
+| --- | --- | --- |
+| v0.3.0 | 先发现已入库能力，再判断是否使用 | 有明确对象、动作或产物的任务先查薄发现表；`gated` 项目可以先提醒，但读取、安装和执行仍需过门禁 |
+| v0.2.0 | 确定性入库与语义参考 | 增加 Schema 事实源、CLI 重建校验、事务写回和一张完整语义表 |
+| v0.1.0 | 可公开的 Markdown 起步模板 | 建立双语模板、入库提示词和脱敏示例 |
+
+## v0.3.0 新增内容
 
 | 新增能力 | 解决的问题 |
 | --- | --- |
-| 零第三方依赖的确定性 Python CLI | 初始化、入库、更新、状态迁移、重建、校验和回滚不再只靠提示词记忆 |
-| Schema 事实源 | 防止 ID、URL、状态、审批信息和派生表互相漂移 |
-| GitHub 项目语义命中表 | 用户只说日常话时，也能建议一个相关的正式保留项目 |
-| 正向示例 + 负向边界 + 命中级别 | 区分自动建议、条件建议、仅点名建议，减少误命中 |
-| 自动一致性校验 + 可选提交前门禁 | 拦截缺记录、重复示例、资格错误和生成表过期；经批准启用后可在 commit 前拦截 |
-| Codex / Claude Code 项目级 Skill | 两端共享工作流事实，但保留各自客户端调用机制 |
-| PR #1 可选只读能力审计 | 盘点 Codex、Claude Code、Kimi Code 等客户端能力，不修改配置 |
-| 事务式写入 | 加锁、修改前备份、原子替换、失败回滚和 Git 历史隐私扫描 |
+| 实质任务必过薄发现门 | Agent 不能再先凭印象断定“没有相关项目”；每类产物先查一次短能力表 |
+| 薄发现 + 完整语义两层表 | 先用唯一能力摘要低成本选 Top-1，再只读对应完整语义行 |
+| `gated` 先提醒 | `high_confidence` 与 `gated` 都可先提示项目存在；`gated` 只限制后续读取或执行 |
+| Schema v2 能力摘要 | 每个正式项目必须有一条可区分的“动词 + 对象 + 产物”摘要；重复摘要会被校验拦截 |
+| 事务化 `migrate-v2` | v0.2 工作流补齐正式项目摘要后，一次性升级项目卡、能力记录、配置和派生表 |
+| 三路线提醒 | 始终保留普通方案；用户选择后才最小读取 Markdown；确需运行时再询问安装或启用 |
 
 ## 最短使用方式
 
@@ -38,7 +46,7 @@ Agent 需要本地执行时，可以把这份公开源码 clone 到隔离目录�
 ├─ workflow.json                # 路径、客户端和 9 类路由配置
 ├─ projects/records/            # GitHub 项目事实源
 ├─ capabilities/records/        # 能力冷库事实源
-├─ indexes/                     # 自动生成的项目索引和语义命中表
+├─ indexes/                     # 自动生成的项目索引、薄发现表和完整语义表
 ├─ router/level1-router.md      # 自动生成的 L1/L2 薄路由
 ├─ logs/maintenance-log.md      # 维护事件
 └─ .workflow/transactions/      # 每次写入的事务、哈希和修改前备份
@@ -52,11 +60,11 @@ Agent 需要本地执行时，可以把这份公开源码 clone 到隔离目录�
 - 项目晋级、能力启用和自动调用走机器校验的状态机；
 - `candidate/disabled/quarantine/retired` 不进入薄路由；
 - active 能力一旦健康降级，自动隔离、禁用调用并从路由消失；
-- 总管型能力单独标记，schema v1 禁止自动调用；
+- 总管型能力单独标记，schema v2 禁止自动调用；
 - 所有写入先加锁，再生成事务清单和修改前备份，失败自动回滚；
 - 索引、候选池、否决记录、L1/L2 路由从事实源重建；
-- S/A/B 且为 `retained/reference` 的项目自动生成语义命中表，每个合格项目恰好一行；
-- 每条语义记录要求至少两条日常说法、命中级别和禁止命中条件；
+- S/A/B 且为 `retained/reference` 的项目自动生成薄发现表和完整语义表；
+- 每条正式记录要求一条唯一能力摘要、至少两条日常说法、命中级别和禁止命中条件；
 - 候选、否决、归档和 C/D 项目自动排除；命中只提供参考，不授权执行；
 - 校验重复 ID、状态组合、派生文件漂移、相对链接、当前文件和 Git 历史中的敏感信息。
 
@@ -79,8 +87,13 @@ python scripts/workflow.py init --root <OUTPUT_DIR> --language zh-CN --client co
 # 创建或命中同一条 GitHub 项目记录
 python scripts/workflow.py new-project --root <OUTPUT_DIR> --url <GITHUB_URL>
 
+# 把已有 v0.2 工作流事务化升级到 v0.3（每个正式项目重复一项）
+python scripts/workflow.py migrate-v2 --root <OUTPUT_DIR> `
+  --capability-summary "gh-owner-repo=比较已保存的项目并输出一份可复用参考建议"
+
 # 晋级正式参考项目时原子写入语义命中信息
 python scripts/workflow.py project-transition --root <OUTPUT_DIR> --id <PROJECT_ID> --to reference --grade B --approved `
+  --capability-summary "比较已保存的项目并输出一份可复用参考建议" `
   --semantic-example "帮我找一个可复用的参考工作流" `
   --semantic-example "现有哪个 GitHub 项目能改善这个任务" `
   --trigger-level gated `
@@ -100,13 +113,13 @@ python scripts/workflow.py validate --root <OUTPUT_DIR>
 
 ## 项目语义命中的真实边界
 
-生成的 `indexes/project-semantic-routing.md` 是只读候选层，不是可执行能力注册表。Agent 根据用户大概意思匹配，不要求用户说出专业关键词；最多建议一个相关项目，并同时保留“不调用额外项目”的普通方案。
+生成的 `indexes/project-semantic-routing.md` 先放薄发现表，再放完整语义表。凡任务已有明确对象、动作或产物，Agent 每类产物先查一次薄表；语义命中最多选 Top-1，再只读对应完整行。工作流负责“怎么做”，项目 reference 负责“库里已有谁能补强”，二者并行。
 
-- `high_confidence`：语义明确时可以自动建议；
-- `gated`：只有满足项目卡里的前置条件才建议；
+- `high_confidence`：语义明确时先提醒；
+- `gated`：也先提醒，门禁只限制后续读取或执行；
 - `explicit_only`：仅在用户点名或明确要求时建议。
 
-命中不会自动 clone、安装、登录、运行未知脚本、改配置或发布。
+提醒时同时给普通方案、用户选择后只读最小 Markdown、确需运行时再询问安装或启用。命中不会自动读取仓库、clone、安装、登录、运行未知脚本、改配置或发布。
 
 ## 可选只读能力审计
 
@@ -137,4 +150,4 @@ python scripts/workflow.py validate --root examples/generated-demo-v1
 python scripts/workflow.py validate-repo
 ```
 
-进一步阅读：[写回协议](docs/write-protocol.md)、[状态机](docs/state-machine.md)、[可选能力审计](docs/optional-capability-optimizer.md)、[可选提交前门禁](docs/optional-pre-commit.md)、[客户端配置边界](docs/client-profiles/generic-agent.md)、[安全策略](SECURITY.md)、[v0.1 → v0.2 迁移](docs/migrations/v0.1-to-v0.2.md)。
+进一步阅读：[写回协议](docs/write-protocol.md)、[状态机](docs/state-machine.md)、[可选能力审计](docs/optional-capability-optimizer.md)、[可选提交前门禁](docs/optional-pre-commit.md)、[客户端配置边界](docs/client-profiles/generic-agent.md)、[安全策略](SECURITY.md)、[v0.1 → v0.2 迁移](docs/migrations/v0.1-to-v0.2.md)、[v0.2 → v0.3 迁移](docs/migrations/v0.2-to-v0.3.md)。
