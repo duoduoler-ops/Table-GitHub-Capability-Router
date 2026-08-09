@@ -4,6 +4,14 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
+- Add first-class `grok-build` client support while keeping schema version 2 unchanged.
+- Treat `.agents/skills/github-vault-router/` as the shared Grok Build/Codex project Skill and retain `.claude/skills/github-vault-router/` as a Claude Code compatibility entry.
+- Make `AGENTS.md` the single canonical rule body and reduce root `CLAUDE.md` to a compatibility pointer; document the Grok Build 1.0.0 observation that the root file is still loaded when Claude compatibility import is disabled.
+- Add Grok Build to the read-only client audit and document host-neutral capability comparisons.
+- Ignore `.grok/` local state and expand the privacy checklist for Grok inspect, authentication/session, and machine-specific snapshots.
+- Strengthen `validate-repo` to require the public rules, security, changelog, ignore, and client-profile files; detect non-example Windows absolute paths; and refresh the generated demo platform labels.
+- Add the third, advanced video walkthrough to all README language entry points.
+
 ## 0.3.0 - 2026-07-31
 
 ### Focus: discover first, activate only when chosen

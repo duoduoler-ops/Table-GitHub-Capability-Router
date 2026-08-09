@@ -8,6 +8,7 @@
 *.rar
 
 # Agent/client local state
+.grok/
 .claude/
 .codex/
 .cursor/

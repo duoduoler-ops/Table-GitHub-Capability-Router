@@ -30,7 +30,8 @@ Untrusted source
 
 - API keys, tokens, cookies, OAuth files, private SSH keys.
 - `.env`, `.env.*`, `.mcp.json`, `settings.local.json`.
-- Local agent config folders such as `.claude/`, `.codex/`, `.cursor/`.
+- Local agent config folders such as `.grok/`, `.claude/`, `.codex/`, `.cursor/`.
+- Grok local inspect exports, authentication/session state, and machine-specific client snapshots.
 - Raw command logs.
 - Full cloned repositories that belong outside the vault.
 - Personal resumes, job applications, real interview notes, or private project plans.
@@ -67,7 +68,7 @@ Get-ChildItem -Recurse -Force | Select-Object FullName
 
 Before you make a repository public, check:
 
-- Does it contain local agent config?
+- Does it contain local agent config, including Grok local state?
 - Does it contain `.env` or `.local` files?
 - Does it contain private paths?
 - Does it contain personal names, emails, phone numbers, or location details?
@@ -110,7 +111,8 @@ If a secret was ever committed, deleting the file in a later commit is not enoug
 
 - API Key、Token、Cookie、OAuth 文件、私有 SSH Key；
 - `.env`、`.env.*`、`.mcp.json`、`settings.local.json`；
-- `.claude/`、`.codex/`、`.cursor/` 等本地 Agent 配置目录；
+- `.grok/`、`.claude/`、`.codex/`、`.cursor/` 等本地 Agent 配置目录；
+- Grok 本机 inspect 导出、认证/会话状态和机器专属客户端快照；
 - 原始命令日志；
 - 本应放在 vault 外部的完整 clone 仓库；
 - 简历、投递记录、真实面试笔记、私人项目计划；
@@ -147,7 +149,7 @@ Get-ChildItem -Recurse -Force | Select-Object FullName
 
 把仓库设为 public 前，先检查：
 
-- 是否包含本地 Agent 配置？
+- 是否包含本地 Agent 配置，包括 Grok 本地状态？
 - 是否包含 `.env` 或 `.local` 文件？
 - 是否包含私人路径？
 - 是否包含姓名、邮箱、手机号、位置等个人信息？

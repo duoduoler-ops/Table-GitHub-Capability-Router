@@ -11,13 +11,15 @@ If you only read one doc before customizing the templates, read this one.
 When you type "hello" to a coding agent, the model does not receive two words. It receives a package. Depending on the client and version, the package typically includes:
 
 1. The system prompt: identity, behavior rules, environment info.
-2. Your rules files (project and user level, e.g. `CLAUDE.md` / `AGENTS.md`).
+2. Your rules files (project and user level, e.g. `AGENTS.md` / `CLAUDE.md`).
 3. Injected memory.
 4. The skill discovery layer: name + description of every visible skill.
 5. Components contributed by plugins (skills, agents, hooks, MCP servers).
 6. MCP: server instructions + tool names / descriptions / schemas (some clients defer-load these).
 7. Whatever session-start hooks inject.
 8. Finally, your message.
+
+In this repository, `AGENTS.md` is the only canonical rules file. Grok Build and Codex share the repo-scoped Skill under `.agents/skills/`; Claude Code keeps a compatibility Skill under `.claude/skills/`. Root `CLAUDE.md` is intentionally only a pointer to `AGENTS.md`, not a second policy source.
 
 So every capability has **two costs**:
 
@@ -90,7 +92,7 @@ One sentence:
 
 Project semantic references run beside this executable L1-L4 chain, not inside it. The generated file first provides a mandatory thin discovery table for substantive tasks, then full semantic details. A meaning match selects at most one approved project reference, preserves `no-extra-project`, and grants no repository-reading or execution permission. `high_confidence` and `gated` both allow a reminder; `gated` controls later reading or execution.
 
-L1 is **soft governance** when it exists only as an instruction in `AGENTS.md`, `CLAUDE.md`, or an equivalent rules file. Stronger isolation requires L0 client controls such as disabling a capability, removing it from implicit discovery, or requiring explicit invocation. Those controls are client-specific configuration and must not be changed without user approval.
+L1 is **soft governance** when it exists only as an instruction in `AGENTS.md` or an equivalent canonical rules file. Compatibility pointers such as this repository's root `CLAUDE.md` must not duplicate or redefine that policy. Stronger isolation requires L0 client controls such as disabling a capability, removing it from implicit discovery, or requiring explicit invocation. Those controls are client-specific configuration and must not be changed without user approval.
 
 The executable loop stays the same, with one added step:
 
@@ -175,7 +177,9 @@ Whoever stands on the first routing layer shapes how your agent thinks.
 
 Injection order, budgets, and truncation behavior vary by client and version. This document freezes the mechanism, not the numbers. Before quoting specific token budgets or thresholds, check current official docs and measure clean new sessions on your own machine.
 
-Last verified 2026-07-21: Codex documents metadata-first Skill discovery, progressive disclosure, implicit-invocation control, and per-Skill enablement. Claude Code documents Skill invocation controls and default MCP Tool Search that defers tool definitions until needed. These facts support the L0/L1 distinction; they do not make this repository a configuration controller.
+Repository-local verification on 2026-08-09 found that Grok Build 1.0.0 discovered the repo Skill under `.agents/skills/` and still loaded root `CLAUDE.md` even when Claude compatibility import was disabled. Therefore Grok Build and Codex share `.agents/skills/`, while root `CLAUDE.md` remains a minimal pointer instead of a duplicated rule body. Claude Code support remains available through `.claude/skills/` as a compatibility client.
+
+The official references below were last reviewed on 2026-07-21. Codex documents metadata-first Skill discovery, progressive disclosure, implicit-invocation control, and per-Skill enablement. Claude Code documents Skill invocation controls and default MCP Tool Search that defers tool definitions until needed. These facts support the L0/L1 distinction; they do not make this repository a configuration controller.
 
 - Claude Code skills: <https://code.claude.com/docs/en/skills>
 - Claude Code MCP: <https://code.claude.com/docs/en/mcp>
@@ -194,13 +198,15 @@ Last verified 2026-07-21: Codex documents metadata-first Skill discovery, progre
 你对 coding agent 说一句"你好"，模型收到的不是两个字，而是一个包裹。按客户端和版本不同，通常包括：
 
 1. 系统提示：身份、行为规则、环境信息。
-2. 你的规则文件（项目级和用户级，如 `CLAUDE.md` / `AGENTS.md`）。
+2. 你的规则文件（项目级和用户级，如 `AGENTS.md` / `CLAUDE.md`）。
 3. 注入的记忆（memory）。
 4. Skill 发现层：所有可见 Skill 的 name + description。
 5. Plugin 贡献的组件（Skills、Agents、Hooks、MCP）。
 6. MCP：server instructions + 工具名称 / 描述 / schema（部分客户端延迟加载）。
 7. SessionStart 等 Hook 注入的内容。
 8. 最后，才是你的消息。
+
+在本仓库中，`AGENTS.md` 是唯一规则正文。Grok Build 与 Codex 共用 `.agents/skills/` 下的项目级 Skill；Claude Code 在 `.claude/skills/` 下保留兼容 Skill。根目录 `CLAUDE.md` 只指向 `AGENTS.md`，不是第二套规则源。
 
 所以每个能力都有**两层成本**：
 
@@ -272,7 +278,7 @@ Agent 先读最薄的一张地图，
 
 项目语义参考与这条可执行 L1-L4 链并列，不进入链内。生成文件先提供实质任务必查的薄发现表，再提供完整语义详情；语义命中最多选择一个经批准的项目参考，保留 `no-extra-project`，且不授予仓库读取或执行权限。`high_confidence` 与 `gated` 都可先提醒，`gated` 只限制后续读取或执行。
 
-如果 L1 只是写在 `AGENTS.md`、`CLAUDE.md` 或同类规则文件里的指令，它属于**软治理**。更强隔离需要配合 L0 客户端控制，例如禁用能力、移出隐式发现或改为仅显式调用。这些操作属于客户端配置修改，未经用户确认不得执行。
+如果 L1 只是写在 `AGENTS.md` 或同类唯一规则正文里的指令，它属于**软治理**。根目录 `CLAUDE.md` 这类兼容指针不得复制或改写规则。更强隔离需要配合 L0 客户端控制，例如禁用能力、移出隐式发现或改为仅显式调用。这些操作属于客户端配置修改，未经用户确认不得执行。
 
 可执行闭环不变，只加一步：
 
@@ -354,7 +360,9 @@ Need Gate：是否需要额外能力
 
 注入顺序、预算数值和截断行为随客户端和版本变化。本文档固化的是机制，不是数字。引用具体 token 预算或阈值前，先查当前官方文档，并在自己机器上用干净新会话实测。
 
-最近核实于 2026-07-21：Codex 官方说明了 Skill metadata 优先、渐进加载、隐式调用控制和按 Skill 启停；Claude Code 官方说明了 Skill 调用控制，以及默认通过 MCP Tool Search 延迟加载工具定义。这些事实支撑 L0/L1 分层，但不代表本仓库能直接控制客户端配置。
+2026-08-09 本仓库实测：Grok Build 1.0.0 能发现 `.agents/skills/` 下的项目 Skill；即使关闭 Claude 兼容导入，仍会读取根目录 `CLAUDE.md`。因此 Grok Build 与 Codex 共用 `.agents/skills/`，根目录 `CLAUDE.md` 只保留最小指针；Claude Code 继续通过 `.claude/skills/` 作为兼容客户端。
+
+下面的官方资料最近复核于 2026-07-21：Codex 官方说明了 Skill metadata 优先、渐进加载、隐式调用控制和按 Skill 启停；Claude Code 官方说明了 Skill 调用控制，以及默认通过 MCP Tool Search 延迟加载工具定义。这些事实支撑 L0/L1 分层，但不代表本仓库能直接控制客户端配置。
 
 - Claude Code Skills：<https://code.claude.com/docs/en/skills>
 - Claude Code MCP：<https://code.claude.com/docs/en/mcp>

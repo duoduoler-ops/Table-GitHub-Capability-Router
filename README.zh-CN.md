@@ -2,6 +2,12 @@
 
 这套仓库的目标很直接：你把一个 GitHub 链接交给 Agent，Agent 不再只在聊天里随口评价，而是把它变成可追踪的项目记录；如果项目能沉淀成 Skill、Plugin、MCP、CLI、脚本或方法论，再进入能力冷库和薄路由。
 
+## 当前验证宿主
+
+当前维护主线是 **Grok Build + Codex**。两者共用 `.agents/skills/github-vault-router/` 项目级 Skill；Claude Code 仍通过 `.claude/skills/github-vault-router/` 保留兼容支持，但不再是当前默认宿主。
+
+`AGENTS.md` 是唯一规则正文。根目录 `CLAUDE.md` 只保留一个指向 `AGENTS.md` 的最小兼容入口：2026-08-09 对 Grok Build 1.0.0 的本机实测发现，即使关闭 Claude 兼容导入，Grok 仍会读取根目录 `CLAUDE.md`，所以不能假定它完全不读这个文件，也不应在里面复制第二份规则。
+
 ## 版本重点
 
 以后每次发布都在这里补一行重点；完整实现细节统一写入 [CHANGELOG.md](CHANGELOG.md)。
@@ -40,7 +46,7 @@
 
 ## 最短使用方式
 
-把下面这段复制给 Codex、Claude Code 或其他能读 GitHub、能操作本地文件的 Agent：
+把下面这段复制给 Grok Build、Codex 或其他能读 GitHub、能操作本地文件的 Agent：
 
 ```text
 请用这个工作流仓库帮我建立“GitHub 项目入库 + 能力冷库 + 自动路由”：
@@ -88,7 +94,7 @@ Agent 需要本地执行时，可以把这份公开源码 clone 到隔离目录�
 - 不替你决定证据是否可信；
 - 不执行目标仓库 README、Issue、代码注释里的命令；
 - 不自动 clone、安装或运行被评估项目；
-- 不自动登录账号、发布内容、删除数据或修改 Codex/Claude 配置；
+- 不自动登录账号、发布内容、删除数据或修改客户端配置；
 - 不把“记录为 active”冒充“客户端已经真的安装并启用”。
 
 这些边界不是自动化不足，而是为了防止外部仓库通过提示词注入抢走 Agent 的执行权。
@@ -97,7 +103,7 @@ Agent 需要本地执行时，可以把这份公开源码 clone 到隔离目录�
 
 ```powershell
 # 初始化隔离工作流
-python scripts/workflow.py init --root <OUTPUT_DIR> --language zh-CN --client codex
+python scripts/workflow.py init --root <OUTPUT_DIR> --language zh-CN --client grok-build
 
 # 创建或命中同一条 GitHub 项目记录
 python scripts/workflow.py new-project --root <OUTPUT_DIR> --url <GITHUB_URL>
@@ -138,7 +144,7 @@ python scripts/workflow.py validate --root <OUTPUT_DIR>
 
 ## 可选只读能力审计
 
-PR #1 提供了独立的跨客户端盘点入口。它只读取 Skill、Plugin、MCP、Hook 和规则可见性，不改文件或客户端配置；命令发现已兼容原生 Windows、macOS 和 Linux。
+PR #1 提供了独立的跨客户端盘点入口，当前覆盖 Grok Build、Codex、Claude Code、Kimi Code 和通用 Agent。它只读取 Skill、Plugin、MCP、Hook 和规则可见性，不改文件或客户端配置；命令发现已兼容原生 Windows、macOS 和 Linux。
 
 ```powershell
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
@@ -148,11 +154,18 @@ node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 
 本仓库同时提供：
 
-- Codex 项目 Skill：`.agents/skills/github-vault-router/`；
-- Claude Code 项目 Skill：`.claude/skills/github-vault-router/`；
-- 通用规则入口：`AGENTS.md`、`CLAUDE.md`、`AGENT-START.md`。
+- Grok Build / Codex 共用项目 Skill：`.agents/skills/github-vault-router/`；
+- Claude Code 兼容项目 Skill：`.claude/skills/github-vault-router/`；
+- 唯一规则正文：`AGENTS.md`；
+- 兼容指针与启动入口：`CLAUDE.md`、`AGENT-START.md`。
 
 当 Agent 打开这份仓库时，匹配“GitHub 项目入库、能力冷库、路由治理”的任务，可按客户端原生机制发现项目 Skill。但把生成后的路由永久接到另一个项目或全局配置，仍是配置变更，必须由使用者批准。
+
+## 视频教程
+
+- [上集 · 你收藏的 GitHub 神器，真的值得装吗](https://www.youtube.com/watch?v=c4d23apzOEY)
+- [下集 · 这个仓库背后的 Agent 能力冷库工作流](https://www.youtube.com/watch?v=juIsuIy55mQ)
+- [进阶篇](https://www.youtube.com/watch?v=k7S5ewLaMVI&t=16s)
 
 ## 验证与演示
 

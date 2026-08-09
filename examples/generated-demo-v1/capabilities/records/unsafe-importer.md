@@ -20,7 +20,7 @@ updated_at: 2026-07-31T16:04:06Z
 - Capability ID / 能力 ID: unsafe-importer
 - Name / 名称: Fictional Unsafe Importer
 - Type / 类型: Script
-- Platform / 平台: Codex / Claude / Shared / Other
+- Platform / 平台: Grok Build / Codex / Claude Code / Shared / Other
 - Source / 来源:
 - Version or commit / 版本或 commit:
 - Related project grade / 相关项目等级: S / A / B / C / N/A

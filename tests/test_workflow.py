@@ -61,6 +61,15 @@ class WorkflowCLITests(unittest.TestCase):
         again = self.initialize("codex")
         self.assertEqual(again["result"], "already_initialized")
 
+    def test_init_accepts_grok_build_client_profile(self) -> None:
+        created = self.initialize("grok-build")
+        self.assertEqual(created["result"], "created")
+        config = json.loads((self.root / "workflow.json").read_text(encoding="utf-8"))
+        self.assertEqual(config["schema_version"], 2)
+        self.assertEqual(config["client_profile"], "grok-build")
+        code, validation = self.invoke("validate", "--root", str(self.root))
+        self.assertEqual(code, 0, validation)
+
     def test_project_url_is_canonical_and_idempotent(self) -> None:
         self.initialize()
         code, first = self.invoke(
@@ -861,6 +870,30 @@ class WorkflowCLITests(unittest.TestCase):
         self.assertEqual(result["errors"], 0)
         if (REPO_ROOT / ".git").exists() and workflow.shutil.which("git"):
             self.assertTrue(result["history_scanned"])
+
+    def test_repository_secret_scan_detects_private_windows_paths(self) -> None:
+        findings = workflow.secret_findings(
+            "Private vault: " + "D:" + r"\AI-Knowledge\notes.md",
+            "fixture",
+            workflow.REPOSITORY_SECRET_PATTERNS,
+        )
+        self.assertTrue(any("private Windows path" in item for item in findings))
+        self.assertEqual(
+            workflow.secret_findings(
+                "Public fixture: " + "D:" + r"\example\demo.md",
+                "fixture",
+                workflow.REPOSITORY_SECRET_PATTERNS,
+            ),
+            [],
+        )
+        self.assertEqual(
+            workflow.secret_findings(
+                r'rg -n "C:\\Users|D:\\" .',
+                "escaped documentation example",
+                workflow.REPOSITORY_SECRET_PATTERNS,
+            ),
+            [],
+        )
 
     def test_generated_demo_is_valid(self) -> None:
         demo = REPO_ROOT / "examples" / "generated-demo-v1"

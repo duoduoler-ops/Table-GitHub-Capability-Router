@@ -7,7 +7,7 @@
   "properties": {
     "schema_version": {"const": 2},
     "language": {"enum": ["zh-CN", "en"]},
-    "client_profile": {"enum": ["generic-agent", "codex", "claude-code"]},
+    "client_profile": {"enum": ["generic-agent", "codex", "claude-code", "grok-build"]},
     "paths": {
       "type": "object",
       "required": [
