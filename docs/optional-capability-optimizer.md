@@ -22,12 +22,17 @@ their client mechanism is documented and the user explicitly approves the diff.
 
 | Client | Level | Behavior |
 | --- | --- | --- |
+| Grok Build | `audit-only` | Discover Grok rules and Skill visibility without changing local configuration. |
 | Codex | `audit-only` | Discover native Skill locations and report the documented invocation control. |
-| Claude Code | `audit-only` | Discover native Skill locations and report the documented invocation control. |
+| Claude Code | `audit-only` | Retain compatibility discovery and report the documented invocation control. |
 | Kimi Code | `audit-only` | Account for merged Kimi, Claude, Codex, and generic Skill roots. |
 | Other agents | `unknown` | Inspect generic Agent Skills and produce an adapter plan without config writes. |
 
 The profile format is intentionally small. This contribution performs no configuration writes.
+The maintained Grok Build and Codex path shares `.agents/skills/`; Claude Code keeps its compatibility
+path under `.claude/skills/`. A local Grok Build 1.0.0 check used `grok inspect --json` and found that
+root `CLAUDE.md` was still loaded even when Claude compatibility import was disabled, so the repository
+keeps that file as a minimal pointer to canonical `AGENTS.md`.
 OpenCode, Pi, Warp, and future agents should begin as `audit-only` or `unknown`; any promotion to
 `managed` belongs in a separate PR after all adapter operations are tested.
 
@@ -45,6 +50,8 @@ Official references used for the initial profiles:
 - Codex Skills and configuration: <https://learn.chatgpt.com/docs/build-skills>
 - Claude Code Skills: <https://code.claude.com/docs/en/skills>
 - Kimi Code Agent Skills: <https://moonshotai.github.io/kimi-code/en/customization/skills.html>
+
+Grok Build behavior above is repository-local test evidence from 2026-08-09, not a claim that every future Grok version loads the same files.
 
 ## 中文
 
@@ -68,10 +75,13 @@ Agent Skills 的指令格式可以通用，但能力发现目录、Plugin 结构
 
 | 客户端 | 级别 | 行为 |
 | --- | --- | --- |
+| Grok Build | `audit-only` | 识别 Grok 规则与 Skill 可见性，不修改本地配置。 |
 | Codex | `audit-only` | 识别原生 Skill 路径并报告官方调用控制，不自动改配置。 |
-| Claude Code | `audit-only` | 识别原生 Skill 路径并报告官方调用控制，不自动改配置。 |
+| Claude Code | `audit-only` | 保留兼容盘点并报告官方调用控制，不自动改配置。 |
 | Kimi Code | `audit-only` | 处理 Kimi、Claude、Codex 和 generic Skill 根目录合并。 |
 | 其他 Agent | `unknown` | 盘点通用 Agent Skills，只生成 adapter 方案。 |
+
+当前维护的 Grok Build 与 Codex 共用 `.agents/skills/`；Claude Code 的兼容入口位于 `.claude/skills/`。2026-08-09 使用 `grok inspect --json` 对 Grok Build 1.0.0 本机核查时发现，即使关闭 Claude 兼容导入，根目录 `CLAUDE.md` 仍被读取，因此该文件只保留指向唯一规则正文 `AGENTS.md` 的最小指针。此结果是版本化实测，不代表未来所有 Grok 版本行为不变。
 
 本次贡献不执行任何配置写入。OpenCode、Pi、Warp 和未来客户端都先从 profile 开始；只有
 `detect`、`inventory`、`plan`、`apply`、`verify` 全部有测试后，才在单独 PR 中讨论 `managed`。

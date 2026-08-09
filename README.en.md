@@ -2,6 +2,12 @@
 
 Give a coding Agent this repository URL and ask it to establish the workflow. The Agent starts at `AGENT-START.md`, uses the dependency-free Python CLI for deterministic writes, and creates an isolated workflow root.
 
+## Current verified hosts
+
+The current maintained path is **Grok Build + Codex**. Both use the repo-scoped Skill at `.agents/skills/github-vault-router/`. Claude Code remains supported through the compatibility copy at `.claude/skills/github-vault-router/`, but it is no longer the current default host.
+
+`AGENTS.md` is the single canonical rules file. Root `CLAUDE.md` is intentionally limited to a compatibility pointer: a 2026-08-09 local check with Grok Build 1.0.0 found that Grok still loaded the root file even when Claude compatibility import was disabled. The pointer is retained to avoid duplicate or drifting policy.
+
 ## Release focus
 
 Every release adds one concise focus row here; implementation details stay in [CHANGELOG.md](CHANGELOG.md).
@@ -82,16 +88,22 @@ python scripts/workflow.py rebuild --root <OUTPUT_DIR>
 python scripts/workflow.py validate --root <OUTPUT_DIR>
 ```
 
-Repository-scoped Codex and Claude Code Skills are included. Persistent wiring into another project or global client configuration remains an approval-gated configuration change.
+Grok Build and Codex share the repository Skill under `.agents/skills/`; Claude Code uses the compatibility Skill under `.claude/skills/`. Persistent wiring into another project or global client configuration remains an approval-gated configuration change.
 
 ## Optional read-only capability audit
 
-PR #1 adds an independent audit entry for Skill, Plugin, MCP, hook, and rule visibility. It does not write files or client configuration, and command discovery works without `sh` on native Windows, macOS, and Linux.
+PR #1 adds an independent audit entry for Grok Build, Codex, Claude Code, Kimi Code, and generic-agent Skill, Plugin, MCP, hook, and rule visibility. It does not write files or client configuration, and command discovery works without `sh` on native Windows, macOS, and Linux.
 
 ```powershell
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 ```
 
-See the [generated demo](examples/generated-demo-v1/README.md), [state machine](docs/state-machine.md), [write protocol](docs/write-protocol.md), [optional capability audit](docs/optional-capability-optimizer.md), [optional pre-commit gate](docs/optional-pre-commit.md), [security policy](SECURITY.md), [v0.1 to v0.2 migration](docs/migrations/v0.1-to-v0.2.md), and [v0.2 to v0.3 migration](docs/migrations/v0.2-to-v0.3.md).
+See the [generated demo](examples/generated-demo-v1/README.md), [state machine](docs/state-machine.md), [write protocol](docs/write-protocol.md), [Grok Build client profile](docs/client-profiles/grok-build.md), [optional capability audit](docs/optional-capability-optimizer.md), [optional pre-commit gate](docs/optional-pre-commit.md), [security policy](SECURITY.md), [v0.1 to v0.2 migration](docs/migrations/v0.1-to-v0.2.md), and [v0.2 to v0.3 migration](docs/migrations/v0.2-to-v0.3.md).
+
+## Video walkthroughs
+
+- [Part 1 · Are your saved GitHub tools actually worth installing?](https://www.youtube.com/watch?v=c4d23apzOEY)
+- [Part 2 · The Agent capability cold-storage workflow behind this repository](https://www.youtube.com/watch?v=juIsuIy55mQ)
+- [Advanced guide](https://www.youtube.com/watch?v=k7S5ewLaMVI&t=16s)
 
 MIT licensed.

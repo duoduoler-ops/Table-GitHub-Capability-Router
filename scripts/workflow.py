@@ -105,6 +105,14 @@ REQUIRED_CAPABILITY_FIELDS = {
     "updated_at",
 }
 
+REPOSITORY_SECRET_PATTERNS = {
+    "private key": r"-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----",
+    "GitHub token": r"gh[pousr]_[A-Za-z0-9]{20,}",
+    "OpenAI key": r"sk-(?:proj-)?[A-Za-z0-9_-]{20,}",
+    "private home path": r"(?i)(?:[A-Z]:\\Users\\(?!example(?:\\|$))[^\\\s]+|/(?:Users|home)/(?!example(?:/|$))[^/\s]+)",
+    "private Windows path": r"(?i)\b[A-Z]:\\(?!\\|example(?:\\|$)|Users(?:\\|$)|<)[^\s`\"'<>()]+",
+}
+
 
 class WorkflowError(RuntimeError):
     pass
@@ -316,7 +324,7 @@ def load_config(root: Path) -> dict:
             raise WorkflowError(f"Route category requires non-empty label and boundary: {entry.get('id')}")
     if config["language"] not in {"zh-CN", "en"}:
         raise WorkflowError(f"Unsupported language: {config['language']}")
-    if config["client_profile"] not in {"generic-agent", "codex", "claude-code"}:
+    if config["client_profile"] not in {"generic-agent", "codex", "claude-code", "grok-build"}:
         raise WorkflowError(f"Unsupported client profile: {config['client_profile']}")
     return config
 
@@ -811,7 +819,7 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
             raise WorkflowError(f"Route category requires non-empty label and boundary: {entry.get('id')}")
     if config["language"] not in {"zh-CN", "en"}:
         raise WorkflowError(f"Unsupported language: {config['language']}")
-    if config["client_profile"] not in {"generic-agent", "codex", "claude-code"}:
+    if config["client_profile"] not in {"generic-agent", "codex", "claude-code", "grok-build"}:
         raise WorkflowError(f"Unsupported client profile: {config['client_profile']}")
 
     paths = resolve_paths(root, config)
@@ -1418,10 +1426,16 @@ def skill_identity_and_body(path: Path) -> tuple[dict[str, str], str]:
 def command_validate_repo(args: argparse.Namespace) -> dict:
     root = Path(args.root).resolve()
     required = [
+        ".gitignore",
         "AGENT-START.md",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "CLAUDE.md",
+        "CONTRIBUTING.md",
         "README.md",
         "README.zh-CN.md",
         "README.en.md",
+        "SECURITY.md",
         "config/workflow.example.json",
         "scripts/workflow.py",
         "tests/test_workflow.py",
@@ -1439,6 +1453,10 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
         ".githooks/pre-commit",
         "docs/migrations/v0.1-to-v0.2.md",
         "docs/migrations/v0.2-to-v0.3.md",
+        "docs/client-profiles/claude-code.md",
+        "docs/client-profiles/codex.md",
+        "docs/client-profiles/generic-agent.md",
+        "docs/client-profiles/grok-build.md",
         "docs/optional-pre-commit.md",
         "docs/optional-capability-optimizer.md",
         "integrations/optimize-agent-capabilities/SKILL.md",
@@ -1446,25 +1464,26 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
         "integrations/optimize-agent-capabilities/profiles/claude-code.json",
         "integrations/optimize-agent-capabilities/profiles/codex.json",
         "integrations/optimize-agent-capabilities/profiles/generic-agent.json",
+        "integrations/optimize-agent-capabilities/profiles/grok-build.json",
         "integrations/optimize-agent-capabilities/profiles/kimi-code.json",
         "integrations/optimize-agent-capabilities/references/client-adapters.md",
         "integrations/optimize-agent-capabilities/scripts/audit.mjs",
         "integrations/optimize-agent-capabilities/tests/audit.test.mjs",
     ]
     errors = [f"Missing required repository file: {name}" for name in required if not (root / name).exists()]
-    codex_skill = root / ".agents" / "skills" / "github-vault-router" / "SKILL.md"
+    shared_skill = root / ".agents" / "skills" / "github-vault-router" / "SKILL.md"
     claude_skill = root / ".claude" / "skills" / "github-vault-router" / "SKILL.md"
-    if codex_skill.exists() and claude_skill.exists():
-        codex_data, codex_body = skill_identity_and_body(codex_skill)
+    if shared_skill.exists() and claude_skill.exists():
+        shared_data, shared_body = skill_identity_and_body(shared_skill)
         claude_data, claude_body = skill_identity_and_body(claude_skill)
         for field in ("name", "description"):
-            if not codex_data.get(field) or not claude_data.get(field):
+            if not shared_data.get(field) or not claude_data.get(field):
                 errors.append(f"Repo-scoped Skills must both define non-empty {field}.")
                 continue
-            if codex_data.get(field) != claude_data.get(field):
-                errors.append(f"Repo-scoped Skill {field} differs between Codex and Claude Code.")
-        if codex_body != claude_body:
-            errors.append("Repo-scoped Skill instructions differ between Codex and Claude Code.")
+            if shared_data.get(field) != claude_data.get(field):
+                errors.append(f"Repo-scoped Skill {field} differs between shared Grok Build/Codex and Claude Code compatibility copies.")
+        if shared_body != claude_body:
+            errors.append("Repo-scoped Skill instructions differ between shared Grok Build/Codex and Claude Code compatibility copies.")
     openai_yaml = root / ".agents" / "skills" / "github-vault-router" / "agents" / "openai.yaml"
     if openai_yaml.exists() and "$github-vault-router" not in openai_yaml.read_text(encoding="utf-8"):
         errors.append("Repo-scoped Codex Skill default_prompt must mention $github-vault-router.")
@@ -1486,12 +1505,6 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
     if (demo_root / "workflow.json").exists():
         demo_errors, _ = collect_validation(demo_root)
         errors.extend(f"Generated demo: {error}" for error in demo_errors)
-    secret_patterns = {
-        "private key": r"-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----",
-        "GitHub token": r"gh[pousr]_[A-Za-z0-9]{20,}",
-        "OpenAI key": r"sk-(?:proj-)?[A-Za-z0-9_-]{20,}",
-        "private home path": r"(?i)(?:[A-Z]:\\Users\\(?!example(?:\\|$))[^\\\s]+|/(?:Users|home)/(?!example(?:/|$))[^/\s]+)",
-    }
     for path in sorted(item for item in root.rglob("*") if item.is_file() and ".git" not in item.parts):
         if path.stat().st_size > 2 * 1024 * 1024:
             continue
@@ -1499,7 +1512,7 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        errors.extend(secret_findings(text, str(path.relative_to(root)), secret_patterns))
+        errors.extend(secret_findings(text, str(path.relative_to(root)), REPOSITORY_SECRET_PATTERNS))
     history_scanned = False
     if (root / ".git").exists() and shutil.which("git"):
         history = subprocess.run(
@@ -1514,7 +1527,7 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
             errors.append(f"Git history scan failed: {history.stderr.strip() or 'unknown git error'}")
         else:
             history_scanned = True
-            errors.extend(secret_findings(history.stdout, "Git history", secret_patterns))
+            errors.extend(secret_findings(history.stdout, "Git history", REPOSITORY_SECRET_PATTERNS))
     if errors:
         raise WorkflowError("Repository validation failed:\n" + "\n".join(errors))
     return {
@@ -1533,7 +1546,11 @@ def build_parser() -> argparse.ArgumentParser:
     init = sub.add_parser("init", help="Initialize a new isolated workflow root.")
     init.add_argument("--root", required=True)
     init.add_argument("--language", choices=["zh-CN", "en"], default="zh-CN")
-    init.add_argument("--client", choices=["generic-agent", "codex", "claude-code"], default="generic-agent")
+    init.add_argument(
+        "--client",
+        choices=["generic-agent", "codex", "claude-code", "grok-build"],
+        default="generic-agent",
+    )
     init.set_defaults(handler=command_init, mutates=True)
 
     migrate_v2 = sub.add_parser("migrate-v2", help="Transactionally migrate an initialized schema v1 workflow to v2.")

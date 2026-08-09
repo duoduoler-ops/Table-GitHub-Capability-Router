@@ -1,0 +1,10 @@
+{
+  "id": "grok-build",
+  "support": "audit-only",
+  "commands": ["grok"],
+  "markers": ["${HOME}/.grok"],
+  "skillRoots": ["${HOME}/.grok/skills", "${CWD}/.agents/skills"],
+  "rules": ["${HOME}/.grok/AGENTS.md", "${CWD}/AGENTS.md", "${CWD}/CLAUDE.md"],
+  "explicitInvocation": "Verify discovery with grok --cwd <repo> inspect --json; no per-Skill invocation-control adapter is inferred",
+  "adapter": null
+}

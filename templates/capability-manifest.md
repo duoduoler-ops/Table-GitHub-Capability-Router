@@ -20,7 +20,7 @@ updated_at: {{UPDATED_AT}}
 - Capability ID / 能力 ID: {{CAPABILITY_ID}}
 - Name / 名称: {{CAPABILITY_NAME}}
 - Type / 类型: {{CAPABILITY_TYPE}}
-- Platform / 平台: Codex / Claude / Shared / Other
+- Platform / 平台: Grok Build / Codex / Claude Code / Shared / Other
 - Source / 来源:
 - Version or commit / 版本或 commit:
 - Related project grade / 相关项目等级: S / A / B / C / N/A

@@ -6,6 +6,14 @@ Give an Agent one repository link. Get a versioned GitHub intake vault, capabili
 
 [中文说明](README.zh-CN.md) | [English](README.en.md) | [5 分钟开始](QUICKSTART.zh-CN.md) | [Agent 唯一入口](AGENT-START.md)
 
+## Current verified hosts / 当前验证宿主
+
+The current maintained path is **Grok Build + Codex**. Both clients use the repo-scoped Skill at `.agents/skills/github-vault-router/`. Claude Code remains supported through the compatibility copy at `.claude/skills/github-vault-router/`; it is no longer the current default host.
+
+当前维护主线是 **Grok Build + Codex**。两者共用 `.agents/skills/github-vault-router/` 项目级 Skill；Claude Code 仍通过 `.claude/skills/github-vault-router/` 保留兼容支持，但不再是当前默认宿主。
+
+`AGENTS.md` is the single canonical rules file. Root `CLAUDE.md` is intentionally kept as a minimal compatibility pointer: a local check with Grok Build 1.0.0 found that Grok still loaded this root file even when Claude compatibility import was disabled, so it must point to `AGENTS.md` rather than duplicate policy.
+
 ## Copy this to your Agent / 复制给 Agent
 
 ```text
@@ -28,7 +36,7 @@ https://github.com/duoduoler-ops/Table-GitHub-Capability-Router
 | Semantic project references | Generated thin discovery + full semantic table, eligibility, duplicate and drift checks | Confirm the project deserves retained/reference status |
 | Capability cold storage | Manifest, health/state rules, route eligibility, automatic quarantine | Install, enable, active/auto promotion, client config |
 | Write safety | Lock, transaction manifest, before backup, atomic replace, rollback, validation | Removing unknown locks or deleting data |
-| Agent routing | Repo-scoped Codex/Claude Skills plus generated L1/L2 router | Persistent wiring into another project or global config |
+| Agent routing | Shared Grok Build/Codex repo Skill, Claude Code compatibility Skill, and generated L1/L2 router | Persistent wiring into another project or global config |
 
 Canonical project and capability records are the source of truth. Indexes, the thin discovery + full semantic project-reference table, and the capability router are generated artifacts. The optional capability audit is read-only and does not create a second routing policy.
 
@@ -87,9 +95,9 @@ No third-party Python package is required. The same GitHub URL always resolves t
 
 ## Optional read-only capability audit / 可选只读能力审计
 
-PR #1 added an independent, audit-only inventory entry. It discovers capability roots and client support boundaries but never installs, enables, disables, or rewrites configuration.
+PR #1 added an independent, audit-only inventory entry. It now covers Grok Build alongside the existing Codex, Claude Code, Kimi Code, and generic-agent profiles. It discovers capability roots and client support boundaries but never installs, enables, disables, or rewrites configuration.
 
-PR #1 增加了独立的只读能力盘点入口。它只发现能力目录和客户端支持边界，不安装、不启停，也不改写配置。
+PR #1 增加了独立的只读能力盘点入口。当前已在原有 Codex、Claude Code、Kimi Code 和通用 Agent profile 基础上加入 Grok Build；它只发现能力目录和客户端支持边界，不安装、不启停，也不改写配置。
 
 ```powershell
 node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
@@ -102,7 +110,8 @@ See [Optional capability optimizer](docs/optional-capability-optimizer.md). Than
 - [Generated demo](examples/generated-demo-v1/README.md) / 真实生成的公开脱敏演示
 - [State machine](docs/state-machine.md) / 状态机
 - [Deterministic write protocol](docs/write-protocol.md) / 确定性写回协议
-- [Client profiles](docs/client-profiles/generic-agent.md) / 客户端接入边界
+- [Grok Build client profile](docs/client-profiles/grok-build.md) / Grok Build 客户端接入边界
+- [Generic client profile](docs/client-profiles/generic-agent.md) / 通用客户端接入边界
 - [Optional capability audit](docs/optional-capability-optimizer.md) / 可选能力审计
 - [Optional pre-commit gate](docs/optional-pre-commit.md) / 可选提交前门禁
 - `python -m unittest discover -s tests -v`
@@ -127,5 +136,6 @@ This is strong workflow automation, not an unattended service. Target repository
 - [Migrate v0.2.0 to v0.3.0](docs/migrations/v0.2-to-v0.3.md)
 - [上集 · 你收藏的 GitHub 神器，真的值得装吗](https://www.youtube.com/watch?v=c4d23apzOEY)
 - [下集 · 这个仓库背后的 Agent 能力冷库工作流](https://www.youtube.com/watch?v=juIsuIy55mQ)
+- [进阶篇 · Advanced guide](https://www.youtube.com/watch?v=k7S5ewLaMVI&t=16s)
 
 MIT licensed. See [SECURITY.md](SECURITY.md) before adapting the kit for a public vault.

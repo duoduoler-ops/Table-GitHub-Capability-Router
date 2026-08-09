@@ -22,7 +22,7 @@ approved_by: demo-user
 - Capability ID / 能力 ID: public-doc-checker
 - Name / 名称: Fictional Public Docs Checker
 - Type / 类型: Skill
-- Platform / 平台: Codex / Claude / Shared / Other
+- Platform / 平台: Grok Build / Codex / Claude Code / Shared / Other
 - Source / 来源:
 - Version or commit / 版本或 commit:
 - Related project grade / 相关项目等级: S / A / B / C / N/A

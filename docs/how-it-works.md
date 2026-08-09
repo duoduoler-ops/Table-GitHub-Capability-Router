@@ -124,7 +124,7 @@ A project is not evaluated in isolation. Compare it against:
 
 - doing nothing extra;
 - the base model;
-- current Codex or Claude Code capabilities;
+- current host capabilities;
 - local CLI tools;
 - existing projects in your vault;
 - one or two similar alternatives.
@@ -324,7 +324,7 @@ GitHub 项目卡
 
 - 不调用额外能力；
 - 模型本身；
-- 当前 Codex 或 Claude Code 能力；
+- 当前宿主能力；
 - 本机 CLI 工具；
 - vault 里已有项目；
 - 1-2 个同类方案。
