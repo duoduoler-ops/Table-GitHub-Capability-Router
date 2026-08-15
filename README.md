@@ -49,10 +49,28 @@ Every release adds one concise focus row here; implementation details stay in [C
 
 | Version | Focus | User-visible change |
 | --- | --- | --- |
-| Unreleased (planned v0.4.0) | Judge B-grade task increment, then settle first real use / 先判断 B 级任务增量，再结算首次真实使用 | Schema v3 separates grade from deployment scope; low-risk executable candidates use T0, approved project scope, and the current project's first real task as T1 / Schema v3 拆开等级与部署范围；低风险可执行候选经过 T0 和项目级批准后，当前项目第一次真实任务就是 T1 |
+| v0.4.0 | Judge B-grade task increment, then settle first real use / 先判断 B 级任务增量，再结算首次真实使用 | Schema v3 separates grade from deployment scope; low-risk executable candidates use T0, approved project scope, and the current project's first real task as T1 / Schema v3 拆开等级与部署范围；低风险可执行候选经过 T0 和项目级批准后，当前项目第一次真实任务就是 T1 |
 | v0.3.0 | Discover saved GitHub capabilities before deciding they are irrelevant / 先发现，再判断是否使用 | Substantive tasks must check a generated thin table; `gated` projects can be mentioned before runtime approval, while reading, installation, and execution remain gated / 实质任务先查薄表；`gated` 项目可先提醒，但读取、安装和执行仍受门禁约束 |
 | v0.2.0 | Deterministic intake and semantic references / 确定性入库与语义参考 | Added schema-driven records, CLI rebuild/validation, transactions, and one full semantic routing table / 增加 Schema 事实源、CLI 重建校验、事务写回和完整语义表 |
 | v0.1.0 | Publish-safe Markdown starter / 可公开的 Markdown 起步模板 | Established bilingual templates, intake prompts, and a sanitized example / 建立双语模板、入库提示词和脱敏示例 |
+
+## What's new in v0.4.0 / v0.4.0 新增内容
+
+- Grade, deployment scope, management state, health, and invocation are separate schema v3 fields or axes. A does not mean global installation.
+- Method-only B projects remain reference and are not installed.
+- Low-risk executable B candidates get T0, then explicit approval for `project` scope; the current project's first real task is T1.
+- T1 pass settles to A/retained + active/project. Failure or an inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
+- `migrate-v3` requires an explicit deployment scope for every capability; `capability-deployment` records facts but never installs or removes files.
+- Grok Build and Codex share the repo-scoped `.agents/skills/github-vault-router/` Skill; Claude Code retains a compatibility copy.
+- No durable `project-trial` state is introduced. Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
+
+- 等级、部署范围、管理状态、健康和调用方式在 schema v3 中分别记录；A 不代表全局安装。
+- B 级只有方法价值时维持 reference，不安装。
+- 低风险可执行候选先做 T0，再询问是否按 `project` 范围安装；当前项目第一次真实任务就是 T1。
+- T1 通过结算为 A/retained + active/project；失败或结论不清则保持 B/reference 并建议卸载，真正删除仍需确认。
+- `migrate-v3` 要求为每项能力明确部署范围；`capability-deployment` 只登记事实，不执行安装或卸载。
+- Grok Build 与 Codex 共用 `.agents/skills/github-vault-router/` 项目 Skill；Claude Code 保留兼容副本。
+- 不新增长期 `project-trial` 状态；只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或无项目级安装方式时才要求隔离。
 
 ## What's new in v0.3.0 / v0.3.0 新增内容
 
@@ -78,21 +96,7 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Optional read-only capability audit | Preserves PR #1's cross-client inventory for Codex, Claude Code, Kimi Code, and generic agents |
 | Transactional writes and validation | Adds locking, backups, atomic replacement, rollback, repository validation, and history privacy scans |
 
-> Historical note / 历史说明：v0.2.0 introduced `high_confidence`, `gated`, and explicit-only routing evidence. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. The Unreleased line keeps that behavior and adds the B-grade settlement below. / v0.2.0 引入了 `high_confidence`、`gated` 和仅点名路由证据；v0.3.0 已改为 `gated` 项目可先提醒，后续读取或执行仍受门禁约束。当前 Unreleased 版本线保留该行为，并增加下方 B 级结算。
-
-## Unreleased (planned v0.4.0): B-grade first real use / Unreleased（计划 v0.4.0）：B 级首次真实使用
-
-- Grade, deployment scope, management state, health, and invocation are separate schema v3 fields or axes. A does not mean global installation.
-- Method-only B projects remain reference and are not installed.
-- Low-risk executable B candidates get T0, then explicit approval for `project` scope; the current project's first real task is T1.
-- T1 pass settles to A/retained + active/project. Failure or an inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
-- No durable `project-trial` state is introduced. Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
-
-- 等级、部署范围、管理状态、健康和调用方式在 schema v3 中分别记录；A 不代表全局安装。
-- B 级只有方法价值时维持 reference，不安装。
-- 低风险可执行候选先做 T0，再询问是否按 `project` 范围安装；当前项目第一次真实任务就是 T1。
-- T1 通过结算为 A/retained + active/project；失败或结论不清则保持 B/reference 并建议卸载，真正删除仍需确认。
-- 不新增长期 `project-trial` 状态；只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或无项目级安装方式时才要求隔离。
+> Historical note / 历史说明：v0.2.0 introduced `high_confidence`, `gated`, and explicit-only routing evidence. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. v0.4.0 keeps that behavior and adds B-grade first-use settlement. / v0.2.0 引入了 `high_confidence`、`gated` 和仅点名路由证据；v0.3.0 已改为 `gated` 项目可先提醒，后续读取或执行仍受门禁约束。v0.4.0 保留该行为，并增加 B 级首次真实使用结算。
 
 ## Deterministic core / 确定性核心
 

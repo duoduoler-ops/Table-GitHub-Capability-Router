@@ -14,10 +14,20 @@ Every release adds one concise focus row here; implementation details stay in [C
 
 | Version | Focus | User-visible change |
 | --- | --- | --- |
-| Unreleased (planned v0.4.0) | Judge B-grade task increment, then settle first real use | Schema v3 separates grade from deployment scope; low-risk executable candidates use T0, approved project scope, and the current project's first real task as T1 |
+| v0.4.0 | Judge B-grade task increment, then settle first real use | Schema v3 separates grade from deployment scope; low-risk executable candidates use T0, approved project scope, and the current project's first real task as T1 |
 | v0.3.0 | Discover saved capabilities before deciding they are irrelevant | Substantive tasks check a thin discovery table; `gated` projects may be mentioned before runtime approval while reading, installation, and execution remain gated |
 | v0.2.0 | Deterministic intake and semantic references | Added schema-driven records, CLI rebuild/validation, transactions, and one full semantic routing table |
 | v0.1.0 | Publish-safe Markdown starter | Established bilingual templates, intake prompts, and a sanitized example |
+
+## What's new in v0.4.0
+
+- Grade, deployment scope, management state, health, and invocation are separate. A does not mean global installation.
+- Method-only B projects remain reference and are not installed.
+- Low-risk executable B candidates get T0, then explicit approval for `project` scope; the current project's first real task is T1.
+- T1 pass settles to A/retained + active/project. Failure or an inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
+- `migrate-v3` requires an explicit deployment scope for every capability; `capability-deployment` records facts but never installs or removes files.
+- Grok Build and Codex share the repo-scoped `.agents/skills/github-vault-router/` Skill; Claude Code retains a compatibility copy.
+- No durable `project-trial` state is introduced. Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
 
 ## What's new in v0.3.0
 
@@ -43,15 +53,7 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Optional read-only capability audit from PR #1 | Inventories Codex, Claude Code, Kimi Code, and generic agent capability visibility without configuration writes |
 | Transactional writes | Adds locking, before backups, atomic replacement, rollback, and Git-history privacy scans |
 
-> Historical note: v0.2.0 introduced trigger levels. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. The Unreleased line keeps that behavior and adds the B-grade settlement below.
-
-## Unreleased (planned v0.4.0): B-grade first real use
-
-- Grade, deployment scope, management state, health, and invocation are separate. A does not mean global installation.
-- Method-only B projects remain reference and are not installed.
-- Low-risk executable B candidates get T0, then explicit approval for `project` scope; the current project's first real task is T1.
-- T1 pass settles to A/retained + active/project. Failure or an inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
-- No durable `project-trial` state is introduced. Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
+> Historical note: v0.2.0 introduced trigger levels. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. v0.4.0 keeps that behavior and adds B-grade first-use settlement.
 
 ## Quick start
 
