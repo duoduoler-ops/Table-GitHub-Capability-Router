@@ -19,7 +19,7 @@
     "updated_at"
   ],
   "properties": {
-    "schema_version": {"const": "2"},
+    "schema_version": {"const": "3"},
     "record_type": {"const": "github-project"},
     "id": {"type": "string", "pattern": "^gh-[a-z0-9-]+$"},
     "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},

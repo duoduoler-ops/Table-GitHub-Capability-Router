@@ -59,13 +59,14 @@ Example:
 
 | Decision | Suggested evidence |
 | --- | --- |
-| Keep as B reference | online check + clear reusable idea |
-| Promote to A component | online check + T0 + T1 |
+| Keep as B method reference | online check + clear reusable idea; no installation |
+| Try a B executable candidate | task-level increment judgment + T0 + approval for project scope |
+| Promote to A + project | T1 in the current project's first real task + explicit retention approval |
 | Replace current tool | T2 same-scenario comparison + rollback path |
 | Promote to S | repeated T3 real workflow use |
 | Reject as D | clear hard blocker or unacceptable risk |
 
-If a tool touches accounts, cookies, private files, payments, publishing, deployment, or deletion, require stronger preflight.
+If a tool touches accounts, cookies, private files, payments, publishing, deployment, deletion, elevated permissions, external writes, background services, or heavy caches, require stronger preflight or isolation. Do not create a durable `project-trial` state: keep grade, deployment scope, management state, health, and invocation separate.
 
 ## 4. Capability Slots
 
@@ -236,13 +237,14 @@ Obsidian vault = 笔记、规则、模板、决策
 
 | 决策 | 建议证据 |
 | --- | --- |
-| 保留为 B reference | 联网核查 + 明确可复用想法 |
-| 升级为 A 组件 | 联网核查 + T0 + T1 |
+| 保留为 B 方法 reference | 联网核查 + 明确可复用想法；不安装 |
+| 尝试 B 级可执行候选 | 任务增量判断 + T0 + 项目级安装批准 |
+| 升级为 A + project | 当前项目第一次真实任务完成 T1 + 明确保留批准 |
 | 替换当前工具 | T2 同场景比较 + 回滚方案 |
 | 升级为 S | 真实 T3 工作流中反复产生价值 |
 | 判为 D | 明确硬阻断或不可接受风险 |
 
-如果工具会触碰账号、Cookie、私有文件、支付、发布、部署或删除，必须要求更强 preflight。
+如果工具会触碰账号、Cookie、私有文件、支付、发布、部署、删除、高权限、外部写入、后台服务或重缓存，必须要求更强 preflight 或隔离。不要建立长期 `project-trial` 状态；等级、部署范围、管理状态、健康和调用方式分开记录。
 
 ## 4. 能力槽
 

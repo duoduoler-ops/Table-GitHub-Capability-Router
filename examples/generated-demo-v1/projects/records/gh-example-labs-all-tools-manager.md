@@ -1,8 +1,8 @@
 ---
-schema_version: 2
+schema_version: 3
 record_type: github-project
 id: gh-example-labs-all-tools-manager
-revision: 3
+revision: 4
 status: rejected
 grade: D
 canonical_url: https://github.com/example-labs/all-tools-manager
@@ -11,7 +11,7 @@ capability_summary: none
 semantic_examples: none
 trigger_level: explicit_only
 negative_routing: none
-updated_at: 2026-07-31T16:04:06Z
+updated_at: 2026-08-15T03:31:11Z
 ---
 
 # GitHub Project Card / GitHub 项目卡

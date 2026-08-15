@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260815T033118Z-f3a0df3c",
+  "action": "capability-health",
+  "created_at": "2026-08-15T03:31:18Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "capabilities/records/public-doc-checker.md",
+      "existed": true,
+      "before_sha256": "47b5a36a00c45448951ec7cb2c5efd96e1611cbcbc9fa1aaff07bc63ea33f09e",
+      "after_sha256": "d87f5a4e5642e38b85cd42a9deaff82f556916cb4a437e657e65fd744dec89c4"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "5be4449faccedd61f77c6d3d588712313cc9b0ca0c7ed6fbe667e78fb113b3b0",
+      "after_sha256": "5be4449faccedd61f77c6d3d588712313cc9b0ca0c7ed6fbe667e78fb113b3b0"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "a2775043f272766422da8f1571ce1f37accf7ad28fc97851c8a4dde9f1e11d90",
+      "after_sha256": "386f066df60329b8e084b2c82ab2ab40600d416bd4ad7a4e64359270cfa14721"
+    }
+  ],
+  "committed_at": "2026-08-15T03:31:18Z"
+}

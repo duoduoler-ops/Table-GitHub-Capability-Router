@@ -25,7 +25,7 @@ from typing import Iterable
 from urllib.parse import urlsplit, urlunsplit
 
 
-SCHEMA_VERSION = "2"
+SCHEMA_VERSION = "3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 PROJECT_STATUSES = {
@@ -61,6 +61,7 @@ MANAGEMENT_STATES = {
     "quarantine",
 }
 HEALTH_STATES = {"healthy", "unverified", "degraded", "broken", "missing"}
+DEPLOYMENT_SCOPES = {"not-installed", "project", "user", "global", "external-service"}
 INVOCATION_STATES = {"auto", "conditional", "explicit-only", "disabled"}
 ROUTABLE_MANAGEMENT_STATES = {"active", "cold", "reference"}
 AUTHORIZATION_STATES = {"ordinary-record", "lifecycle-update", "routing-proposal", "configuration-change"}
@@ -69,7 +70,7 @@ CAPABILITY_TRANSITIONS = {
     "active": {"cold", "disabled", "quarantine", "retired"},
     "cold": {"active", "disabled", "reference", "quarantine", "retired"},
     "disabled": {"active", "cold", "reference", "quarantine", "retired"},
-    "reference": {"active", "cold", "disabled", "quarantine", "retired"},
+    "reference": {"candidate", "active", "cold", "disabled", "quarantine", "retired"},
     "quarantine": {"cold", "disabled", "retired"},
     "retired": {"candidate"},
 }
@@ -97,6 +98,7 @@ REQUIRED_CAPABILITY_FIELDS = {
     "revision",
     "management_state",
     "health_state",
+    "deployment_scope",
     "risk",
     "invocation",
     "authorization",
@@ -311,8 +313,11 @@ def load_config(root: Path) -> dict:
     if missing:
         raise WorkflowError(f"workflow.json is missing: {', '.join(sorted(missing))}")
     if str(config["schema_version"]) != SCHEMA_VERSION:
-        if str(config["schema_version"]) == "1":
-            raise WorkflowError("Workflow schema version 1 requires migration. Run migrate-v2 before other commands.")
+        if str(config["schema_version"]) in {"1", "2"}:
+            raise WorkflowError(
+                f"Workflow schema version {config['schema_version']} requires migration. "
+                "Run migrate-v3 before other commands."
+            )
         raise WorkflowError(f"Unsupported workflow schema version: {config['schema_version']}")
     category_ids = [entry.get("id") for entry in config["route_categories"]]
     if not 1 <= len(category_ids) <= 10 or len(category_ids) != len(set(category_ids)):
@@ -499,7 +504,7 @@ def capability_router(config: dict, records: Iterable[tuple[Path, dict[str, str]
         if data["management_state"] not in ROUTABLE_MANAGEMENT_STATES:
             continue
         registry.append(
-            f"| {data['id']} | {data['management_state']} / {data['health_state']} | {data['invocation']} | "
+            f"| {data['id']} | {data['deployment_scope']} | {data['management_state']} / {data['health_state']} | {data['invocation']} | "
             f"{data['authorization']} | {data['risk']} | [{path.name}](../capabilities/records/{path.name}) |"
         )
     return "\n".join(
@@ -518,8 +523,8 @@ def capability_router(config: dict, records: Iterable[tuple[Path, dict[str, str]
             "",
             "## Level 2 Registry",
             "",
-            "| ID | Management / Health | Invocation | Authorization | Risk | Card |",
-            "| --- | --- | --- | --- | --- | --- |",
+            "| ID | Deployment scope | Management / Health | Invocation | Authorization | Risk | Card |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
             *registry,
             "",
             "If nothing matches, use `no-extra-tool`; never scan the whole capability directory.",
@@ -636,6 +641,8 @@ def validate_capability(data: dict[str, str], path: Path, category_ids: set[str]
         errors.append(f"{path}: invalid management_state {data['management_state']}")
     if data["health_state"] not in HEALTH_STATES:
         errors.append(f"{path}: invalid health_state {data['health_state']}")
+    if data["deployment_scope"] not in DEPLOYMENT_SCOPES:
+        errors.append(f"{path}: invalid deployment_scope {data['deployment_scope']}")
     if data["invocation"] not in INVOCATION_STATES:
         errors.append(f"{path}: invalid invocation {data['invocation']}")
     if data["risk"] not in {"low", "medium", "high"}:
@@ -652,6 +659,10 @@ def validate_capability(data: dict[str, str], path: Path, category_ids: set[str]
         errors.append(f"{path}: active capability requires approved_by")
     if data["management_state"] == "active" and data["invocation"] == "disabled":
         errors.append(f"{path}: active capability cannot have disabled invocation")
+    if data["management_state"] == "active" and data["deployment_scope"] == "not-installed":
+        errors.append(f"{path}: active capability requires a deployed scope")
+    if data["management_state"] == "reference" and data["deployment_scope"] != "not-installed":
+        errors.append(f"{path}: reference capability must use not-installed deployment scope")
     if data["management_state"] in {"candidate", "cold", "reference"} and data["invocation"] != "explicit-only":
         errors.append(f"{path}: candidate/cold/reference capability requires explicit-only invocation")
     if data["invocation"] == "auto" and data["management_state"] != "active":
@@ -775,6 +786,28 @@ def parse_capability_summary_specs(values: list[str] | None) -> dict[str, str]:
     return summaries
 
 
+def parse_deployment_scope_specs(values: list[str] | None) -> dict[str, str]:
+    scopes: dict[str, str] = {}
+    for raw in values or []:
+        if "=" not in raw:
+            raise WorkflowError(
+                "Each --deployment-scope must use CAPABILITY_ID=SCOPE, for example "
+                "public-doc-checker=project."
+            )
+        capability_id, scope = (part.strip() for part in raw.split("=", 1))
+        if not re.match(r"^[a-z][a-z0-9-]+$", capability_id):
+            raise WorkflowError(f"Invalid capability id in --deployment-scope: {capability_id}")
+        if scope not in DEPLOYMENT_SCOPES:
+            raise WorkflowError(
+                f"Invalid deployment scope for {capability_id}: {scope}. "
+                f"Choose one of {', '.join(sorted(DEPLOYMENT_SCOPES))}."
+            )
+        if capability_id in scopes:
+            raise WorkflowError(f"Duplicate --deployment-scope for {capability_id}.")
+        scopes[capability_id] = scope
+    return scopes
+
+
 def insert_frontmatter_field(
     data: dict[str, str], after_key: str, field: str, value: str
 ) -> dict[str, str]:
@@ -792,11 +825,11 @@ def insert_frontmatter_field(
     return updated
 
 
-def command_migrate_v2(args: argparse.Namespace) -> dict:
+def command_migrate_v3(args: argparse.Namespace) -> dict:
     root = Path(args.root).resolve()
     path = config_path(root)
     if not path.exists():
-        raise WorkflowError(f"Missing {path}. Only initialized schema v1 workflows can be migrated.")
+        raise WorkflowError(f"Missing {path}. Only initialized schema v1/v2 workflows can be migrated.")
     config = json.loads(path.read_text(encoding="utf-8"))
     missing_config = REQUIRED_CONFIG_KEYS - set(config)
     if missing_config:
@@ -805,10 +838,12 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
     if current_version == SCHEMA_VERSION:
         errors, summary = collect_validation(root)
         if errors:
-            raise WorkflowError("Already schema v2 but invalid:\n" + "\n".join(errors))
-        return {"action": "migrate-v2", "result": "already_migrated", **summary}
-    if current_version != "1":
-        raise WorkflowError(f"migrate-v2 only accepts schema version 1, found {current_version or '<missing>'}.")
+            raise WorkflowError("Already schema v3 but invalid:\n" + "\n".join(errors))
+        return {"action": "migrate-v3", "result": "already_migrated", **summary}
+    if current_version not in {"1", "2"}:
+        raise WorkflowError(
+            f"migrate-v3 only accepts schema version 1 or 2, found {current_version or '<missing>'}."
+        )
     category_ids_list = [entry.get("id") for entry in config["route_categories"]]
     if not 1 <= len(category_ids_list) <= 10 or len(category_ids_list) != len(set(category_ids_list)):
         raise WorkflowError("route_categories must contain unique non-empty ids.")
@@ -825,33 +860,56 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
     paths = resolve_paths(root, config)
     projects = read_records(paths["project_records"], "github-project")
     capabilities = read_records(paths["capability_records"], "capability")
-    supplied = parse_capability_summary_specs(args.capability_summary)
+    supplied_summaries = parse_capability_summary_specs(args.capability_summary)
+    supplied_scopes = parse_deployment_scope_specs(args.deployment_scope)
     eligible_ids = {
         data["id"] for _, data, _ in projects if data.get("status") in SEMANTIC_ELIGIBLE_STATUSES
     }
-    unknown = sorted(set(supplied) - eligible_ids)
-    if unknown:
+    unknown_summaries = sorted(set(supplied_summaries) - eligible_ids)
+    if unknown_summaries:
         raise WorkflowError(
-            "Capability summaries may only target retained/reference projects: " + ", ".join(unknown)
+            "Capability summaries may only target retained/reference projects: "
+            + ", ".join(unknown_summaries)
         )
-    missing = sorted(
-        project_id
-        for project_id in eligible_ids
-        if not supplied.get(project_id)
-    )
-    if missing:
+    if current_version == "1":
+        missing_summaries = sorted(
+            project_id for project_id in eligible_ids if not supplied_summaries.get(project_id)
+        )
+    else:
+        missing_summaries = []
+    if missing_summaries:
         raise WorkflowError(
-            "Schema v2 migration requires one --capability-summary PROJECT_ID=SUMMARY for each "
-            "retained/reference project. Missing: " + ", ".join(missing)
+            "Direct schema v1 -> v3 migration requires one --capability-summary "
+            "PROJECT_ID=SUMMARY for each retained/reference project. Missing: "
+            + ", ".join(missing_summaries)
+        )
+    capability_ids = {data["id"] for _, data, _ in capabilities}
+    unknown_scopes = sorted(set(supplied_scopes) - capability_ids)
+    if unknown_scopes:
+        raise WorkflowError(
+            "Deployment scopes target unknown capabilities: " + ", ".join(unknown_scopes)
+        )
+    missing_scopes = sorted(capability_ids - set(supplied_scopes))
+    if missing_scopes:
+        raise WorkflowError(
+            "Schema v3 migration requires one --deployment-scope CAPABILITY_ID=SCOPE for each "
+            "capability; scope is never inferred. Missing: " + ", ".join(missing_scopes)
         )
 
     timestamp = now_utc()
     migrated_projects: list[tuple[Path, dict[str, str], str]] = []
     for project_path, data, body in projects:
-        if data.get("schema_version") != "1":
-            raise WorkflowError(f"Expected schema version 1 in {project_path}.")
-        capability_summary = supplied[data["id"]] if data["id"] in eligible_ids else SEMANTIC_EMPTY
-        updated = insert_frontmatter_field(data, "evidence_level", "capability_summary", capability_summary)
+        if data.get("schema_version") != current_version:
+            raise WorkflowError(f"Expected schema version {current_version} in {project_path}.")
+        if current_version == "1":
+            capability_summary = (
+                supplied_summaries[data["id"]] if data["id"] in eligible_ids else SEMANTIC_EMPTY
+            )
+            updated = insert_frontmatter_field(
+                data, "evidence_level", "capability_summary", capability_summary
+            )
+        else:
+            updated = dict(data)
         updated["schema_version"] = SCHEMA_VERSION
         updated["revision"] = str(int(updated["revision"]) + 1)
         updated["updated_at"] = timestamp
@@ -863,9 +921,14 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
     category_ids = {entry["id"] for entry in config["route_categories"]}
     migrated_capabilities: list[tuple[Path, dict[str, str], str]] = []
     for capability_path, data, body in capabilities:
-        if data.get("schema_version") != "1":
-            raise WorkflowError(f"Expected schema version 1 in {capability_path}.")
-        updated = dict(data)
+        if data.get("schema_version") != current_version:
+            raise WorkflowError(f"Expected schema version {current_version} in {capability_path}.")
+        updated = insert_frontmatter_field(
+            data,
+            "health_state",
+            "deployment_scope",
+            supplied_scopes[data["id"]],
+        )
         updated["schema_version"] = SCHEMA_VERSION
         updated["revision"] = str(int(updated["revision"]) + 1)
         updated["updated_at"] = timestamp
@@ -879,12 +942,12 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
         raise WorkflowError("Project migration validation failed:\n" + "\n".join(uniqueness_errors))
     project_ids = [data["id"] for _, data, _ in migrated_projects]
     project_urls = [data["canonical_url"] for _, data, _ in migrated_projects]
-    capability_ids = [data["id"] for _, data, _ in migrated_capabilities]
+    migrated_capability_ids = [data["id"] for _, data, _ in migrated_capabilities]
     duplicate_errors = []
     for label, values in (
         ("project id", project_ids),
         ("project URL", project_urls),
-        ("capability id", capability_ids),
+        ("capability id", migrated_capability_ids),
     ):
         duplicates = sorted({value for value in values if values.count(value) > 1})
         if duplicates:
@@ -894,7 +957,7 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
 
     migrated_config = dict(config)
     migrated_config["schema_version"] = int(SCHEMA_VERSION)
-    transaction = Transaction(root, "migrate-v2")
+    transaction = Transaction(root, "migrate-v3")
     transaction.add(path, json.dumps(migrated_config, ensure_ascii=False, indent=2) + "\n")
     for project_path, data, body in migrated_projects:
         transaction.add(project_path, render_frontmatter(data, body))
@@ -927,14 +990,14 @@ def command_migrate_v2(args: argparse.Namespace) -> dict:
         paths["maintenance_log"],
         append_log(
             current_log,
-            "Migrated workflow schema v1 -> v2; added canonical capability summaries and rebuilt the thin discovery plus full semantic routing table.",
+            f"Migrated workflow schema v{current_version} -> v3; recorded explicit deployment scope for every capability and rebuilt all derived views.",
         ),
     )
     transaction.commit()
     errors, summary = collect_validation(root)
     if errors:
         raise WorkflowError("Migration validation failed:\n" + "\n".join(errors))
-    return {"action": "migrate-v2", "result": "migrated", **summary}
+    return {"action": "migrate-v3", "result": "migrated", **summary}
 
 
 def command_init(args: argparse.Namespace) -> dict:
@@ -1055,6 +1118,7 @@ def command_new_capability(args: argparse.Namespace) -> dict:
             "REVISION": "1",
             "MANAGEMENT_STATE": "candidate",
             "HEALTH_STATE": "unverified",
+            "DEPLOYMENT_SCOPE": "not-installed",
             "RISK": args.risk,
             "INVOCATION": "explicit-only",
             "AUTHORIZATION": "routing-proposal",
@@ -1073,7 +1137,7 @@ def command_new_capability(args: argparse.Namespace) -> dict:
     current_log = paths["maintenance_log"].read_text(encoding="utf-8")
     transaction.add(
         paths["maintenance_log"],
-        append_log(current_log, f"Created candidate capability `{capability_id}` as unverified and explicit-only; no capability was installed, enabled, or configured."),
+        append_log(current_log, f"Created candidate capability `{capability_id}` as unverified, explicit-only, and not-installed; no capability was installed, enabled, or configured."),
     )
     transaction.commit()
     return {"action": "new-capability", "result": "created", "id": capability_id, "path": str(target)}
@@ -1332,6 +1396,71 @@ def command_capability_health(args: argparse.Namespace) -> dict:
     return {"action": "capability-health", "id": args.id, "from": old, "to": args.to, "revision": int(data["revision"])}
 
 
+def command_capability_deployment(args: argparse.Namespace) -> dict:
+    root = Path(args.root).resolve()
+    config = load_config(root)
+    paths = resolve_paths(root, config)
+    target, data, body = locate_record(paths["capability_records"], args.id, "capability")
+    if not args.approved:
+        raise WorkflowError("Deployment scope changes require explicit approval and --approved.")
+    if not args.evidence.strip():
+        raise WorkflowError("Deployment scope changes require a non-empty --evidence summary.")
+    old = data["deployment_scope"]
+    new = args.to
+    if old == new:
+        return {
+            "action": "capability-deployment",
+            "result": "unchanged",
+            "id": args.id,
+            "deployment_scope": new,
+            "revision": int(data["revision"]),
+        }
+    if new == "not-installed" and data["management_state"] == "active":
+        raise WorkflowError(
+            "An active capability cannot be recorded as not-installed. "
+            "Move it out of active first, then record confirmed removal."
+        )
+    if data["management_state"] == "reference" and new != "not-installed":
+        raise WorkflowError(
+            "A reference capability is method-only and cannot use an installed deployment scope."
+        )
+    data["deployment_scope"] = new
+    data["deployment_evidence"] = args.evidence.strip()
+    data["revision"] = str(int(data["revision"]) + 1)
+    data["updated_at"] = now_utc()
+    data["approved_by"] = args.approved_by or "user"
+    category_ids = {entry["id"] for entry in config["route_categories"]}
+    capability_errors = validate_capability(data, target, category_ids)
+    if capability_errors:
+        raise WorkflowError(
+            "Capability deployment validation failed:\n" + "\n".join(capability_errors)
+        )
+    changed = render_frontmatter(data, body)
+    transaction = Transaction(root, "capability-deployment")
+    transaction.add(target, changed)
+    records = []
+    for path, current, current_body in read_records(paths["capability_records"], "capability"):
+        records.append((path, data, body) if path == target else (path, current, current_body))
+    transaction.add(paths["router"], capability_router(config, records))
+    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    transaction.add(
+        paths["maintenance_log"],
+        append_log(
+            current_log,
+            f"Capability `{args.id}` deployment scope changed {old} -> {new}; evidence recorded. "
+            "This records an approved real-world fact and does not install or remove files.",
+        ),
+    )
+    transaction.commit()
+    return {
+        "action": "capability-deployment",
+        "id": args.id,
+        "from": old,
+        "to": new,
+        "revision": int(data["revision"]),
+    }
+
+
 def command_capability_transition(args: argparse.Namespace) -> dict:
     root = Path(args.root).resolve()
     config = load_config(root)
@@ -1347,8 +1476,15 @@ def command_capability_transition(args: argparse.Namespace) -> dict:
             raise WorkflowError("Promotion to active requires explicit approval and --approved.")
         if data["health_state"] != "healthy":
             raise WorkflowError("Promotion to active requires healthy evidence first.")
+        if data["deployment_scope"] == "not-installed":
+            raise WorkflowError("Promotion to active requires a deployed scope first.")
         if invocation == "disabled":
             invocation = "conditional"
+    if new == "reference" and data["deployment_scope"] != "not-installed":
+        raise WorkflowError(
+            "Promotion to reference requires deployment_scope not-installed; "
+            "record confirmed removal first."
+        )
     if data["manager_type"] == "true" and invocation == "auto":
         raise WorkflowError("Manager-type capabilities cannot use automatic invocation; use conditional or explicit-only.")
     if invocation == "auto" and (new != "active" or not args.approved):
@@ -1453,6 +1589,7 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
         ".githooks/pre-commit",
         "docs/migrations/v0.1-to-v0.2.md",
         "docs/migrations/v0.2-to-v0.3.md",
+        "docs/migrations/v0.3-to-v0.4.md",
         "docs/client-profiles/claude-code.md",
         "docs/client-profiles/codex.md",
         "docs/client-profiles/generic-agent.md",
@@ -1553,14 +1690,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     init.set_defaults(handler=command_init, mutates=True)
 
-    migrate_v2 = sub.add_parser("migrate-v2", help="Transactionally migrate an initialized schema v1 workflow to v2.")
-    migrate_v2.add_argument("--root", required=True)
-    migrate_v2.add_argument(
+    migrate_v3 = sub.add_parser(
+        "migrate-v3",
+        help="Transactionally migrate an initialized schema v1/v2 workflow to v3.",
+    )
+    migrate_v3.add_argument("--root", required=True)
+    migrate_v3.add_argument(
         "--capability-summary",
         action="append",
-        help="Repeat PROJECT_ID=SUMMARY once for every retained/reference project.",
+        help="For direct v1 migration, repeat PROJECT_ID=SUMMARY for retained/reference projects.",
     )
-    migrate_v2.set_defaults(handler=command_migrate_v2, mutates=True)
+    migrate_v3.add_argument(
+        "--deployment-scope",
+        action="append",
+        help="Repeat CAPABILITY_ID=SCOPE once for every capability; scope is never inferred.",
+    )
+    migrate_v3.set_defaults(handler=command_migrate_v3, mutates=True)
 
     new_project = sub.add_parser("new-project", help="Create one idempotent GitHub project candidate record.")
     new_project.add_argument("--root", required=True)
@@ -1621,6 +1766,18 @@ def build_parser() -> argparse.ArgumentParser:
     health.add_argument("--to", choices=sorted(HEALTH_STATES), required=True)
     health.add_argument("--evidence", default="")
     health.set_defaults(handler=command_capability_health, mutates=True)
+
+    deployment = sub.add_parser(
+        "capability-deployment",
+        help="Record an explicitly approved deployment-scope fact without installing or removing files.",
+    )
+    deployment.add_argument("--root", required=True)
+    deployment.add_argument("--id", required=True)
+    deployment.add_argument("--to", choices=sorted(DEPLOYMENT_SCOPES), required=True)
+    deployment.add_argument("--evidence", required=True)
+    deployment.add_argument("--approved", action="store_true")
+    deployment.add_argument("--approved-by")
+    deployment.set_defaults(handler=command_capability_deployment, mutates=True)
 
     capability_transition = sub.add_parser("capability-transition", help="Apply a validated capability state transition.")
     capability_transition.add_argument("--root", required=True)

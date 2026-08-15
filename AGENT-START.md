@@ -41,7 +41,7 @@ python scripts/workflow.py validate --root <OUTPUT_DIR>
 
 Initialization is idempotent: rerunning it against a valid initialized directory returns `already_initialized` and does not duplicate files.
 
-If an existing workflow reports schema version 1, do not edit generated files or silently invent capability summaries. Follow [v0.2 to v0.3 migration](docs/migrations/v0.2-to-v0.3.md) and run `migrate-v2` with one user-reviewed summary for every retained/reference project.
+If an existing workflow reports schema version 1 or 2, do not edit generated files, invent capability summaries, or infer where a capability is installed. Follow [v0.3 to v0.4 migration](docs/migrations/v0.3-to-v0.4.md) and run `migrate-v3`. Direct v1 migration also needs one user-reviewed summary for every retained/reference project; every v1/v2 capability needs one explicit deployment-scope mapping.
 
 ## First GitHub project intake / 第一条 GitHub 项目入库
 
@@ -80,13 +80,49 @@ Use `project-routing` with the capability summary and the same three semantic ar
 
 The same canonical GitHub URL always maps to the same `gh-owner-repo` ID. Repeating `new-project` returns the existing record.
 
+## B-grade task increment gate / B 级任务增量闸门
+
+When a retained/reference B-grade project matches a real task:
+
+1. Keep the ordinary `no-extra-project` route visible.
+2. Judge the expected increment from the current project card first. Refresh only facts that can drift and matter to safety or compatibility; do not repeat a full repository survey by default.
+3. If the value is method, architecture, or a reusable pattern only, read the minimum relevant Markdown and keep the project at B/reference. Do not install it.
+4. If it has a concrete executable increment, complete T0: source and license, permission and credential surface, external writes, background services, cache/dependency cost, project-level install path, and rollback/removal method. T0 means only that no obvious risk was found in the checked scope; it is not a claim of absolute safety.
+5. Require isolation instead of direct project use only for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
+6. For a low-risk executable candidate, ask before installing at `project` scope. Record the approved fact with `capability-deployment`; the command itself never installs anything.
+7. Use the current project's first real task as T1. Do not create a separate demo or durable `project-trial` management state by default.
+8. Settle immediately after T1:
+   - passed: update the project to T1 evidence, promote B/reference to A/retained, mark the capability healthy, then promote it to active at `project` scope;
+   - failed or inconclusive: keep B/reference, keep the capability outside active routing, and recommend uninstall. Actual deletion and the subsequent `not-installed` record both require explicit confirmation.
+
+B 级正式项目命中真实任务时：
+
+1. 始终保留 `no-extra-project` 普通方案。
+2. 先根据当前项目卡判断预计增量；只补查会变化且影响安全或兼容性的事实，不默认重做完整调研。
+3. 如果只有方法、架构或可复用模式价值，就只读最小 Markdown，维持 B/reference，不安装。
+4. 如果存在明确可执行增量，先做 T0：来源与 License、权限和凭据、外部写入、后台服务、缓存/依赖成本、项目级安装方式及回滚/删除方法。T0 只表示“已查范围内未发现明显风险”，不代表绝对安全。
+5. 只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清，或没有项目级安装方式时才要求隔离。
+6. 对低风险可执行候选，先询问是否按 `project` 范围安装；用 `capability-deployment` 记录获批事实，但命令本身不执行安装。
+7. 当前项目里的第一次真实任务就是 T1；默认不额外做 Demo，也不建立长期 `project-trial` 管理状态。
+8. T1 后立即结算：
+   - 通过：项目写入 T1 证据，B/reference 升为 A/retained；能力写入 healthy，再以 `project` 范围升为 active；
+   - 失败或结论不清：保持 B/reference，能力不进入 active 路由，并建议卸载。真正删除以及随后写回 `not-installed` 都仍需明确确认。
+
 ## First capability intake / 第一条能力入库
 
 ```powershell
 python scripts/workflow.py new-capability --root <OUTPUT_DIR> --id <ID> --name <NAME> --type <TYPE> --route-category <CATEGORY>
 ```
 
-New capabilities always start as `candidate / unverified / explicit-only`. Record health evidence before promotion. `active` and `auto` both require explicit approval; these commands update routing records only and never install or enable a real client capability.
+New capabilities always start as `candidate / unverified / explicit-only / not-installed`. Record health evidence and deployment scope before promotion. `active`, `auto`, and deployment-scope changes all require explicit approval; these commands update routing records only and never install, remove, or enable a real client capability.
+
+Deployment scope is a separate machine field: `not-installed / project / user / global / external-service`. Grade, deployment scope, management state, health, and invocation must never be collapsed into one label. Record an already approved deployment fact with:
+
+```powershell
+python scripts/workflow.py capability-deployment --root <OUTPUT_DIR> --id <CAPABILITY_ID> --to project --evidence "Approved project-local installation completed" --approved
+```
+
+This command records evidence only. It never installs, removes, or configures the real capability.
 
 To add reviewed source, permission, activation, rollback, or test notes, edit a separate manifest draft and use:
 
@@ -94,7 +130,7 @@ To add reviewed source, permission, activation, rollback, or test notes, edit a 
 python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILITY_ID> --from-file <REVIEWED_DRAFT>
 ```
 
-`candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v2. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
+`candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v3. An active capability must have a deployed scope. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
 
 ## Automatic routing after bootstrap / 初始化后的自动路由
 
@@ -111,12 +147,14 @@ python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILIT
 
 ## Completion checklist / 完成检查
 
-- `workflow.json` exists and has `schema_version: 2`.
+- `workflow.json` exists and has `schema_version: 3`.
 - `projects/records/` and `capabilities/records/` are canonical sources.
 - Project index, thin discovery + full semantic project-reference table, candidate pool, rejection log, and L1/L2 capability router are generated—not manually maintained.
 - Every retained/reference S/A/B project has one distinct capability summary, at least two semantic examples, one valid trigger level, and non-empty negative routing; every ineligible project is absent from both generated sections.
 - Transaction manifests exist under `.workflow/transactions/` for every mutation.
 - Canonical evidence/body updates were applied through `update-project` or `update-capability`, not direct edits.
 - No duplicate canonical URL or stable ID exists.
+- Every capability has an explicit deployment scope; active is never `not-installed`, and reference is always `not-installed`.
+- B-grade executable candidates use the current project's first real task as T1 and settle without a durable `project-trial` state.
 - `validate` passes.
 - No install, login, external publishing, deletion, or client configuration change happened without approval.

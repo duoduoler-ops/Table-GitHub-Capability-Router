@@ -1,5 +1,5 @@
 ---
-schema_version: 2
+schema_version: 3
 record_type: distillation
 id: example-method
 revision: 1
