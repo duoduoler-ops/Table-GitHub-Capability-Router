@@ -14,6 +14,7 @@
 
 | 版本 | 本次重点 | 用户能感知到的变化 |
 | --- | --- | --- |
+| Unreleased（计划 v0.4.0） | B 级任务增量判断与首次真实使用结算 | Schema v3 拆开等级与部署范围；低风险可执行候选经过 T0 和项目级批准后，当前项目第一次真实任务就是 T1 |
 | v0.3.0 | 先发现已入库能力，再判断是否使用 | 有明确对象、动作或产物的任务先查薄发现表；`gated` 项目可以先提醒，但读取、安装和执行仍需过门禁 |
 | v0.2.0 | 确定性入库与语义参考 | 增加 Schema 事实源、CLI 重建校验、事务写回和一张完整语义表 |
 | v0.1.0 | 可公开的 Markdown 起步模板 | 建立双语模板、入库提示词和脱敏示例 |
@@ -42,7 +43,15 @@
 | PR #1 可选只读能力审计 | 盘点 Codex、Claude Code、Kimi Code 等客户端能力，不修改配置 |
 | 事务式写入 | 加锁、修改前备份、原子替换、失败回滚和 Git 历史隐私扫描 |
 
-> 历史说明：v0.2.0 引入命中级别；v0.3.0 已把 `gated` 调整为“先提醒项目存在，后续读取或执行再过门禁”。当前行为以上方 v0.3.0 说明为准。
+> 历史说明：v0.2.0 引入命中级别；v0.3.0 已把 `gated` 调整为“先提醒项目存在，后续读取或执行再过门禁”。当前 Unreleased 版本线保留该行为，并增加下方 B 级结算。
+
+## Unreleased（计划 v0.4.0）：B 级首次真实使用
+
+- 等级、部署范围、管理状态、健康和调用方式分别记录；A 不代表全局安装。
+- B 级只有方法价值时维持 reference，不安装。
+- 低风险可执行候选先做 T0，再询问是否按 `project` 范围安装；当前项目第一次真实任务就是 T1。
+- 通过后结算为 A/retained + active/project；失败或结论不清则保持 B/reference 并建议卸载，真正删除仍需确认。
+- 不建立长期 `project-trial` 状态。只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或没有项目级安装方式时才要求隔离。
 
 ## 最短使用方式
 
@@ -77,11 +86,12 @@ Agent 需要本地执行时，可以把这份公开源码 clone 到隔离目录�
 
 - GitHub 地址规范化，稳定 ID，重复链接命中同一记录；
 - 新项目固定从 `candidate / ungraded / unverified` 开始；
-- 新能力固定从 `candidate / unverified / explicit-only` 开始；
+- 新能力固定从 `candidate / unverified / not-installed / explicit-only` 开始；
 - 项目晋级、能力启用和自动调用走机器校验的状态机；
 - `candidate/disabled/quarantine/retired` 不进入薄路由；
 - active 能力一旦健康降级，自动隔离、禁用调用并从路由消失；
-- 总管型能力单独标记，schema v2 禁止自动调用；
+- 总管型能力单独标记，schema v3 禁止自动调用；
+- 每条能力明确记录 `not-installed / project / user / global / external-service` 部署范围；
 - 所有写入先加锁，再生成事务清单和修改前备份，失败自动回滚；
 - 索引、候选池、否决记录、L1/L2 路由从事实源重建；
 - S/A/B 且为 `retained/reference` 的项目自动生成薄发现表和完整语义表；
@@ -108,9 +118,9 @@ python scripts/workflow.py init --root <OUTPUT_DIR> --language zh-CN --client gr
 # 创建或命中同一条 GitHub 项目记录
 python scripts/workflow.py new-project --root <OUTPUT_DIR> --url <GITHUB_URL>
 
-# 把已有 v0.2 工作流事务化升级到 v0.3（每个正式项目重复一项）
-python scripts/workflow.py migrate-v2 --root <OUTPUT_DIR> `
-  --capability-summary "gh-owner-repo=比较已保存的项目并输出一份可复用参考建议"
+# 把已有 schema v2 工作流事务化升级到 schema v3（每条能力重复一项）
+python scripts/workflow.py migrate-v3 --root <OUTPUT_DIR> `
+  --deployment-scope "capability-id=project"
 
 # 晋级正式参考项目时原子写入语义命中信息
 python scripts/workflow.py project-transition --root <OUTPUT_DIR> --id <PROJECT_ID> --to reference --grade B --approved `
@@ -122,6 +132,9 @@ python scripts/workflow.py project-transition --root <OUTPUT_DIR> --id <PROJECT_
 
 # 创建能力候选
 python scripts/workflow.py new-capability --root <OUTPUT_DIR> --id <ID> --name <NAME> --type <TYPE> --route-category <CATEGORY>
+
+# 真实安装已另行获批并完成后，只记录部署事实；本命令不会执行安装
+python scripts/workflow.py capability-deployment --root <OUTPUT_DIR> --id <ID> --to project --evidence "已批准并完成当前项目安装" --approved
 
 # 从事实源重建索引和路由
 python scripts/workflow.py rebuild --root <OUTPUT_DIR>

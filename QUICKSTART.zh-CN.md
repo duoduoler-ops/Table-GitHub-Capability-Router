@@ -28,19 +28,21 @@ Windows 上如果 `python` 不可用，但本机已有 `py`，可改用 `py -3`�
 
 ## 成功标准
 
-- `workflow.json` 的 `schema_version` 为 `2`；
+- `workflow.json` 的 `schema_version` 为 `3`；
 - 同一个 GitHub 链接重复处理仍只有一张项目卡；
 - 项目卡、能力卡是事实源，索引、薄发现 + 完整语义表和能力路由由 CLI 生成；
 - 只有经批准的 S/A/B `retained/reference` 项目进入薄发现表和完整语义表，且在两张表中各一行；
 - 每条正式记录有一条唯一能力摘要、至少两条日常说法、命中级别和禁止命中条件；
 - 有明确对象、动作或产物的任务会先查薄发现表；`gated` 项目先提醒，读取或执行仍需过门禁；
 - `candidate/disabled/quarantine/retired` 能力不出现在薄路由；
+- 每条能力明确记录部署范围；active 不能是 `not-installed`，reference 必须是 `not-installed`；
+- B 级低风险可执行候选把当前项目第一次真实任务作为 T1，不建立长期 `project-trial` 状态；
 - `.workflow/transactions/` 留下本次写入清单；
 - `validate` 返回 `result: pass` 和 `errors: 0`；
 - 没有自动安装、登录、外发、删除或修改客户端配置。
 
 ## 下一步
 
-把一个待评价项目链接交给 Agent，让它先做轻量评估。Agent 可以补充项目卡里的公开证据，但不得执行目标仓库里的命令。准备晋级时，要同时补充唯一能力摘要、日常语义示例、命中级别和禁止命中边界；准备读取仓库、clone、安装或真实测试时，再按门禁单独确认。已有 v0.2 工作流先按 [v0.2 → v0.3 迁移](docs/migrations/v0.2-to-v0.3.md) 升级。
+把一个待评价项目链接交给 Agent，让它先做轻量评估。Agent 可以补充项目卡里的公开证据，但不得执行目标仓库里的命令。准备晋级时，要同时补充唯一能力摘要、日常语义示例、命中级别和禁止命中边界；B 级命中后先判断任务增量，只有方法价值就不安装，低风险可执行候选完成 T0 并获得项目级安装批准后，当前项目第一次真实任务就是 T1。已有 schema v1/v2 工作流按 [v0.3 → v0.4 迁移](docs/migrations/v0.3-to-v0.4.md) 升级。
 
 完整规则见 [AGENT-START.md](AGENT-START.md)；真实产物见 [自动生成演示](examples/generated-demo-v1/README.md)。

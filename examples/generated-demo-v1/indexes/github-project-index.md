@@ -3,5 +3,5 @@
 
 | ID | Status | Grade | Canonical URL | Card | Updated |
 | --- | --- | --- | --- | --- | --- |
-| gh-example-labs-all-tools-manager | rejected | D | [https://github.com/example-labs/all-tools-manager](https://github.com/example-labs/all-tools-manager) | [gh-example-labs-all-tools-manager.md](../projects/records/gh-example-labs-all-tools-manager.md) | 2026-07-31T16:04:06Z |
-| gh-example-labs-reference-patterns | reference | B | [https://github.com/example-labs/reference-patterns](https://github.com/example-labs/reference-patterns) | [gh-example-labs-reference-patterns.md](../projects/records/gh-example-labs-reference-patterns.md) | 2026-07-31T16:04:06Z |
+| gh-example-labs-all-tools-manager | rejected | D | [https://github.com/example-labs/all-tools-manager](https://github.com/example-labs/all-tools-manager) | [gh-example-labs-all-tools-manager.md](../projects/records/gh-example-labs-all-tools-manager.md) | 2026-08-15T03:31:11Z |
+| gh-example-labs-reference-patterns | reference | B | [https://github.com/example-labs/reference-patterns](https://github.com/example-labs/reference-patterns) | [gh-example-labs-reference-patterns.md](../projects/records/gh-example-labs-reference-patterns.md) | 2026-08-15T03:31:11Z |

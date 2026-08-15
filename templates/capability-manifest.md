@@ -5,6 +5,7 @@ id: {{CAPABILITY_ID}}
 revision: {{REVISION}}
 management_state: {{MANAGEMENT_STATE}}
 health_state: {{HEALTH_STATE}}
+deployment_scope: {{DEPLOYMENT_SCOPE}}
 risk: {{RISK}}
 invocation: {{INVOCATION}}
 authorization: {{AUTHORIZATION}}
@@ -32,6 +33,7 @@ updated_at: {{UPDATED_AT}}
 
 - Asset form / 资产形态: runtime / skill / plugin / mcp-config / script / reference / source-pointer
 - Canonical state / 权威状态: see frontmatter; do not duplicate mutable state here / 见 frontmatter，不在正文重复可变状态
+- Deployment scope / 部署范围: see `deployment_scope` in frontmatter: not-installed / project / user / global / external-service
 - Risk / 风险: {{RISK}}
 - Manager type / 是否总管型: see `manager_type` in frontmatter / 见 frontmatter 的 `manager_type`
 - Quarantine / 隔离: true / false
@@ -53,6 +55,11 @@ updated_at: {{UPDATED_AT}}
 
 ## Activation / 激活
 
+- B-candidate gate / B 级候选闸门: method-only reference / executable candidate
+- T0 safety boundary / T0 安全边界:
+- Approved first-use project / 已批准首次使用项目:
+- T1 real-task outcome / T1 真实任务结果: not-run / passed / failed / inconclusive
+- Settlement / 结算: retain as A + project / stay B and recommend uninstall / not applicable
 - Activation method / 激活方式:
 - Refresh, new session, or restart / 刷新、新会话或重启要求:
 - Health check / 健康检查:
@@ -65,6 +72,7 @@ updated_at: {{UPDATED_AT}}
 - Raw log / 原始日志:
 - Latest verification / 最近验证:
 - Recheck trigger / 复查条件:
+- Lifecycle note / 生命周期说明: grade, deployment scope, management state, health, and invocation are separate axes; never create a `project-trial` state / 等级、部署范围、管理状态、健康和调用方式相互独立；不创建 `project-trial` 状态
 
 ## Security / 安全
 

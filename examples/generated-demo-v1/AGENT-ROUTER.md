@@ -1,6 +1,6 @@
 # Agent Router Entry / Agent 路由入口
 
-- Schema version / Schema 版本：2
+- Schema version / Schema 版本：3
 - Client profile / 客户端：`generic-agent`
 - Language / 语言：`zh-CN`
 
@@ -15,6 +15,10 @@ For every substantive task with a clear object, action, or deliverable, read the
 `high_confidence` and `gated` both allow a reminder; `gated` controls later reading or execution, not whether the project may be mentioned. `explicit_only` requires the user to name or clearly request the project. A reminder is not repository use: keep `no-extra-project`, offer the normal route, offer to read the smallest relevant Markdown only after the user chooses, and ask before installation or enablement only when runtime execution is truly required.
 
 `high_confidence` 与 `gated` 都允许先提醒；`gated` 只控制后续读取或执行，不控制是否可以提及项目。`explicit_only` 仍要求用户点名或明确要求。提醒不等于使用仓库：保留 `no-extra-project` 普通方案，用户选择后才只读最小相关 Markdown，确需运行时再询问安装或启用。
+
+When a B-grade project matches, judge its visible increment from the project card first and refresh only safety- or compatibility-sensitive facts. Method-only value stays reference-only. For a low-risk executable increment, complete T0, ask before installing at `project` scope, and use the current project's first real task as T1. Success settles to grade A plus project-scoped retention; failure or an inconclusive result stays B and recommends uninstall. Deletion still requires confirmation. Do not create a durable `project-trial` state. Require isolation only for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
+
+B 级项目命中时，先根据项目卡判断可见增量，只补查安全或兼容性相关的当前事实。只有方法价值就继续只作 reference；低风险可执行增量完成 T0 后，先询问是否按 `project` 范围安装，并把当前项目的第一次真实任务作为 T1。成功结算为 A 级证据 + 当前项目保留；失败或结论不清则维持 B 级并建议卸载，真正删除仍需确认。不建立长期 `project-trial` 状态。高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或无项目级安装方式时才要求隔离。
 
 For GitHub intake, use the deterministic commands from the source repository:
 

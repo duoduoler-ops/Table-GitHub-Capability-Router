@@ -10,6 +10,7 @@
     "revision",
     "management_state",
     "health_state",
+    "deployment_scope",
     "risk",
     "invocation",
     "authorization",
@@ -18,12 +19,13 @@
     "updated_at"
   ],
   "properties": {
-    "schema_version": {"const": "2"},
+    "schema_version": {"const": "3"},
     "record_type": {"const": "capability"},
     "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
     "revision": {"type": "string", "pattern": "^[1-9][0-9]*$"},
     "management_state": {"enum": ["candidate", "active", "cold", "disabled", "reference", "retired", "quarantine"]},
     "health_state": {"enum": ["healthy", "unverified", "degraded", "broken", "missing"]},
+    "deployment_scope": {"enum": ["not-installed", "project", "user", "global", "external-service"]},
     "risk": {"enum": ["low", "medium", "high"]},
     "invocation": {"enum": ["auto", "conditional", "explicit-only", "disabled"]},
     "authorization": {"enum": ["ordinary-record", "lifecycle-update", "routing-proposal", "configuration-change"]},
@@ -40,9 +42,14 @@
         "required": ["approved_by"],
         "properties": {
           "health_state": {"const": "healthy"},
+          "deployment_scope": {"not": {"const": "not-installed"}},
           "invocation": {"enum": ["auto", "conditional", "explicit-only"]}
         }
       }
+    },
+    {
+      "if": {"properties": {"management_state": {"const": "reference"}}},
+      "then": {"properties": {"deployment_scope": {"const": "not-installed"}}}
     },
     {
       "if": {"properties": {"management_state": {"enum": ["candidate", "cold", "reference"]}}},

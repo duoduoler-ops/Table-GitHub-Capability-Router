@@ -51,3 +51,11 @@
 ## 2026-07-31
 
 - Migrated workflow schema v1 -> v2; added canonical capability summaries and rebuilt the thin discovery plus full semantic routing table.
+
+## 2026-08-15
+
+- Migrated workflow schema v2 -> v3; recorded explicit deployment scope for every capability and rebuilt all derived views.
+
+## 2026-08-15
+
+- Capability `public-doc-checker` health changed healthy -> healthy; evidence summary recorded in the manifest frontmatter.

@@ -25,6 +25,7 @@ Rules:
 - Capability duplication is not an automatic rejection. Decide whether the project keeps, complements, challenges, replaces, or falls back from the current solution.
 - If the project is retained as a reference, distill only the reusable method into an existing workflow, concept, or project page. Create a new distillation page only if no natural page exists.
 - If S/A/B retained/reference promotion is recommended, propose one distinct verb + object + output capability summary, at least two phrases the user might actually say, one `high_confidence/gated/explicit_only` trigger level, a negative-routing boundary, and the visible increment over `no-extra-project`. `high_confidence` and `gated` both allow a reminder; `gated` controls later reading or execution.
+- If a B-grade project later matches a real task, use the project card for a task-level increment judgment. Method-only value stays reference-only. A low-risk executable increment gets T0 and explicit approval for `project` scope; the current project's first real task is T1. Pass settles to A/retained + active/project; failure or an inconclusive result stays B/reference and recommends uninstall. Never create `project-trial` or infer global installation from grade A.
 - Do not add candidate, rejected, archived, C, or D projects to semantic routing. Do not hand-edit the generated semantic table.
 - Do not repeat the project card inside the distillation page. The project card keeps evidence; the distillation page keeps reusable knowledge.
 - Scores are optional and only compare similar candidates. They do not automatically decide S/A/B/C/D.
@@ -105,6 +106,7 @@ Capability name or path:
 - 能力重复不等于自动淘汰。必须判断它是保留现有、互补组合、挑战者测试、替换现有，还是回退轻量方案。
 - 如果项目作为 reference 保留，只把可复用方法提炼进已有工作流页、概念页或项目页。没有自然归属时才新建提炼页。
 - 如果建议将项目晋级为 S/A/B `retained/reference`，先提出一条可区分的“动词 + 对象 + 产物”能力摘要、至少两句用户日常会说的话、一个 `high_confidence/gated/explicit_only` 命中级别、禁止命中边界，以及相比 `no-extra-project` 普通方案的可见增量。`high_confidence` 与 `gated` 都允许先提醒，`gated` 只限制后续读取或执行。
+- B 级项目以后命中真实任务时，先根据项目卡做任务增量判断。只有方法价值就继续只作 reference；低风险可执行增量完成 T0 并获得 `project` 范围安装批准后，当前项目第一次真实任务就是 T1。通过后结算为 A/retained + active/project；失败或结论不清保持 B/reference 并建议卸载。不建立 `project-trial`，也不从 A 级推断全局安装。
 - 候选、否决、归档和 C/D 项目不得进入语义命中表；生成表不得手改。
 - 不要在提炼页里重复项目卡。项目卡保存证据，提炼页保存可复用知识。
 - 评分是可选项，只用于同类候选比较，不能自动决定 S/A/B/C/D。

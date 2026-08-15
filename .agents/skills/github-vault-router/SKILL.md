@@ -12,5 +12,7 @@ description: Initialize or maintain a GitHub project intake, mandatory thin disc
 5. For retained/reference promotion, require one distinct capability summary, at least two ordinary-language semantic examples, one trigger level, and a negative-routing boundary.
 6. For every substantive task with a clear object, action, or deliverable, read the thin discovery section of `indexes/project-semantic-routing.md` once per deliverable type before concluding that no saved project is relevant. Pure chat and no-action one-line questions are exempt.
 7. On a meaning match, return at most Top-1 plus `no-extra-project`, then read only its full semantic row. Keep workflow guidance and project reference parallel.
-8. Let `high_confidence` and `gated` both produce a reminder; use `gated` only for later reading or execution. Read minimum Markdown only after the user chooses the reference. Ask before installation, login, publishing, deletion, client configuration, promotion, enablement, or automatic invocation.
-9. Report created/updated files, evidence boundaries, validation, and gated actions not executed.
+8. Let `high_confidence` and `gated` both produce a reminder; use `gated` only for later reading or execution. Read minimum Markdown only after the user chooses the reference.
+9. For a B-grade match, use the task-increment gate in `AGENT-START.md`: method-only stays reference; low-risk executable value gets T0, approval for `project` scope, and T1 in the current project's first real task. Pass settles to A + project; failure or an inconclusive result stays B and recommends uninstall. Never create `project-trial` or infer global installation from grade A.
+10. Ask before installation, login, publishing, deletion, client configuration, promotion, enablement, deployment-scope changes, or automatic invocation.
+11. Report created/updated files, evidence boundaries, validation, and gated actions not executed.

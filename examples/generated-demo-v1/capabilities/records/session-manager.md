@@ -1,16 +1,17 @@
 ---
-schema_version: 2
+schema_version: 3
 record_type: capability
 id: session-manager
-revision: 3
+revision: 4
 management_state: disabled
 health_state: unverified
+deployment_scope: not-installed
 risk: high
 invocation: disabled
 authorization: routing-proposal
 manager_type: true
 route_category: governance
-updated_at: 2026-07-31T16:04:06Z
+updated_at: 2026-08-15T03:31:11Z
 ---
 
 # Capability Manifest / 能力冷库 Manifest

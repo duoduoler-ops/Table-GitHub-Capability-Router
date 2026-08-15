@@ -154,8 +154,8 @@ Use evidence levels:
 | Author claim | README, docs, demo, or marketing statement |
 | Online check | Current repo status, release, issues, license, docs |
 | Static check | Read code/config without running it |
-| T0 | Minimal static or install-boundary check |
-| T1 | One-sample smoke test |
+| T0 | Minimum safety and installation-boundary check; only “no obvious risk found in checked scope” |
+| T1 | First real task in the approved current project |
 | T2 | Same-scenario comparison against the current solution |
 | T3 | Real recurring task with repeatable value |
 
@@ -168,12 +168,25 @@ Use simple retention states:
 | Grade | Meaning |
 | --- | --- |
 | S | Core workflow asset proven by real work |
-| A | Verified component or strong backup |
-| B | Useful reference, method, architecture, or bounded tool |
+| A | Verified component or strong backup; deployment scope is recorded separately |
+| B | Useful method reference or executable candidate that still needs task-level increment judgment |
 | C | Candidate to watch or test later |
 | D | Do not keep beyond a short rejection note |
 
 Scores can help sort similar candidates, but they should not automatically produce S/A/B/C/D.
+
+### B-grade increment and first-use settlement
+
+When a B-grade project matches a real task, compare the ordinary `no-extra-project` route with the expected project-informed increment. Use the current card first and refresh only safety- or compatibility-sensitive facts.
+
+- Method-only value stays B/reference and is not installed.
+- A low-risk executable increment gets T0, then explicit approval for `project`-scope installation.
+- The current project's first real task is T1; a separate demo is not required by default.
+- A pass settles the project to A/retained and the capability to active at `project` scope.
+- A failure or inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
+- No durable `project-trial` state exists. Grade, deployment scope, management state, health, and invocation are independent fields.
+
+Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or tools with no project-level installation path.
 
 ## 6. Write Back
 
@@ -354,8 +367,8 @@ retired：不再使用
 | 作者声明 | README、文档、demo 或营销说明 |
 | 联网核查 | 当前仓库状态、Release、Issue、License、文档 |
 | 静态检查 | 只读代码和配置，不运行 |
-| T0 | 最小静态或安装边界检查 |
-| T1 | 单样本冒烟测试 |
+| T0 | 最低限度安全与安装边界检查；只表示“已查范围内未发现明显风险” |
+| T1 | 获批当前项目里的第一次真实任务 |
 | T2 | 和当前方案做同场景比较 |
 | T3 | 真实重复任务中产生稳定价值 |
 
@@ -368,12 +381,25 @@ retired：不再使用
 | 等级 | 含义 |
 | --- | --- |
 | S | 已由真实工作流证明的核心资产 |
-| A | 已验证组件或强备用方案 |
-| B | 有用的 reference、方法、架构或边界明确的工具 |
+| A | 已验证组件或强备用方案；部署范围另行记录 |
+| B | 有用的方法 reference，或仍需做任务增量判断的可执行候选 |
 | C | 候选观察，等待触发条件或测试 |
 | D | 不保留，只写一句可复核否决理由 |
 
 评分可以帮助同类候选排序，但不要自动生成 S/A/B/C/D。
+
+### B 级增量判断与首次使用结算
+
+B 级项目命中真实任务时，要把 `no-extra-project` 普通方案和项目可能带来的增量并列比较。先用当前项目卡，只补查安全或兼容性相关的易变事实。
+
+- 只有方法价值：维持 B/reference，不安装。
+- 低风险可执行增量：先完成 T0，再明确询问是否按 `project` 范围安装。
+- 当前项目的第一次真实任务就是 T1，默认不额外制作 Demo。
+- 通过：项目结算为 A/retained，能力以 `project` 范围进入 active。
+- 失败或结论不清：保持 B/reference 并建议卸载；真正删除仍需确认。
+- 不建立长期 `project-trial` 状态。等级、部署范围、管理状态、健康和调用方式分别记录。
+
+只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清，或没有项目级安装方式时才要求隔离。
 
 ## 6. 写回
 

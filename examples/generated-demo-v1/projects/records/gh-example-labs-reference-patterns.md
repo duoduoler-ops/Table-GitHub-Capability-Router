@@ -1,8 +1,8 @@
 ---
-schema_version: 2
+schema_version: 3
 record_type: github-project
 id: gh-example-labs-reference-patterns
-revision: 4
+revision: 5
 status: reference
 grade: B
 canonical_url: https://github.com/example-labs/reference-patterns
@@ -11,7 +11,7 @@ capability_summary: Compare reusable repository patterns and produce a reference
 semantic_examples: Help me compare reusable repository patterns || Suggest a reference project before I design this workflow
 trigger_level: high_confidence
 negative_routing: Do not route for one-off answers or when the user already chose an implementation
-updated_at: 2026-07-31T16:04:06Z
+updated_at: 2026-08-15T03:31:11Z
 approved_by: demo-user
 ---
 

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "transaction_id": "20260815T033111Z-8b5dd436",
+  "action": "migrate-v3",
+  "created_at": "2026-08-15T03:31:11Z",
+  "status": "committed",
+  "files": [
+    {
+      "path": "workflow.json",
+      "existed": true,
+      "before_sha256": "4b1eb91bf66c2b0fa44bb243a6760891738446fdf27aec79efbe4485f131fb14",
+      "after_sha256": "647d389234716775c0d5ccd4d36ffb7efbaea9e41e3d8446f25922b4b523ee92"
+    },
+    {
+      "path": "projects/records/gh-example-labs-all-tools-manager.md",
+      "existed": true,
+      "before_sha256": "55c95637db72ee6c62025147b8aa77d334df200e2e7e573aa6203f4360e872c8",
+      "after_sha256": "366f84d889e1877a7f21da7846d02587d45cb9a1c8ac1889073df5da8ca6a157"
+    },
+    {
+      "path": "projects/records/gh-example-labs-reference-patterns.md",
+      "existed": true,
+      "before_sha256": "d02a4c1ceb953e15a49da09f86e119ccfb2245893c60b7bf57f18a9a01396ea5",
+      "after_sha256": "88eeae3686f50e7ce9b4aa36b65860304e7dab6d5e8ec9a4720846879ad28261"
+    },
+    {
+      "path": "capabilities/records/public-doc-checker.md",
+      "existed": true,
+      "before_sha256": "bebe7ffee071872129d4501ac00cc513be0ce584c1f10622517d926902d47881",
+      "after_sha256": "47b5a36a00c45448951ec7cb2c5efd96e1611cbcbc9fa1aaff07bc63ea33f09e"
+    },
+    {
+      "path": "capabilities/records/session-manager.md",
+      "existed": true,
+      "before_sha256": "05067544d3c637d5d6d871467fb1bea1daab9d208af28a182b8a7ada4919a81c",
+      "after_sha256": "af1940f9b0e05c0f0d29a785eb20d24b15a09064542ebb4ac4fbf0bcc5cf2cea"
+    },
+    {
+      "path": "capabilities/records/unsafe-importer.md",
+      "existed": true,
+      "before_sha256": "91f2b35c64f592bafa0fd98af62d1cb519216c5ae0c3413c63c086666b7289f5",
+      "after_sha256": "37ec7234896f26d774a4f8dd4da789819df9f84f24671dd352a867142cdd5f62"
+    },
+    {
+      "path": "AGENT-ROUTER.md",
+      "existed": true,
+      "before_sha256": "3071415c5a9792c138532ec6632d9cd4db024b85d654ee61ff94d34378c529b8",
+      "after_sha256": "bc63f12e9411623fd1b7eebd5e0a9549f40c3a09f1e8e92087b22d126ec209dd"
+    },
+    {
+      "path": "indexes/github-project-index.md",
+      "existed": true,
+      "before_sha256": "465256ca819ad6b57609041bd987873be89347d3eee36e118b2834d55dd79700",
+      "after_sha256": "b0db2f5be7c30c2249c416fa9fce21247f43f90141d522e74d1c2ae632bd2cd2"
+    },
+    {
+      "path": "indexes/project-semantic-routing.md",
+      "existed": true,
+      "before_sha256": "7313a8928f063793955bd28ed60e6e2bc75d0192dfc0b78a966f17d832566e7a",
+      "after_sha256": "7313a8928f063793955bd28ed60e6e2bc75d0192dfc0b78a966f17d832566e7a"
+    },
+    {
+      "path": "projects/candidate-pool.md",
+      "existed": true,
+      "before_sha256": "611a7f83f2c92af0080d5b0ae65bb69cb2ea4d4f1f1c4ec51c3becc0818d2872",
+      "after_sha256": "611a7f83f2c92af0080d5b0ae65bb69cb2ea4d4f1f1c4ec51c3becc0818d2872"
+    },
+    {
+      "path": "projects/rejection-log.md",
+      "existed": true,
+      "before_sha256": "c42edc4a28ded7e69b05413a3ad81cee491ef0c63a7171c0465ffb40359a4721",
+      "after_sha256": "c42edc4a28ded7e69b05413a3ad81cee491ef0c63a7171c0465ffb40359a4721"
+    },
+    {
+      "path": "router/level1-router.md",
+      "existed": true,
+      "before_sha256": "0cc6d3d9a1e64439c0fd082dd320328a51d638dfd5d97b322de10a655875ffc9",
+      "after_sha256": "5be4449faccedd61f77c6d3d588712313cc9b0ca0c7ed6fbe667e78fb113b3b0"
+    },
+    {
+      "path": "logs/maintenance-log.md",
+      "existed": true,
+      "before_sha256": "426fbae5677090f852517aaa685a9276c64be5e54a54f1db89b9461e27e2807e",
+      "after_sha256": "a2775043f272766422da8f1571ce1f37accf7ad28fc97851c8a4dde9f1e11d90"
+    }
+  ],
+  "committed_at": "2026-08-15T03:31:11Z"
+}

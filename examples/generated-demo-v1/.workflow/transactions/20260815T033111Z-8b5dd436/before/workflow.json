@@ -1,0 +1,64 @@
+{
+  "schema_version": 2,
+  "language": "zh-CN",
+  "client_profile": "generic-agent",
+  "paths": {
+    "project_records": "projects/records",
+    "capability_records": "capabilities/records",
+    "project_index": "indexes/github-project-index.md",
+    "semantic_router": "indexes/project-semantic-routing.md",
+    "candidate_pool": "projects/candidate-pool.md",
+    "rejection_log": "projects/rejection-log.md",
+    "router": "router/level1-router.md",
+    "maintenance_log": "logs/maintenance-log.md",
+    "distillations": "distillations",
+    "inbox": "inbox"
+  },
+  "route_categories": [
+    {
+      "id": "direct-answer",
+      "label": "Direct answer / 直接作答",
+      "boundary": "Given information is enough; do not call extra tools / 信息足够时不调用额外工具"
+    },
+    {
+      "id": "local-files",
+      "label": "Local files / 本地文件",
+      "boundary": "Read the user-scoped workspace; no deletion or configuration change / 只读指定范围，不删除、不改配置"
+    },
+    {
+      "id": "public-research",
+      "label": "Public research / 公开调研",
+      "boundary": "Use public sources only; never use logged-in or private data / 只查公开来源，不碰登录态和私有数据"
+    },
+    {
+      "id": "documents",
+      "label": "Documents / 文档交付",
+      "boundary": "Use only for requested Word, PDF, slides, or sheets / 仅用于明确要求的办公文档"
+    },
+    {
+      "id": "media",
+      "label": "Media / 媒体处理",
+      "boundary": "Use only authorized media; preserve source and license evidence / 仅处理授权素材并保留来源证据"
+    },
+    {
+      "id": "browser",
+      "label": "Browser control / 浏览器控制",
+      "boundary": "Explicitly requested UI work only; logged-in actions need approval / 仅明确要求的界面操作，登录态动作需批准"
+    },
+    {
+      "id": "github",
+      "label": "GitHub / GitHub 操作",
+      "boundary": "Read first; publishing, PRs, issues, and releases need approval / 先只读，发布、PR、Issue、Release 需批准"
+    },
+    {
+      "id": "build",
+      "label": "Build and code / 构建与代码",
+      "boundary": "Work inside the requested repository and verify outputs / 只改目标仓库并验证产物"
+    },
+    {
+      "id": "governance",
+      "label": "Governance / 系统治理",
+      "boundary": "Record proposals first; install, enable, disable, hooks, and config need approval / 先记录提案，安装启停和配置需批准"
+    }
+  ]
+}

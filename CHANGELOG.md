@@ -4,7 +4,13 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
-- Add first-class `grok-build` client support while keeping schema version 2 unchanged.
+- Introduce schema v3 with required `deployment_scope`, keeping project grade, deployment scope, management state, health, and invocation as separate axes.
+- Add transactional `migrate-v3` for schema v1/v2 roots; deployment scope is explicit and never inferred.
+- Add `capability-deployment` to record an approved deployment or removal fact without installing or deleting files.
+- Add the B-grade task-increment gate: method-only projects remain reference; low-risk executable candidates use T0, approval for project scope, and the current project's first real task as T1.
+- Settle T1 success to A/retained + active/project; keep failure or inconclusive results at B/reference and recommend uninstall without creating a `project-trial` state.
+- Update schemas, templates, generated routers, state-machine documentation, bilingual guides, repo-scoped Skills, demo records, and tests for scope-aware routing.
+- Add first-class `grok-build` client support; this work landed before the schema v3 scope update in the same Unreleased line.
 - Treat `.agents/skills/github-vault-router/` as the shared Grok Build/Codex project Skill and retain `.claude/skills/github-vault-router/` as a Claude Code compatibility entry.
 - Make `AGENTS.md` the single canonical rule body and reduce root `CLAUDE.md` to a compatibility pointer; document the Grok Build 1.0.0 observation that the root file is still loaded when Claude compatibility import is disabled.
 - Add Grok Build to the read-only client audit and document host-neutral capability comparisons.

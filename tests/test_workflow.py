@@ -54,7 +54,7 @@ class WorkflowCLITests(unittest.TestCase):
         self.assertEqual(code, 0, validation)
         self.assertEqual(validation["projects"], 0)
         self.assertEqual(validation["capabilities"], 0)
-        self.assertEqual(validation["schema_version"], 2)
+        self.assertEqual(validation["schema_version"], 3)
         agent_router = (self.root / "AGENT-ROUTER.md").read_text(encoding="utf-8")
         self.assertIn("For every substantive task", agent_router)
         self.assertIn("high_confidence` and `gated` both allow a reminder", agent_router)
@@ -65,7 +65,7 @@ class WorkflowCLITests(unittest.TestCase):
         created = self.initialize("grok-build")
         self.assertEqual(created["result"], "created")
         config = json.loads((self.root / "workflow.json").read_text(encoding="utf-8"))
-        self.assertEqual(config["schema_version"], 2)
+        self.assertEqual(config["schema_version"], 3)
         self.assertEqual(config["client_profile"], "grok-build")
         code, validation = self.invoke("validate", "--root", str(self.root))
         self.assertEqual(code, 0, validation)
@@ -459,6 +459,20 @@ class WorkflowCLITests(unittest.TestCase):
             "Do not route for an unrelated one-line answer",
         )
         self.assertEqual(code, 0, promoted)
+        code, capability = self.invoke(
+            "new-capability",
+            "--root",
+            str(self.root),
+            "--id",
+            "migration-tool",
+            "--name",
+            "Migration Tool",
+            "--type",
+            "Skill",
+            "--route-category",
+            "governance",
+        )
+        self.assertEqual(code, 0, capability)
 
         config_path = self.root / "workflow.json"
         config = json.loads(config_path.read_text(encoding="utf-8"))
@@ -467,11 +481,18 @@ class WorkflowCLITests(unittest.TestCase):
         card = self.root / "projects" / "records" / "gh-example-migrate-reference.md"
         card.write_text(
             card.read_text(encoding="utf-8")
-            .replace("schema_version: 2", "schema_version: 1")
+            .replace("schema_version: 3", "schema_version: 1")
             .replace(
                 "capability_summary: Compare migration patterns and produce a reusable upgrade plan\n",
                 "",
             ),
+            encoding="utf-8",
+        )
+        capability_card = self.root / "capabilities" / "records" / "migration-tool.md"
+        capability_card.write_text(
+            capability_card.read_text(encoding="utf-8")
+            .replace("schema_version: 3", "schema_version: 1")
+            .replace("deployment_scope: not-installed\n", ""),
             encoding="utf-8",
         )
 
@@ -482,38 +503,83 @@ class WorkflowCLITests(unittest.TestCase):
             encoding="utf-8",
         )
         code, broken = self.invoke(
-            "migrate-v2",
+            "migrate-v3",
             "--root",
             str(self.root),
             "--capability-summary",
             "gh-example-migrate-reference=Compare migration patterns and produce a reusable upgrade plan",
+            "--deployment-scope",
+            "migration-tool=not-installed",
         )
         self.assertEqual(code, 2)
         self.assertIn("route_categories", broken["error"])
         self.assertEqual(json.loads(config_path.read_text(encoding="utf-8"))["schema_version"], 1)
         config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-        code, blocked = self.invoke("migrate-v2", "--root", str(self.root))
+        code, blocked = self.invoke("migrate-v3", "--root", str(self.root))
         self.assertEqual(code, 2)
         self.assertIn("missing", blocked["error"].lower())
         self.assertEqual(json.loads(config_path.read_text(encoding="utf-8"))["schema_version"], 1)
 
         code, migrated = self.invoke(
-            "migrate-v2",
+            "migrate-v3",
             "--root",
             str(self.root),
             "--capability-summary",
             "gh-example-migrate-reference=Compare migration patterns and produce a reusable upgrade plan",
+            "--deployment-scope",
+            "migration-tool=not-installed",
         )
         self.assertEqual(code, 0, migrated)
         self.assertEqual(migrated["result"], "migrated")
-        self.assertEqual(migrated["schema_version"], 2)
+        self.assertEqual(migrated["schema_version"], 3)
+        capability_data, _ = workflow.parse_frontmatter(capability_card.read_text(encoding="utf-8"))
+        self.assertEqual(capability_data["deployment_scope"], "not-installed")
         router = (self.root / "indexes" / "project-semantic-routing.md").read_text(encoding="utf-8")
         self.assertIn("Thin Discovery / 薄发现表", router)
         self.assertIn("gate before read or run", router)
-        code, again = self.invoke("migrate-v2", "--root", str(self.root))
+        code, again = self.invoke("migrate-v3", "--root", str(self.root))
         self.assertEqual(code, 0, again)
         self.assertEqual(again["result"], "already_migrated")
+
+    def test_schema_v2_migration_requires_explicit_deployment_scope(self) -> None:
+        self.initialize()
+        self.invoke(
+            "new-capability",
+            "--root",
+            str(self.root),
+            "--id",
+            "legacy-tool",
+            "--name",
+            "Legacy Tool",
+            "--type",
+            "CLI",
+            "--route-category",
+            "local-files",
+        )
+        config_path = self.root / "workflow.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config["schema_version"] = 2
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        card = self.root / "capabilities" / "records" / "legacy-tool.md"
+        card.write_text(
+            card.read_text(encoding="utf-8")
+            .replace("schema_version: 3", "schema_version: 2")
+            .replace("deployment_scope: not-installed\n", ""),
+            encoding="utf-8",
+        )
+        code, blocked = self.invoke("migrate-v3", "--root", str(self.root))
+        self.assertEqual(code, 2)
+        self.assertIn("scope", blocked["error"].lower())
+        code, migrated = self.invoke(
+            "migrate-v3",
+            "--root",
+            str(self.root),
+            "--deployment-scope",
+            "legacy-tool=not-installed",
+        )
+        self.assertEqual(code, 0, migrated)
+        self.assertEqual(migrated["schema_version"], 3)
 
     def test_invalid_semantic_trigger_is_reported_without_crashing(self) -> None:
         self.initialize()
@@ -654,6 +720,109 @@ class WorkflowCLITests(unittest.TestCase):
         self.assertEqual(code, 0, created)
         router = (self.root / "router" / "level1-router.md").read_text(encoding="utf-8")
         self.assertNotIn("sample-search", router)
+        code, referenced = self.invoke(
+            "capability-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "reference",
+        )
+        self.assertEqual(code, 0, referenced)
+        code, reevaluating = self.invoke(
+            "capability-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "candidate",
+        )
+        self.assertEqual(code, 0, reevaluating)
+        code, blocked = self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "project",
+            "--evidence",
+            "Synthetic project-local installation",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("approval", blocked["error"].lower())
+        code, deployed = self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "project",
+            "--evidence",
+            "Synthetic project-local installation",
+            "--approved",
+        )
+        self.assertEqual(code, 0, deployed)
+        code, blocked = self.invoke(
+            "capability-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "reference",
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("not-installed", blocked["error"])
+        code, removed = self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "not-installed",
+            "--evidence",
+            "Synthetic failed first task; approved project-local removal completed",
+            "--approved",
+        )
+        self.assertEqual(code, 0, removed)
+        code, referenced = self.invoke(
+            "capability-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "reference",
+        )
+        self.assertEqual(code, 0, referenced)
+        code, reevaluating = self.invoke(
+            "capability-transition",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "candidate",
+        )
+        self.assertEqual(code, 0, reevaluating)
+        code, redeployed = self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "sample-search",
+            "--to",
+            "project",
+            "--evidence",
+            "Synthetic second project-local installation",
+            "--approved",
+        )
+        self.assertEqual(code, 0, redeployed)
         code, blocked = self.invoke(
             "capability-transition",
             "--root",
@@ -675,7 +844,7 @@ class WorkflowCLITests(unittest.TestCase):
             "--to",
             "healthy",
             "--evidence",
-            "Synthetic T0 check passed",
+            "Synthetic first real project task passed",
         )
         self.assertEqual(code, 0, health)
         code, blocked = self.invoke(
@@ -705,7 +874,7 @@ class WorkflowCLITests(unittest.TestCase):
         )
         self.assertEqual(code, 0, active)
         router = (self.root / "router" / "level1-router.md").read_text(encoding="utf-8")
-        self.assertIn("sample-search", router)
+        self.assertIn("| sample-search | project |", router)
         code, validation = self.invoke("validate", "--root", str(self.root))
         self.assertEqual(code, 0, validation)
 
@@ -728,6 +897,19 @@ class WorkflowCLITests(unittest.TestCase):
             "--manager-type",
         )
         self.assertEqual(code, 0, created)
+        code, deployed = self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "session-manager",
+            "--to",
+            "project",
+            "--evidence",
+            "Synthetic isolated project deployment",
+            "--approved",
+        )
+        self.assertEqual(code, 0, deployed)
         code, health = self.invoke(
             "capability-health",
             "--root",
@@ -781,6 +963,18 @@ class WorkflowCLITests(unittest.TestCase):
             "CLI",
             "--route-category",
             "local-files",
+        )
+        self.invoke(
+            "capability-deployment",
+            "--root",
+            str(self.root),
+            "--id",
+            "fragile-tool",
+            "--to",
+            "project",
+            "--evidence",
+            "Synthetic project deployment",
+            "--approved",
         )
         self.invoke(
             "capability-health",

@@ -1,17 +1,18 @@
 ---
-schema_version: 2
+schema_version: 3
 record_type: capability
 id: public-doc-checker
-revision: 4
+revision: 6
 management_state: active
 health_state: healthy
+deployment_scope: project
 risk: low
 invocation: conditional
 authorization: routing-proposal
 manager_type: false
 route_category: public-research
-updated_at: 2026-07-31T16:04:06Z
-health_evidence: Fictional isolated one-sample smoke test passed.
+updated_at: 2026-08-15T03:31:18Z
+health_evidence: Fictional current-project first real task passed.
 approved_by: demo-user
 ---
 

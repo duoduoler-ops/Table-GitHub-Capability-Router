@@ -24,6 +24,7 @@ updated_at: {{UPDATED_AT}}
 - Version or commit / 版本或 commit:
 - Evaluation mode / 评价模式: lightweight / full / install test
 - Project type / 项目类型:
+- Asset role / 资产角色: method-reference / executable-candidate / retained-component
 - Capability chain / 能力链:
 - Capability summary / 能力摘要: see `capability_summary` in frontmatter; use one distinct verb + object + output sentence / 见 frontmatter；使用一条可区分的“动词 + 对象 + 产物”句子
 - Distillation page / 提炼页:
@@ -41,6 +42,34 @@ Only `retained` and `reference` projects with grade S/A/B may enter the generate
 - Do not route or prefer another path / 禁止命中或优先分流:
 - Visible increment over the normal approach / 相比普通方案的可见增量:
 - When matched, propose normal vs project-informed routes / 命中后是否提供普通方案与项目方案对比:
+
+## B-Grade Task Increment Gate / B 级任务增量闸门
+
+Use this section whenever a B-grade project matches a real task. Judge the increment from this card first; refresh only the current facts needed for safety or compatibility. Do not repeat a full repository survey by default.
+
+B 级项目命中真实任务时填写本节。先根据项目卡判断增量；只有安全、版本或兼容性可能变化时才补充当前核查，不默认重做完整联网调研。
+
+- Ordinary route / 不调用额外项目的普通方案:
+- Expected increment / 预计增量:
+- Evidence source / 判断依据: current card / targeted current check
+- Decision / 判断: method-only reference / executable candidate / no useful increment
+- Minimum files to read / 最小读取范围:
+- T0 safety result / T0 安全结论: no obvious risk found in checked scope / isolation required / stop
+- Isolation reason if required / 如需隔离，原因:
+
+## First Real Use Settlement / 第一次真实使用结算
+
+For a low-risk executable B candidate, ask before project-level installation. The current project's first real task is T1; do not create a separate demo or durable `project-trial` state by default.
+
+低风险 B 级可执行候选先询问是否安装到当前项目。当前项目里的第一次真实任务就是 T1；默认不额外制作 Demo，也不建立长期 `project-trial` 状态。
+
+- Capability record / 对应能力记录:
+- Approved deployment scope / 已批准部署范围: not-installed / project / user / global / external-service
+- T1 real task / T1 真实任务:
+- Outcome / 结果: passed / failed / inconclusive / not-run
+- Success settlement / 成功结算: grade A + retained project + active capability at project scope
+- Failure settlement / 失败结算: remain B/reference; recommend uninstall and wait for deletion confirmation
+- Actual removal confirmed / 是否已确认并完成删除: yes / no / not applicable
 
 ## 30-Second Positioning / 30 秒定位
 
@@ -112,6 +141,10 @@ Change these weights for your own goals. Do not let the total score automaticall
 - Summary path / 摘要路径:
 - Raw log path / 原始日志路径:
 
+T1 means the first real task in the approved current project, not an isolated one-sample smoke test. Use isolation only for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or tools with no project-level installation path.
+
+T1 指获批当前项目里的第一次真实任务，不是隔离目录中的单样本冒烟。只有涉及高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清，或根本没有项目级安装方式时才要求隔离。
+
 ## Knowledge Distillation / 知识提炼
 
 Use this section only when the project creates reusable knowledge. Prefer updating an existing workflow, concept, or project page. Create a new distillation page only when the method has no natural home yet.
@@ -130,6 +163,7 @@ Use this section only when the project creates reusable knowledge. Prefer updati
 ## Cold-Storage Decision / 冷库处置
 
 - Asset type / 资产形态: runtime / skill / plugin / mcp-config / script / reference / source-pointer
+- Deployment scope / 部署范围: not-installed / project / user / global / external-service（写入能力记录，不拼进等级或管理状态）
 - Management / 管理状态: active / cold / disabled / reference / retired
 - Health / 健康状态: healthy / unverified / degraded / broken / missing
 - Risk / 风险: low / medium / high

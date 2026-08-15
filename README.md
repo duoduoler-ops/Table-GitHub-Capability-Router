@@ -34,7 +34,7 @@ https://github.com/duoduoler-ops/Table-GitHub-Capability-Router
 | Bootstrap | Directory structure, rules pointer, config, indexes, router, log | Choose output path |
 | GitHub intake | Canonical URL, stable ID, deduplication, candidate card, derived views | Evidence judgment and retained/reference promotion |
 | Semantic project references | Generated thin discovery + full semantic table, eligibility, duplicate and drift checks | Confirm the project deserves retained/reference status |
-| Capability cold storage | Manifest, health/state rules, route eligibility, automatic quarantine | Install, enable, active/auto promotion, client config |
+| Capability cold storage | Manifest, explicit deployment scope, health/state rules, route eligibility, automatic quarantine | Install, removal, enablement, active/auto promotion, client config |
 | Write safety | Lock, transaction manifest, before backup, atomic replace, rollback, validation | Removing unknown locks or deleting data |
 | Agent routing | Shared Grok Build/Codex repo Skill, Claude Code compatibility Skill, and generated L1/L2 router | Persistent wiring into another project or global config |
 
@@ -49,6 +49,7 @@ Every release adds one concise focus row here; implementation details stay in [C
 
 | Version | Focus | User-visible change |
 | --- | --- | --- |
+| Unreleased (planned v0.4.0) | Judge B-grade task increment, then settle first real use / 先判断 B 级任务增量，再结算首次真实使用 | Schema v3 separates grade from deployment scope; low-risk executable candidates use T0, approved project scope, and the current project's first real task as T1 / Schema v3 拆开等级与部署范围；低风险可执行候选经过 T0 和项目级批准后，当前项目第一次真实任务就是 T1 |
 | v0.3.0 | Discover saved GitHub capabilities before deciding they are irrelevant / 先发现，再判断是否使用 | Substantive tasks must check a generated thin table; `gated` projects can be mentioned before runtime approval, while reading, installation, and execution remain gated / 实质任务先查薄表；`gated` 项目可先提醒，但读取、安装和执行仍受门禁约束 |
 | v0.2.0 | Deterministic intake and semantic references / 确定性入库与语义参考 | Added schema-driven records, CLI rebuild/validation, transactions, and one full semantic routing table / 增加 Schema 事实源、CLI 重建校验、事务写回和完整语义表 |
 | v0.1.0 | Publish-safe Markdown starter / 可公开的 Markdown 起步模板 | Established bilingual templates, intake prompts, and a sanitized example / 建立双语模板、入库提示词和脱敏示例 |
@@ -77,7 +78,21 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Optional read-only capability audit | Preserves PR #1's cross-client inventory for Codex, Claude Code, Kimi Code, and generic agents |
 | Transactional writes and validation | Adds locking, backups, atomic replacement, rollback, repository validation, and history privacy scans |
 
-> Historical note / 历史说明：v0.2.0 introduced `high_confidence`, `gated`, and explicit-only routing evidence. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. Current behavior is defined in the v0.3.0 section above. / v0.2.0 引入了 `high_confidence`、`gated` 和仅点名路由证据；v0.3.0 已改为 `gated` 项目可先提醒，后续读取或执行仍受门禁约束。当前行为以上方 v0.3.0 说明为准。
+> Historical note / 历史说明：v0.2.0 introduced `high_confidence`, `gated`, and explicit-only routing evidence. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. The Unreleased line keeps that behavior and adds the B-grade settlement below. / v0.2.0 引入了 `high_confidence`、`gated` 和仅点名路由证据；v0.3.0 已改为 `gated` 项目可先提醒，后续读取或执行仍受门禁约束。当前 Unreleased 版本线保留该行为，并增加下方 B 级结算。
+
+## Unreleased (planned v0.4.0): B-grade first real use / Unreleased（计划 v0.4.0）：B 级首次真实使用
+
+- Grade, deployment scope, management state, health, and invocation are separate schema v3 fields or axes. A does not mean global installation.
+- Method-only B projects remain reference and are not installed.
+- Low-risk executable B candidates get T0, then explicit approval for `project` scope; the current project's first real task is T1.
+- T1 pass settles to A/retained + active/project. Failure or an inconclusive result stays B/reference and recommends uninstall; deletion still requires confirmation.
+- No durable `project-trial` state is introduced. Isolation is reserved for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
+
+- 等级、部署范围、管理状态、健康和调用方式在 schema v3 中分别记录；A 不代表全局安装。
+- B 级只有方法价值时维持 reference，不安装。
+- 低风险可执行候选先做 T0，再询问是否按 `project` 范围安装；当前项目第一次真实任务就是 T1。
+- T1 通过结算为 A/retained + active/project；失败或结论不清则保持 B/reference 并建议卸载，真正删除仍需确认。
+- 不新增长期 `project-trial` 状态；只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或无项目级安装方式时才要求隔离。
 
 ## Deterministic core / 确定性核心
 
@@ -87,7 +102,7 @@ python scripts/workflow.py new-project --root <OUTPUT_DIR> --url <GITHUB_URL>
 python scripts/workflow.py validate --root <OUTPUT_DIR>
 ```
 
-Existing v0.2 roots use `migrate-v2` with one explicit `PROJECT_ID=SUMMARY` value for every retained/reference project; see the [v0.2 to v0.3 migration](docs/migrations/v0.2-to-v0.3.md).
+Existing schema v1/v2 roots use `migrate-v3`. Every capability needs an explicit `CAPABILITY_ID=SCOPE` mapping; direct v1 migration also needs one `PROJECT_ID=SUMMARY` for every retained/reference project. See the [v0.3 to v0.4 migration](docs/migrations/v0.3-to-v0.4.md).
 
 No third-party Python package is required. The same GitHub URL always resolves to the same `gh-owner-repo` record.
 
@@ -124,7 +139,7 @@ This is strong workflow automation, not an unattended service. Target repository
 
 这是一套强工作流自动化，不是无人值守服务。目标仓库内容只是不可信证据，不能变成执行指令。未经明确批准，本工作流不会安装、登录、外发、删除或修改客户端配置。
 
-`active`, `retained/reference`, and automatic invocation are approval-gated. Manager-type capabilities cannot use automatic invocation in schema v2. An unhealthy active capability is automatically quarantined and removed from the generated capability router. Discovery remains a read-only reminder and never authorizes repository reading, clone, installation, login, unknown script execution, configuration changes, or publishing.
+`active`, `retained/reference`, deployment-scope changes, and automatic invocation are approval-gated. Manager-type capabilities cannot use automatic invocation in schema v3. An unhealthy active capability is automatically quarantined and removed from the generated capability router. Discovery remains a read-only reminder and never authorizes repository reading, clone, installation, login, unknown script execution, configuration changes, or publishing.
 
 ## Learn more / 更多资料
 
@@ -134,6 +149,7 @@ This is strong workflow automation, not an unattended service. Target repository
 - [Privacy and sanitization](docs/privacy-and-sanitization.md)
 - [Migrate v0.1.0 to v0.2.0](docs/migrations/v0.1-to-v0.2.md)
 - [Migrate v0.2.0 to v0.3.0](docs/migrations/v0.2-to-v0.3.md)
+- [Migrate v0.3.0 to v0.4.0](docs/migrations/v0.3-to-v0.4.md)
 - [上集 · 你收藏的 GitHub 神器，真的值得装吗](https://www.youtube.com/watch?v=c4d23apzOEY)
 - [下集 · 这个仓库背后的 Agent 能力冷库工作流](https://www.youtube.com/watch?v=juIsuIy55mQ)
 - [进阶篇 · Advanced guide](https://www.youtube.com/watch?v=k7S5ewLaMVI&t=16s)

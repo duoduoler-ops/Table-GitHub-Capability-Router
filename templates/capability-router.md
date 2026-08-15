@@ -49,7 +49,8 @@ One row per routable capability. Keep the whole table small (a few dozen rows at
 | ID | Stable identifier, referenced by Level 1 / 稳定标识，被一级路由引用 |
 | Capability slot / 能力槽 | verb + object + output / 动词 + 对象 + 产物 |
 | Type & platform / 类型与平台 | Skill / Plugin / MCP / CLI / Script; which client / 所属客户端 |
-| Deploy & health / 部署与健康 | installed / configured; healthy / unverified / degraded / broken / missing |
+| Deployment scope / 部署范围 | not-installed / project / user / global / external-service；不要把范围拼进等级或管理状态 |
+| Management & health / 管理与健康 | active / cold / disabled / reference / retired；healthy / unverified / degraded / broken / missing |
 | Invocation / 调用策略 | auto / conditional / explicit-only / disabled |
 | Authorization / 授权级别 | ordinary record / lifecycle update / routing proposal / configuration change / 普通记录、生命周期更新、路由提案、配置修改 |
 | Trigger + do-not-use / 触发与禁用 | Truncation-safe: purpose and restrictions up front / 截断安全：用途和限制前置 |
@@ -62,7 +63,8 @@ Example row / 示例行：
 ID: your-yt-dlp
 Slot: download public videos and keep subtitle metadata
 Type: CLI / shared
-Deploy & health: installed / healthy (verified 2026-06-22)
+Deployment scope: project
+Management & health: active / healthy (verified 2026-06-22)
 Invocation: explicit-only
 Trigger + do-not-use: Only for public, owned, or licensed content the user names.
   Do not use for restricted resources or anything requiring cookies.
