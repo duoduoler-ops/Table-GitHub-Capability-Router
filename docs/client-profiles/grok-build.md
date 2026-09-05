@@ -2,6 +2,8 @@
 
 Verified locally against Grok Build CLI 1.0.0 on 2026-08-09.
 
+This is historical discovery evidence, not a health claim for every current session. Recheck the active host's discovery surface after updates or project changes.
+
 - User Skills live under `~/.grok/skills/<skill-name>/SKILL.md`.
 - Repo-scoped Skills are discovered under `.agents/skills/<skill-name>/SKILL.md`; this repository does not create a duplicate `.grok/skills` tree.
 - User rules live in `~/.grok/AGENTS.md`, and `AGENTS.md` is this repository's canonical project-rules surface.

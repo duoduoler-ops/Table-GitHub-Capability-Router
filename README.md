@@ -92,7 +92,7 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Semantic project-reference routing | Lets everyday user wording suggest one relevant retained/reference GitHub project while keeping the no-extra-project option |
 | Positive and negative routing evidence | Requires at least two ordinary-language examples plus explicit do-not-route conditions |
 | Automatic consistency checks + optional pre-commit gate | Catches missing, duplicate, ineligible, and stale semantic routing records before release or, when explicitly enabled, before commit |
-| Repo-scoped Codex and Claude Code Skills | Shares the workflow rules without forcing identical client-specific configuration |
+| Shared Grok Build/Codex Skill and Claude Code compatibility Skill | Shares the workflow rules while preserving client-specific configuration |
 | Optional read-only capability audit | Preserves PR #1's cross-client inventory for Codex, Claude Code, Kimi Code, and generic agents |
 | Transactional writes and validation | Adds locking, backups, atomic replacement, rollback, repository validation, and history privacy scans |
 
@@ -125,6 +125,10 @@ node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 See [Optional capability optimizer](docs/optional-capability-optimizer.md). Thanks to [@Calvingen3](https://github.com/Calvingen3) for the initial contribution.
 
 ## Proof / 可验证证据
+
+Unreleased reliability changes add base-hash draft protection, protected rollback, actual-index pre-commit checks, and Windows/Linux CI. Existing body-update callers must add `--expected-sha256`; schema stays v3. See [write protocol](docs/write-protocol.md), [hook and CI](docs/optional-pre-commit.md), and [changelog](CHANGELOG.md). CI results must be verified from an actual GitHub run.
+
+未发布的可靠性更新包含旧稿 hash 拦截、回滚保护、真实暂存区检查和 Windows/Linux CI。旧的正文更新调用须补 `--expected-sha256`，Schema 保持 v3；CI 是否通过以 GitHub 实际运行结果为准。
 
 - [Generated demo](examples/generated-demo-v1/README.md) / 真实生成的公开脱敏演示
 - [State machine](docs/state-machine.md) / 状态机

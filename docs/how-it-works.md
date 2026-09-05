@@ -179,6 +179,8 @@ Scores can help sort similar candidates, but they should not automatically produ
 
 When a B-grade project matches a real task, compare the ordinary `no-extra-project` route with the expected project-informed increment. Use the current card first and refresh only safety- or compatibility-sensitive facts.
 
+An insufficient increment or rollback plan stops installation. Interrupted T1 is recorded as inconclusive with unfinished checks, actual installation state and proposed rollback actions. Later matches reuse the previous settlement; another install or T1 needs a material task, version, environment or capability-gap change, or an explicit user request. See [Agent Start](../AGENT-START.md) for the full settlement procedure.
+
 - Method-only value stays B/reference and is not installed.
 - A low-risk executable increment gets T0, then explicit approval for `project`-scope installation.
 - The current project's first real task is T1; a separate demo is not required by default.
@@ -391,6 +393,8 @@ retired：不再使用
 ### B 级增量判断与首次使用结算
 
 B 级项目命中真实任务时，要把 `no-extra-project` 普通方案和项目可能带来的增量并列比较。先用当前项目卡，只补查安全或兼容性相关的易变事实。
+
+增量不足或回滚方案不完整时不安装。T1 中断记为结论不清，列出未完成检查、实际安装状态和拟回滚清单。下次命中先复用旧结算；只有任务、版本、环境或能力缺口发生实质变化，或用户明确要求，才再次建议安装或 T1。完整结算步骤见 [Agent Start](../AGENT-START.md)。
 
 - 只有方法价值：维持 B/reference，不安装。
 - 低风险可执行增量：先完成 T0，再明确询问是否按 `project` 范围安装。

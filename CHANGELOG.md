@@ -4,6 +4,12 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
+- Require the original SHA256 for `update-project` and `update-capability`; add read-only `record-hash` and reject stale revision/timestamp values. Existing update callers must add `--expected-sha256`; schema remains v3.
+- Verify observed file hashes during writes, preserve exact backup bytes, validate before committing, and preserve concurrent edits during rollback. Incomplete rollback is recorded as `recovery_required`.
+- Make the optional pre-commit hook validate the actual Git index without executing staged code. Keep working-tree and local-history checks in `validate-repo`.
+- Add pinned, read-only GitHub Actions checks for Windows/Python 3.14 and Linux/Python 3.10, including tests and an isolated CLI quickstart.
+- Clarify B-grade interrupted T1 settlement and reuse of previous evidence; keep Grok Build + Codex as the maintained path and Claude Code as compatibility support.
+
 ## 0.4.0 - 2026-08-15
 
 ### Focus: settle B-grade first real use at project scope

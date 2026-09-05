@@ -23,4 +23,6 @@ Schema version 1 introduces flat YAML frontmatter for canonical project and capa
 
 Use `update-project --from-file` and `update-capability --from-file` for reviewed body migrations. Do not paste old frontmatter over schema v1 records; protected metadata is preserved by the CLI.
 
+This page describes the historical schema v1 baseline. With the current CLI, first migrate the vault to schema v3 and follow the [current write protocol](../write-protocol.md), including `record-hash` and `--expected-sha256` for reviewed drafts.
+
 Do not bulk-copy a private vault, raw logs, client settings, credentials, or machine-specific inventory into a public or newly initialized workflow.

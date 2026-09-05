@@ -56,13 +56,14 @@ Then:
 1. Read only the created card, `AGENT-ROUTER.md`, and the target repository's public evidence needed for a lightweight evaluation.
 2. Check the canonical URL, current project health, license, input/output, local baseline, existing alternatives, and the `no-extra-tool` option.
 3. Do not clone, install, run target scripts, use login state, or read secrets in lightweight mode.
-4. Copy the existing card to a separate draft file, edit only the reviewed body, then write it back through the protected update command. Do not hand-edit the canonical card:
+4. Read the current card and capture its base hash before copying it to a separate draft. Save the returned `sha256` as `<BASE_SHA256>`, edit only the reviewed body, then use the protected update command. Do not hand-edit the canonical card:
 
 ```powershell
-python scripts/workflow.py update-project --root <OUTPUT_DIR> --id <PROJECT_ID> --from-file <REVIEWED_DRAFT> --evidence-level online-check
+python scripts/workflow.py record-hash --root <OUTPUT_DIR> --kind project --id <PROJECT_ID>
+python scripts/workflow.py update-project --root <OUTPUT_DIR> --id <PROJECT_ID> --from-file <REVIEWED_DRAFT> --expected-sha256 <BASE_SHA256> --evidence-level online-check
 ```
 
-5. The update command rejects changes to ID, URL, status, grade, approval, and semantic-routing metadata. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval, the `--approved` flag, one distinct `--capability-summary`, at least two `--semantic-example` values, `--trigger-level`, and `--negative-routing`.
+5. The update command rejects a missing or stale base hash, stale revision/timestamp, and changes to protected frontmatter. If the source changed, reread it and merge the intervening changes into a fresh draft; never just replace the hash to force an old draft through. Use `project-transition` for state changes. Promotion to `retained` or `reference` requires user approval, the `--approved` flag, one distinct `--capability-summary`, at least two `--semantic-example` values, `--trigger-level`, and `--negative-routing`.
 6. Run `rebuild`, then `validate`.
 
 Example promotion:
@@ -87,26 +88,30 @@ When a retained/reference B-grade project matches a real task:
 1. Keep the ordinary `no-extra-project` route visible.
 2. Judge the expected increment from the current project card first. Refresh only facts that can drift and matter to safety or compatibility; do not repeat a full repository survey by default.
 3. If the value is method, architecture, or a reusable pattern only, read the minimum relevant Markdown and keep the project at B/reference. Do not install it.
-4. If it has a concrete executable increment, complete T0: source and license, permission and credential surface, external writes, background services, cache/dependency cost, project-level install path, and rollback/removal method. T0 means only that no obvious risk was found in the checked scope; it is not a claim of absolute safety.
+4. If it has a concrete executable increment, complete T0: source and license, permission and credential surface, external writes, background services, cache/dependency cost, project-level install path, and rollback/removal method. If the increment or rollback plan is insufficient, keep the ordinary route and do not install. T0 means only that no obvious risk was found in the checked scope; it is not a claim of absolute safety.
 5. Require isolation instead of direct project use only for elevated permissions, real credentials, external writes, background services, heavy caches, unclear source/license/rollback, or no project-level installation path.
 6. For a low-risk executable candidate, ask before installing at `project` scope. Record the approved fact with `capability-deployment`; the command itself never installs anything.
 7. Use the current project's first real task as T1. Do not create a separate demo or durable `project-trial` management state by default.
 8. Settle immediately after T1:
    - passed: update the project to T1 evidence, promote B/reference to A/retained, mark the capability healthy, then promote it to active at `project` scope;
    - failed or inconclusive: keep B/reference, keep the capability outside active routing, and recommend uninstall. Actual deletion and the subsequent `not-installed` record both require explicit confirmation.
+9. If T1 is interrupted, record `inconclusive` in the evidence body, list unfinished checks and the actual installed files/services plus proposed rollback actions, and keep the capability outside active routing. Interruption does not prove failure, successful removal, or a healthy state.
+10. On a later match, reuse the previous evidence and settlement. Propose another installation or T1 only when the task, version, environment, or capability gap materially changes, or the user explicitly requests it.
 
 B 级正式项目命中真实任务时：
 
 1. 始终保留 `no-extra-project` 普通方案。
 2. 先根据当前项目卡判断预计增量；只补查会变化且影响安全或兼容性的事实，不默认重做完整调研。
 3. 如果只有方法、架构或可复用模式价值，就只读最小 Markdown，维持 B/reference，不安装。
-4. 如果存在明确可执行增量，先做 T0：来源与 License、权限和凭据、外部写入、后台服务、缓存/依赖成本、项目级安装方式及回滚/删除方法。T0 只表示“已查范围内未发现明显风险”，不代表绝对安全。
+4. 如果存在明确可执行增量，先做 T0：来源与 License、权限和凭据、外部写入、后台服务、缓存/依赖成本、项目级安装方式及回滚/删除方法。增量不足或回滚方案不完整时，继续普通方案，不安装。T0 只表示“已查范围内未发现明显风险”，不代表绝对安全。
 5. 只有高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清，或没有项目级安装方式时才要求隔离。
 6. 对低风险可执行候选，先询问是否按 `project` 范围安装；用 `capability-deployment` 记录获批事实，但命令本身不执行安装。
 7. 当前项目里的第一次真实任务就是 T1；默认不额外做 Demo，也不建立长期 `project-trial` 管理状态。
 8. T1 后立即结算：
    - 通过：项目写入 T1 证据，B/reference 升为 A/retained；能力写入 healthy，再以 `project` 范围升为 active；
    - 失败或结论不清：保持 B/reference，能力不进入 active 路由，并建议卸载。真正删除以及随后写回 `not-installed` 都仍需明确确认。
+9. T1 中断时，在证据正文记为 `inconclusive`，列出未完成检查、实际已安装的文件/服务和拟回滚清单，能力不进入 active 路由。中断不能证明失败、已卸载或健康。
+10. 下次命中先复用旧证据和结算；只有任务、版本、环境或能力缺口发生实质变化，或用户明确要求，才再次建议安装或 T1。
 
 ## First capability intake / 第一条能力入库
 
@@ -124,10 +129,11 @@ python scripts/workflow.py capability-deployment --root <OUTPUT_DIR> --id <CAPAB
 
 This command records evidence only. It never installs, removes, or configures the real capability.
 
-To add reviewed source, permission, activation, rollback, or test notes, edit a separate manifest draft and use:
+To add reviewed source, permission, activation, rollback, or test notes, read the current manifest and capture its hash before preparing a separate draft. Save the returned `sha256` as `<BASE_SHA256>` and use:
 
 ```powershell
-python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILITY_ID> --from-file <REVIEWED_DRAFT>
+python scripts/workflow.py record-hash --root <OUTPUT_DIR> --kind capability --id <CAPABILITY_ID>
+python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILITY_ID> --from-file <REVIEWED_DRAFT> --expected-sha256 <BASE_SHA256>
 ```
 
 `candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v3. An active capability must have a deployed scope. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
@@ -152,7 +158,7 @@ python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILIT
 - Project index, thin discovery + full semantic project-reference table, candidate pool, rejection log, and L1/L2 capability router are generated—not manually maintained.
 - Every retained/reference S/A/B project has one distinct capability summary, at least two semantic examples, one valid trigger level, and non-empty negative routing; every ineligible project is absent from both generated sections.
 - Transaction manifests exist under `.workflow/transactions/` for every mutation.
-- Canonical evidence/body updates were applied through `update-project` or `update-capability`, not direct edits.
+- Canonical evidence/body updates were applied through `update-project` or `update-capability` with the original base hash. Stale drafts were reviewed again before retrying.
 - No duplicate canonical URL or stable ID exists.
 - Every capability has an explicit deployment scope; active is never `not-installed`, and reference is always `not-installed`.
 - B-grade executable candidates use the current project's first real task as T1 and settle without a durable `project-trial` state.

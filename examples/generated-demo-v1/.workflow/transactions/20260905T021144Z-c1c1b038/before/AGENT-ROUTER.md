@@ -20,10 +20,6 @@ When a B-grade project matches, judge its visible increment from the project car
 
 B 级项目命中时，先根据项目卡判断可见增量，只补查安全或兼容性相关的当前事实。只有方法价值就继续只作 reference；低风险可执行增量完成 T0 后，先询问是否按 `project` 范围安装，并把当前项目的第一次真实任务作为 T1。成功结算为 A 级证据 + 当前项目保留；失败或结论不清则维持 B 级并建议卸载，真正删除仍需确认。不建立长期 `project-trial` 状态。高权限、真实凭据、外部写入、后台服务、重缓存、来源/License/回滚不清或无项目级安装方式时才要求隔离。
 
-If the expected increment or rollback plan is insufficient, do not install. If T1 is interrupted, record an inconclusive result in the evidence body, keep the capability outside active routing, and list unfinished checks, observed installation state, and proposed rollback actions. On later matches, reuse that settlement; propose another install or T1 only after a material task, version, environment, or capability-gap change, or an explicit user request.
-
-预计增量不足或回滚方案不完整时不安装。T1 中断时，在证据正文记为结论不清，能力不进入 active 路由，并列出未完成检查、实际安装状态和拟回滚清单。下次命中先复用结算；只有任务、版本、环境或能力缺口发生实质变化，或用户明确要求，才再次建议安装或 T1。
-
 For GitHub intake, use the deterministic commands from the source repository:
 
 ```text

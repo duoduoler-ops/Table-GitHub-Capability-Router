@@ -1,50 +1,58 @@
 # Deterministic Write Protocol / 确定性写回协议
 
-English | [中文](#中文)
+## Canonical sources / 唯一事实源
 
-## Canonical sources
+`projects/records/*.md`, `capabilities/records/*.md`, and `workflow.json` are canonical. Project indexes, semantic-reference tables, pools, and the capability router are generated. Never edit derived files manually.
 
-- `projects/records/*.md`: one canonical record per GitHub repository.
-- `capabilities/records/*.md`: one canonical record per capability.
-- `workflow.json`: schema version, client profile, paths, and routing categories.
+项目记录、能力记录和 `workflow.json` 是唯一事实源；项目索引、语义表、候选池和能力路由均由 CLI 生成。
 
-Project index, thin discovery + full semantic project-reference table, candidate pool, rejection log, and capability router are derived outputs. Never edit them manually.
+## Reviewed draft updates / 草稿写回
 
-## Mutation order
+1. Read the current canonical record and run `record-hash --root <ROOT> --kind project --id <ID>` (use `--kind capability` for a capability).
+2. Keep the returned `sha256`, copy the record to a separate draft, and edit only its body. Preserve all frontmatter, including `revision` and `updated_at`.
+3. Run `update-project` or `update-capability` with `--from-file <DRAFT> --expected-sha256 <BASE_SHA256>`.
+4. If the base hash, revision, or timestamp changed, reread the current record and merge the intervening changes into a fresh draft before retrying. Do not simply substitute today's hash on an old draft.
+
+The hash covers exact file bytes, so even a manual body edit without a revision bump invalidates an old base. Missing hashes are rejected. This is a CLI compatibility change: existing update callers must capture and pass the base hash. Schema remains v3; no data migration is needed for a v3 vault. See [Agent Start](../AGENT-START.md) for complete commands.
+
+先读取正式记录并用 `record-hash` 保存原始 `sha256`，再复制草稿，只改正文。写回必须带 `--expected-sha256`，并保留原版本号与时间戳。正式记录发生变化时，要先阅读并合并新内容，不能只换一个新 hash 强行提交旧稿。hash 按原始字节计算，正文被手工修改但未升版本也能拦截。已有调用脚本需要补参数；Schema 仍为 v3，无须迁移现有 v3 数据。
+
+## Transaction order / 事务顺序
 
 ```text
 Acquire .workflow/lock
--> canonicalize input and check stable ID
--> validate requested state transition and approval gate
--> prepare all target contents in memory
--> snapshot every existing target into one transaction directory
--> atomically replace each target
--> rollback already-written targets on any failure
--> mark transaction committed
--> validate generated state
--> release lock
+-> check IDs, state transitions, approval gates and draft base
+-> capture hashes of source reads and prepare target contents
+-> verify sources and targets still match their observed hashes
+-> back up exact target bytes and write an applying receipt
+-> verify observed hashes before each atomic file replacement
+-> validate the resulting workflow and recheck hashes
+-> save committed receipt, then release lock
 ```
 
-Every mutation creates `.workflow/transactions/<transaction-id>/manifest.json` with before/after hashes. Transactions never write outside the initialized workflow root.
+Each prepared transaction has `.workflow/transactions/<id>/manifest.json` and `before/` backups, with relative paths and before/after hashes. Writes stay inside the initialized root. Repeated canonical URLs/IDs reuse their records; repeating valid initialization returns `already_initialized`. Derived output ordering is deterministic. State/body updates increment the record revision.
 
-## Idempotency
+If a write, post-write validation, or final receipt fails, rollback walks all applied targets in reverse order. It restores an original file only when the current bytes still match this transaction's output and the backup hash is intact. A newly created, unchanged transaction output is removed. A concurrent edit is preserved. One restore failure does not prevent attempts to restore the remaining files.
 
-- The same canonical GitHub URL always maps to the same stable ID.
-- Repeating `init` returns `already_initialized`.
-- Repeating `new-project` or `new-capability` returns the existing record.
-- Derived pages are regenerated from canonical records and have deterministic ordering.
-- Exactly one thin-discovery row and one full-semantic row are generated for every eligible retained/reference project; ineligible projects generate neither.
-- Missing semantic fields, duplicate capability summaries, duplicate examples, invalid eligibility, and stale generated tables fail validation.
-- State changes increment `revision`; invalid or unapproved transitions fail without partial writes.
-- Capability deployment scope is an independent fact axis: `not-installed`, `project`, `user`, `global`, or `external-service`. It is not a temporary management state.
-- `capability-deployment` requires explicit approval plus evidence and records only the observed scope. It never installs, removes, enables, or configures a real capability.
-- Promotion to `active` requires a healthy capability with a deployed scope; transition to `reference` requires `not-installed`. Record the real-world install or removal first, then update the record.
-- Evidence and narrative changes use a separate reviewed draft plus `update-project` or `update-capability`. The CLI rejects protected frontmatter changes, increments `revision`, writes the canonical record transactionally, and refreshes derived files.
+| Receipt status | Meaning and response |
+| --- | --- |
+| `applying` | Prepared or interrupted; inspect the lock, process, targets and backups before any recovery. |
+| `committed` | All replacements and validation completed, and the final receipt was saved. |
+| `rolled_back` | A caught failure occurred; all applied targets were restored or removed. |
+| `recovery_required` | Concurrent changes or restore failures prevented full rollback. Preserve evidence and review each listed recovery item. |
 
-## Concurrency
+If the receipt cannot be saved, the CLI reports the transaction directory and requires inspection; it does not claim successful rollback. Do not automatically restore a whole backup directory or remove an unknown lock. Any recovery affecting user data requires the applicable approval and a reviewed plan.
 
-Only one mutating command may hold `.workflow/lock`. A leftover lock may indicate a crashed or still-running process. Inspect it before removing it; the CLI never force-deletes an unknown lock.
+先加锁并验证草稿、状态和批准门；读取时记录 hash，写入前复核，按原始字节备份，再逐个替换。最终一致性校验通过后才记 `committed`。失败时逆序回滚；只有文件仍等于本事务刚写入的内容，才允许恢复或移除。其他进程的新修改会被保留，备份损坏或恢复失败会记为 `recovery_required`，且继续尝试恢复其余文件。回执也无法保存时会报告事务目录，不能当作已成功回滚。
 
-## 中文
+## Concurrency and recovery limits / 并发与恢复边界
 
-项目记录、能力记录和 `workflow.json` 是唯一事实源；索引、薄发现 + 完整语义表、候选池、否决记录和能力路由表全部派生。每个合格的 `retained/reference` 项目在薄发现表和完整语义表中各生成一行，不合格项目不生成；缺字段、重复能力摘要、重复示例、资格错误和生成表漂移都会校验失败。每次修改先加锁、校验 ID/状态/批准门，再在一个事务中备份并原子替换；任何写入失败都恢复已写文件。能力的部署范围是独立事实轴：`not-installed / project / user / global / external-service`，不是临时管理状态。`capability-deployment` 必须带明确批准和证据，只登记已经发生的部署范围，不负责真实安装、卸载、启用或配置；升为 `active` 前必须已经健康且有部署范围，转为 `reference` 前必须先回到 `not-installed`。证据正文先在独立草稿中编辑，再通过 `update-project` 或 `update-capability` 受控写回，不能借机改 ID、状态、等级、审批、部署范围或语义路由字段。重复输入命中原记录，不制造重复项。
+`.workflow/lock` serializes cooperating CLI writers. Hash checks detect observed file changes and reduce lost updates from other writers; they do not provide a filesystem-wide transaction against arbitrary editors. Each file replacement is atomic, but the whole multi-file operation is not. A hard process kill or power loss may leave `applying` and a stale lock; recovery is manual. Directory entry changes and a modification in the small check/replace window are outside the lock's protection when another writer bypasses the CLI.
+
+CLI 锁约束遵守本协议的写入者，hash 复核补充检测其他修改。逐文件替换是原子的，多文件整体不是；强制杀进程或断电可能留下 `applying` 和锁，需要人工核对。绕过 CLI 的目录增删、hash 检查与替换之间的极短并发窗口，不属于强一致保证。
+
+## State and deployment / 状态与部署
+
+Deployment scope remains an independent fact: `not-installed / project / user / global / external-service`. Approved deployment commands record observed facts only. They never install, remove, enable, or configure a real capability. Active requires health plus an installed/deployed scope; reference requires `not-installed`. Semantic eligibility and generated-table consistency remain validated.
+
+部署范围始终独立于等级、管理状态、健康和调用方式。部署命令只登记已获批且实际发生的事实；不会执行真实安装、卸载、启用或配置。active 必须健康且已部署，reference 必须为 `not-installed`。
