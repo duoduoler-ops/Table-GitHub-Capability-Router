@@ -8,6 +8,8 @@
 
 ## Reviewed draft updates / 草稿写回
 
+Optional `.workflow/lifecycle/<id>/runs/` and `evidence/` JSON files are canonical evidence sources, managed only by the [lifecycle commands](capability-lifecycle.md). A completed use receipt and its evidence commit together using the same lock, hash checks and protected rollback. Hook caches are disposable notices and do not contribute to health. Vault schema remains v3; extension contracts are independently versioned.
+
 1. Read the current canonical record and run `record-hash --root <ROOT> --kind project --id <ID>` (use `--kind capability` for a capability).
 2. Keep the returned `sha256`, copy the record to a separate draft, and edit only its body. Preserve all frontmatter, including `revision` and `updated_at`.
 3. Run `update-project` or `update-capability` with `--from-file <DRAFT> --expected-sha256 <BASE_SHA256>`.

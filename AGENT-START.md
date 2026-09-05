@@ -138,6 +138,12 @@ python scripts/workflow.py update-capability --root <OUTPUT_DIR> --id <CAPABILIT
 
 `candidate`, `disabled`, `quarantine`, and `retired` records never enter the generated thin router. Manager-type capabilities use `--manager-type` at creation and cannot use automatic invocation in schema v3. An active capability must have a deployed scope. If an active capability becomes unhealthy, the health command automatically quarantines it and disables routing.
 
+## Optional evidence lifecycle / 可选证据闭环
+
+For identity-bound capability use, read [capability evidence and receipts](docs/capability-lifecycle.md). Before reusing evidence, run `capability-check` with a refreshed identity declaration; handle review/error outcomes explicitly. Use `use-begin` immediately before an already-authorized task and `use-finish` after actual validation and settlement. An approved first T1 can establish new evidence; missing evidence is not authorization to run it. Use `lifecycle-status` to recover unfinished work. These commands never execute a capability or change its governance state. Existing v3 records need no bulk migration.
+
+需要绑定版本和环境的使用记录时，按[能力证据与回执](docs/capability-lifecycle.md)执行：复用前检查当前身份，已获批任务开始前登记，真实验收和结算后结束；中断用待结算状态保留，后续按原记录恢复。旧健康文字不会自动变成新任务证据。可选 Hook 只补充提醒，接入须另行批准。
+
 ## Automatic routing after bootstrap / 初始化后的自动路由
 
 - When this repository is opened in Grok Build or Codex, both clients use the repo-scoped Skill at `.agents/skills/github-vault-router/`.

@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 SPEC = importlib.util.spec_from_file_location("agent_vault_workflow", REPO_ROOT / "scripts" / "workflow.py")
 workflow = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None

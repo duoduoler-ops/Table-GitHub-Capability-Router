@@ -25,6 +25,8 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import urlsplit, urlunsplit
 
+import capability_lifecycle as lifecycle
+
 
 SCHEMA_VERSION = "3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -757,6 +759,7 @@ def collect_validation(root: Path, template_root: Path | None = None) -> tuple[l
         if duplicates:
             errors.append(f"Duplicate {label}: {duplicates}")
     errors.extend(validate_semantic_uniqueness(projects))
+    errors.extend(lifecycle.validate_store(sys.modules[__name__], root, set(capability_ids), template_root))
     expected: dict[Path, str] = {
         root / "AGENT-ROUTER.md": replace_template(
             (template_root or REPO_ROOT) / "templates" / "vault-rules.md",
@@ -1694,6 +1697,10 @@ def validate_repository(root: Path, files: list[Path], history_root: Path | None
         "schemas/workflow-config.schema.json",
         "schemas/project-card.schema.json",
         "schemas/capability-manifest.schema.json",
+        "schemas/lifecycle.schema.json",
+        "scripts/capability_lifecycle.py",
+        "scripts/lifecycle_contract.py",
+        "scripts/lifecycle_hook.py",
         "examples/generated-demo-v1/README.md",
         "examples/generated-demo-v1/indexes/project-semantic-routing.md",
         ".agents/skills/github-vault-router/SKILL.md",
@@ -1977,6 +1984,7 @@ def build_parser() -> argparse.ArgumentParser:
     record_hash.add_argument("--kind", choices=("project", "capability"), required=True)
     record_hash.add_argument("--id", required=True)
     record_hash.set_defaults(handler=command_record_hash, mutates=False)
+    lifecycle.register(sub, sys.modules[__name__])
     return parser
 
 
@@ -1995,8 +2003,9 @@ def main(argv: list[str] | None = None) -> int:
                     OBSERVED_READS.reset(token)
         else:
             result = args.handler(args)
+        exit_code = result.pop("_exit_code", 0)
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0
+        return exit_code
     except (WorkflowError, OSError, json.JSONDecodeError, ValueError) as exc:
         print(json.dumps({"result": "error", "error": str(exc)}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2

@@ -124,6 +124,12 @@ node integrations/optimize-agent-capabilities/scripts/audit.mjs --json
 
 See [Optional capability optimizer](docs/optional-capability-optimizer.md). Thanks to [@Calvingen3](https://github.com/Calvingen3) for the initial contribution.
 
+## Optional evidence lifecycle / 可选证据闭环
+
+Unreleased: identity-bound health reports, idempotent use receipts, read-only drift/reuse checks and optional Codex/Grok Hook adapters. Vault schema stays v3; sidecar contracts use version 1. No installation or automatic promotion. Start with the [lifecycle guide](docs/capability-lifecycle.md), [synthetic demo](examples/lifecycle-demo.py) and [Hook boundaries](docs/optional-lifecycle-hooks.md).
+
+新增可选闭环把版本、使用、验收和结算关联起来；旧健康文字不会自动成为新任务证据。Hook 配置仅提供示例，Grok 的默认通知能力与 Codex 不同，见接入说明。
+
 ## Proof / 可验证证据
 
 Unreleased reliability changes add base-hash draft protection, protected rollback, actual-index pre-commit checks, and Windows/Linux CI. Existing body-update callers must add `--expected-sha256`; schema stays v3. See [write protocol](docs/write-protocol.md), [hook and CI](docs/optional-pre-commit.md), and [changelog](CHANGELOG.md). CI results must be verified from an actual GitHub run.
