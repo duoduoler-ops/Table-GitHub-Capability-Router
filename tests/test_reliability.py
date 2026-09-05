@@ -22,7 +22,8 @@ class ReliabilityTests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="workflow-reliability-")
-        self.root = Path(self.temp.name) / "vault"
+        # Match the CLI's canonical paths, including Windows short-name TEMP roots.
+        self.root = (Path(self.temp.name) / "vault").resolve()
         self.initialize()
 
     def tearDown(self) -> None:
