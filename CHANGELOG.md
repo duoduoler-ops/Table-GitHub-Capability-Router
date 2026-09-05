@@ -4,6 +4,11 @@ All notable changes are documented here. The project uses schema versions for re
 
 ## Unreleased
 
+- Add optional version-1 lifecycle sidecars while preserving Vault schema v3: identity-bound discovery/smoke reports, transactional use receipts and task evidence.
+- Add `use-begin`, `use-finish`, `record-evidence`, `capability-check` and `lifecycle-status`; detect stale/changed evidence, negative outcomes, unfinished use and read-time changes without granting execution permission.
+- Add shared optional Hook adapters with scoped deduplication and fail-open behavior. Codex can display warnings; Grok defaults to a notice file and only requests continuation with explicit opt-in. No real client configuration is installed.
+- Add synthetic lifecycle demonstrations and fault-oriented tests for evidence scope, concurrency, settlement and recovery.
+
 - Require the original SHA256 for `update-project` and `update-capability`; add read-only `record-hash` and reject stale revision/timestamp values. Existing update callers must add `--expected-sha256`; schema remains v3.
 - Verify observed file hashes during writes, preserve exact backup bytes, validate before committing, and preserve concurrent edits during rollback. Incomplete rollback is recorded as `recovery_required`.
 - Make the optional pre-commit hook validate the actual Git index without executing staged code. Keep working-tree and local-history checks in `validate-repo`.

@@ -1,0 +1,6 @@
+{
+  "hooks": {
+    "SessionStart": [{"hooks": [{"type": "command", "command": "py -3 \"<SOURCE_ROOT>/scripts/lifecycle_hook.py\" --root \"<VAULT_ROOT>\" --host grok-build", "timeout": 5}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": "py -3 \"<SOURCE_ROOT>/scripts/lifecycle_hook.py\" --root \"<VAULT_ROOT>\" --host grok-build", "timeout": 5}]}]
+  }
+}

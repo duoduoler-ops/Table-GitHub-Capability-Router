@@ -24,6 +24,10 @@ If the expected increment or rollback plan is insufficient, do not install. If T
 
 预计增量不足或回滚方案不完整时不安装。T1 中断时，在证据正文记为结论不清，能力不进入 active 路由，并列出未完成检查、实际安装状态和拟回滚清单。下次命中先复用结算；只有任务、版本、环境或能力缺口发生实质变化，或用户明确要求，才再次建议安装或 T1。
 
+For optional identity-bound evidence, follow `docs/capability-lifecycle.md` in the source repository. Refresh the identity declaration and run `capability-check` before evidence reuse; missing or invalid evidence is not execution permission. Register an already-authorized use with `use-begin`, then record real validation/settlement with `use-finish`. Use `lifecycle-status` to recover pending work. These commands do not change governance state; Hook reminders cannot discover unregistered use.
+
+采用可选证据闭环时，先读源码仓库的 `docs/capability-lifecycle.md`：复用前更新身份声明并检查；已获批使用开始前登记，实际验收和结算后结束，中断保留待办。证据记录不改变等级、部署或启用权限，Hook 也不能发现从未登记的使用。
+
 For GitHub intake, use the deterministic commands from the source repository:
 
 ```text

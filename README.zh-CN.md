@@ -2,6 +2,12 @@
 
 这套仓库的目标很直接：你把一个 GitHub 链接交给 Agent，Agent 不再只在聊天里随口评价，而是把它变成可追踪的项目记录；如果项目能沉淀成 Skill、Plugin、MCP、CLI、脚本或方法论，再进入能力冷库和薄路由。
 
+## 开发中：证据与使用闭环
+
+新增可选的健康证据、使用回执、只读差异检查与 Hook 适配；保留 Schema v3，不批量改写旧数据。证据绑定声明的版本、宿主、实际文件哈希及项目范围，成功验收并结算后才能作为任务证据复用。默认不安装、不晋级、不改宿主配置。
+
+详见[使用说明](docs/capability-lifecycle.md)、[可运行的虚构示例](examples/lifecycle-demo.py)和[Hook 接入边界](docs/optional-lifecycle-hooks.md)。
+
 ## 当前维护宿主
 
 当前维护主线是 **Grok Build + Codex**。两者共用 `.agents/skills/github-vault-router/` 项目级 Skill；Claude Code 仍通过 `.claude/skills/github-vault-router/` 保留兼容支持，但不再是当前默认宿主。

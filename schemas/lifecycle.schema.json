@@ -1,0 +1,352 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Optional lifecycle extension version 1",
+  "description": "Select a $defs contract. Cross-record settlement and identity invariants are validated by capability_lifecycle.py.",
+  "$defs": {
+    "host": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64}|absent)$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "identity-definition": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "capability_id",
+        "host",
+        "version",
+        "files"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "capability_id",
+        "host",
+        "version",
+        "artifact_root_key",
+        "files",
+        "metadata_source",
+        "file_source",
+        "sha256"
+      ],
+      "properties": {
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "host": {
+          "$ref": "#/$defs/host"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        },
+        "artifact_root_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/file"
+          }
+        },
+        "metadata_source": {
+          "const": "caller-declared"
+        },
+        "file_source": {
+          "const": "measured-sha256"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_id",
+        "capability_id",
+        "project_key",
+        "identity",
+        "record_type",
+        "session_id",
+        "turn_id",
+        "before",
+        "started_at",
+        "status",
+        "validation",
+        "settlement",
+        "summary",
+        "ended_at",
+        "end_identity_sha256"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "record_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "project_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "identity": {
+          "$ref": "#/$defs/identity"
+        },
+        "record_type": {
+          "const": "capability-use"
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        },
+        "turn_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+        },
+        "before": {
+          "type": "object",
+          "required": [
+            "management_state",
+            "health_state",
+            "deployment_scope",
+            "invocation",
+            "revision"
+          ],
+          "properties": {
+            "management_state": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            },
+            "health_state": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            },
+            "deployment_scope": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            },
+            "invocation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "completed"
+          ]
+        },
+        "validation": {
+          "enum": [
+            "pending",
+            "passed",
+            "failed",
+            "inconclusive"
+          ]
+        },
+        "settlement": {
+          "enum": [
+            "pending",
+            "complete"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "ended_at": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "end_identity_sha256": {
+          "type": "string",
+          "pattern": "^([a-f0-9]{64})?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_id",
+        "capability_id",
+        "project_key",
+        "identity",
+        "record_type",
+        "kind",
+        "result",
+        "observed_at",
+        "summary",
+        "run_id",
+        "identity_matches",
+        "source"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "record_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,95}$"
+        },
+        "project_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "identity": {
+          "$ref": "#/$defs/identity"
+        },
+        "record_type": {
+          "const": "capability-evidence"
+        },
+        "kind": {
+          "enum": [
+            "discovery",
+            "smoke",
+            "task"
+          ]
+        },
+        "result": {
+          "enum": [
+            "passed",
+            "failed",
+            "inconclusive"
+          ]
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^([a-z][a-z0-9-]{1,95})?$"
+        },
+        "identity_matches": {
+          "type": "boolean"
+        },
+        "source": {
+          "enum": [
+            "caller-reported-check",
+            "caller-reported-use-receipt"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
