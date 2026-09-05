@@ -2,7 +2,9 @@
 
 All notable changes are documented here. The project uses schema versions for record compatibility and Git tags for public releases.
 
-## Unreleased
+## 0.5.0 - 2026-09-05
+
+### Focus: safer writes and traceable capability use
 
 - Add optional version-1 lifecycle sidecars while preserving Vault schema v3: identity-bound discovery/smoke reports, transactional use receipts and task evidence.
 - Add `use-begin`, `use-finish`, `record-evidence`, `capability-check` and `lifecycle-status`; detect stale/changed evidence, negative outcomes, unfinished use and read-time changes without granting execution permission.
@@ -14,6 +16,7 @@ All notable changes are documented here. The project uses schema versions for re
 - Make the optional pre-commit hook validate the actual Git index without executing staged code. Keep working-tree and local-history checks in `validate-repo`.
 - Add pinned, read-only GitHub Actions checks for Windows/Python 3.14 and Linux/Python 3.10, including tests and an isolated CLI quickstart.
 - Clarify B-grade interrupted T1 settlement and reuse of previous evidence; keep Grok Build + Codex as the maintained path and Claude Code as compatibility support.
+- Rewrite the overview and Chinese/English READMEs in plain language, preserve the existing structure and tutorials, and align feature and upgrade instructions with the v0.5.0 release.
 
 ## 0.4.0 - 2026-08-15
 

@@ -14,11 +14,11 @@ This repository gives you a workflow for collecting links, reviewing projects, k
 
 ## Release focus
 
-The changes from PR #8 and PR #9 are on **`main`**, but are not included in the latest **v0.4.0 Release**. Use current main source for the new commands. Full details are in [CHANGELOG.md](CHANGELOG.md).
+**The current release is [v0.5.0](https://github.com/duoduoler-ops/Table-GitHub-Capability-Router/releases/tag/v0.5.0)**. Its source download includes safer writes, use records, evidence checks, and optional Hooks. The instructions below describe this version. Full details are in [CHANGELOG.md](CHANGELOG.md).
 
 | Version | Focus | What changes for you |
 | --- | --- | --- |
-| Current main, awaiting a new release | Safer writes, use evidence, and optional Hooks | Stale drafts are rejected; individual uses can be tracked; old evidence and unfinished work can be checked |
+| v0.5.0 | Safer writes, use evidence, and optional Hooks | Stale drafts are rejected; individual uses can be tracked; old evidence and unfinished work can be checked |
 | v0.4.0 | Separate project grade from installation scope | Review a B-grade project's value, approve project-level installation when needed, then assess its first real task |
 | v0.3.0 | Check saved projects before choosing an approach | Read a short capability table first, then the conditions for one relevant match |
 | v0.2.0 | Maintain records through scripts | Added intake, rebuilds, validation, write backups, and task-based project discovery |
@@ -145,7 +145,7 @@ Connecting the generated router permanently to another project or to global clie
 
 ## Optional evidence and use records
 
-This addition tracks which capability was used, in which project, what result was reported, and whether follow-up work was completed. An old free-text health note does not become proof of a successful new task.
+The use records added in v0.5.0 track which capability was used, in which project, what result was reported, and whether follow-up work was completed. An old free-text health note does not become proof of a successful new task.
 
 | Command | Purpose |
 | --- | --- |
