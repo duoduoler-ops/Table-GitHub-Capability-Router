@@ -2,7 +2,7 @@
 
 这套仓库的目标很直接：你把一个 GitHub 链接交给 Agent，Agent 不再只在聊天里随口评价，而是把它变成可追踪的项目记录；如果项目能沉淀成 Skill、Plugin、MCP、CLI、脚本或方法论，再进入能力冷库和薄路由。
 
-## 当前验证宿主
+## 当前维护宿主
 
 当前维护主线是 **Grok Build + Codex**。两者共用 `.agents/skills/github-vault-router/` 项目级 Skill；Claude Code 仍通过 `.claude/skills/github-vault-router/` 保留兼容支持，但不再是当前默认宿主。
 
@@ -49,13 +49,15 @@
 | GitHub 项目语义命中表 | 用户只说日常话时，也能建议一个相关的正式保留项目 |
 | 正向示例 + 负向边界 + 命中级别 | 引入 `high_confidence`、`gated` 和仅点名证据，为后续版本的发现门奠定事实源 |
 | 自动一致性校验 + 可选提交前门禁 | 拦截缺记录、重复示例、资格错误和生成表过期；经批准启用后可在 commit 前拦截 |
-| Codex / Claude Code 项目级 Skill | 两端共享工作流事实，但保留各自客户端调用机制 |
+| Grok Build / Codex 共享 Skill 与 Claude Code 兼容 Skill | 共享工作流事实，同时保留各自客户端调用机制 |
 | PR #1 可选只读能力审计 | 盘点 Codex、Claude Code、Kimi Code 等客户端能力，不修改配置 |
 | 事务式写入 | 加锁、修改前备份、原子替换、失败回滚和 Git 历史隐私扫描 |
 
 > 历史说明：v0.2.0 引入命中级别；v0.3.0 已把 `gated` 调整为“先提醒项目存在，后续读取或执行再过门禁”。v0.4.0 保留该行为，并增加 B 级首次真实使用结算。
 
 ## 最短使用方式
+
+未发布的可靠性更新增加了草稿原始 hash 校验、保留并发修改的回滚、真实暂存区检查和 Windows/Linux CI。Schema 仍为 v3，旧的正文更新调用须补 `--expected-sha256`；操作见[写回协议](docs/write-protocol.md)，验收边界见 [Hook 与 CI](docs/optional-pre-commit.md)。
 
 把下面这段复制给 Grok Build、Codex 或其他能读 GitHub、能操作本地文件的 Agent：
 

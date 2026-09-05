@@ -1,0 +1,80 @@
+name: Validate workflow
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: '3.10'
+          - os: windows-latest
+            python: '3.14'
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Python tests
+        run: python -B -m unittest discover -s tests -v
+      - name: Read-only capability audit tests
+        run: node --test integrations/optimize-agent-capabilities/tests/audit.test.mjs
+      - name: Validate generated demo
+        run: python -B scripts/workflow.py validate --root examples/generated-demo-v1
+      - name: Validate repository and history
+        run: python -B scripts/workflow.py validate-repo --root .
+      - name: Validate Git index
+        run: python -B scripts/workflow.py validate-staged --root .
+      - name: Isolated CLI quickstart
+        shell: python
+        run: |
+          import json
+          import pathlib
+          import subprocess
+          import sys
+          import tempfile
+
+          scratch = pathlib.Path('_test-logs')
+          scratch.mkdir(exist_ok=True)
+          with tempfile.TemporaryDirectory(prefix='quickstart-', dir=scratch) as directory:
+              def run(*arguments):
+                  output = subprocess.check_output(
+                      [sys.executable, '-B', 'scripts/workflow.py', *arguments, '--root', directory],
+                      encoding='utf-8')
+                  return json.loads(output)
+              run('init', '--client', 'generic-agent', '--language', 'zh-CN')
+              assert run('init')['result'] == 'already_initialized'
+              first = run('new-project', '--url', 'https://github.com/example/ci-check')
+              second = run('new-project', '--url', 'example/ci-check')
+              assert first['id'] == second['id']
+              run('validate')
+              print('CLI quickstart and idempotency passed')
+      - name: Whitespace check
+        run: git diff --check

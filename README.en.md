@@ -2,7 +2,7 @@
 
 Give a coding Agent this repository URL and ask it to establish the workflow. The Agent starts at `AGENT-START.md`, uses the dependency-free Python CLI for deterministic writes, and creates an isolated workflow root.
 
-## Current verified hosts
+## Maintained hosts
 
 The current maintained path is **Grok Build + Codex**. Both use the repo-scoped Skill at `.agents/skills/github-vault-router/`. Claude Code remains supported through the compatibility copy at `.claude/skills/github-vault-router/`, but it is no longer the current default host.
 
@@ -49,13 +49,15 @@ Every release adds one concise focus row here; implementation details stay in [C
 | Semantic GitHub project references | Maps ordinary user wording to one relevant retained/reference project |
 | Positive examples, negative routing, and trigger levels | Introduces `high_confidence`, `gated`, and explicit-only evidence as the source for later discovery behavior |
 | Automatic consistency validation + optional pre-commit gate | Blocks missing metadata, duplicate examples, ineligible rows, and stale generated tables before release or, when explicitly enabled, before commit |
-| Repo-scoped Codex and Claude Code Skills | Shares workflow facts while preserving client-specific invocation mechanisms |
+| Shared Grok Build/Codex Skill and Claude Code compatibility Skill | Shares workflow facts while preserving client-specific invocation mechanisms |
 | Optional read-only capability audit from PR #1 | Inventories Codex, Claude Code, Kimi Code, and generic agent capability visibility without configuration writes |
 | Transactional writes | Adds locking, before backups, atomic replacement, rollback, and Git-history privacy scans |
 
 > Historical note: v0.2.0 introduced trigger levels. v0.3.0 changed discovery so `gated` projects may be mentioned first while later reading or execution remains gated. v0.4.0 keeps that behavior and adds B-grade first-use settlement.
 
 ## Quick start
+
+Unreleased reliability changes require a base hash for reviewed body updates, protect rollback from concurrent edits, and add staged-index validation plus Windows/Linux CI. Schema stays v3. Existing callers must follow the updated [write protocol](docs/write-protocol.md); see [hook and CI](docs/optional-pre-commit.md) for verification boundaries.
 
 ```text
 Use this repository to establish a GitHub intake, capability cold-storage, and agent-routing workflow:

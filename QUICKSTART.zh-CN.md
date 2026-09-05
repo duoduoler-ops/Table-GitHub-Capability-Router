@@ -46,3 +46,5 @@ Windows 上如果 `python` 不可用，但本机已有 `py`，可改用 `py -3`�
 把一个待评价项目链接交给 Agent，让它先做轻量评估。Agent 可以补充项目卡里的公开证据，但不得执行目标仓库里的命令。准备晋级时，要同时补充唯一能力摘要、日常语义示例、命中级别和禁止命中边界；B 级命中后先判断任务增量，只有方法价值就不安装，低风险可执行候选完成 T0 并获得项目级安装批准后，当前项目第一次真实任务就是 T1。已有 schema v1/v2 工作流按 [v0.3 → v0.4 迁移](docs/migrations/v0.3-to-v0.4.md) 升级。
 
 完整规则见 [AGENT-START.md](AGENT-START.md)；真实产物见 [自动生成演示](examples/generated-demo-v1/README.md)。
+
+更新项目卡或能力卡正文前，先用 `record-hash` 保存正式记录的原始 hash，再复制和编辑草稿；`update-project` / `update-capability` 必须带 `--expected-sha256`。旧稿被拦截时要阅读并合并新内容，不能只替换 hash。完整命令见[写回协议](docs/write-protocol.md)。T1 中断记为结论不清并列待处理清单，下次命中先复用旧结算。

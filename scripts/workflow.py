@@ -13,11 +13,12 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
+import tempfile
 import uuid
 from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 SCHEMA_VERSION = "3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
+OBSERVED_READS: ContextVar[dict[Path, str] | None] = ContextVar("observed_reads", default=None)
 
 PROJECT_STATUSES = {
     "candidate",
@@ -132,6 +134,19 @@ def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def file_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else "absent"
+
+
+def read_text(path: Path) -> str:
+    """Capture the first read in a mutation so later edits cannot be overwritten."""
+    raw = path.read_bytes()
+    observed = OBSERVED_READS.get()
+    if observed is not None:
+        observed.setdefault(path.resolve(), hashlib.sha256(raw).hexdigest())
+    return raw.decode("utf-8").replace("\r\n", "\n")
+
+
 def slugify(value: str) -> str:
     value = value.strip().lower()
     value = re.sub(r"[^a-z0-9]+", "-", value)
@@ -191,7 +206,7 @@ def render_frontmatter(data: dict[str, str], body: str) -> str:
 
 
 def replace_template(path: Path, values: dict[str, str]) -> str:
-    text = path.read_text(encoding="utf-8")
+    text = read_text(path)
     for key, value in values.items():
         text = text.replace("{{" + key + "}}", value)
     unresolved = sorted(set(re.findall(r"\{\{([A-Z0-9_]+)\}\}", text)))
@@ -200,11 +215,17 @@ def replace_template(path: Path, values: dict[str, str]) -> str:
     return text
 
 
-def atomic_write(path: Path, content: str) -> None:
+def atomic_write(path: Path, content: str | bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}")
-    temp.write_text(content, encoding="utf-8", newline="\n")
-    os.replace(temp, path)
+    try:
+        with temp.open("wb") as handle:
+            handle.write(content.encode("utf-8") if isinstance(content, str) else content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, path)
+    finally:
+        temp.unlink(missing_ok=True)
 
 
 @contextmanager
@@ -231,6 +252,7 @@ def workflow_lock(root: Path):
 class PendingWrite:
     path: Path
     content: str
+    expected_sha256: str = ""
 
 
 class Transaction:
@@ -248,11 +270,23 @@ class Transaction:
             resolved.relative_to(self.root)
         except ValueError as exc:
             raise WorkflowError(f"Transaction target escapes workflow root: {resolved}") from exc
-        self.writes.append(PendingWrite(resolved, content))
+        if any(item.path == resolved for item in self.writes):
+            raise WorkflowError(f"Duplicate transaction target: {resolved}")
+        observed = OBSERVED_READS.get() or {}
+        self.writes.append(PendingWrite(resolved, content, observed.get(resolved, file_hash(resolved))))
 
     def commit(self) -> None:
         if not self.writes:
             return
+        observed = dict(OBSERVED_READS.get() or {})
+        expected = observed | {item.path: item.expected_sha256 for item in self.writes}
+
+        def assert_current(hashes: dict[Path, str]) -> None:
+            for path, expected_hash in hashes.items():
+                if file_hash(path) != expected_hash:
+                    raise WorkflowError(f"Concurrent change detected; current file preserved: {path}")
+
+        assert_current(expected)
         self.before.mkdir(parents=True, exist_ok=True)
         manifest: dict[str, object] = {
             "schema_version": 1,
@@ -265,39 +299,67 @@ class Transaction:
         for item in self.writes:
             relative = item.path.relative_to(self.root).as_posix()
             existed = item.path.exists()
-            old_text = item.path.read_text(encoding="utf-8") if existed else ""
+            old_bytes = item.path.read_bytes() if existed else b""
+            if (hashlib.sha256(old_bytes).hexdigest() if existed else "absent") != item.expected_sha256:
+                raise WorkflowError(f"Concurrent change detected before backup: {item.path}")
             if existed:
                 backup = self.before / relative
                 backup.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(item.path, backup)
+                backup.write_bytes(old_bytes)
             manifest["files"].append(
                 {
                     "path": relative,
                     "existed": existed,
-                    "before_sha256": sha256_text(old_text) if existed else None,
+                    "before_sha256": item.expected_sha256,
                     "after_sha256": sha256_text(item.content),
                 }
             )
-        atomic_write(self.dir / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+        manifest_path = self.dir / "manifest.json"
+        def save_manifest() -> None:
+            atomic_write(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+
+        manifest["status"] = "applying"
+        save_manifest()
         applied: list[PendingWrite] = []
         try:
             for item in self.writes:
+                assert_current(expected)
                 atomic_write(item.path, item.content)
                 applied.append(item)
-        except Exception:
+                expected[item.path] = sha256_text(item.content)
+            assert_current(expected)
+            errors, _ = collect_validation(self.root)
+            if errors:
+                raise WorkflowError("Post-write validation failed:\n" + "\n".join(errors))
+            assert_current(expected)
+            manifest["status"] = "committed"
+            manifest["committed_at"] = now_utc()
+            save_manifest()
+        except BaseException as error:
+            recovery: list[str] = []
             for item in reversed(applied):
                 relative = item.path.relative_to(self.root)
                 backup = self.before / relative
-                if backup.exists():
-                    atomic_write(item.path, backup.read_text(encoding="utf-8"))
-                elif item.path.exists():
-                    item.path.unlink()
-            manifest["status"] = "rolled_back"
-            atomic_write(self.dir / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+                try:
+                    if file_hash(item.path) != sha256_text(item.content):
+                        recovery.append(f"Concurrent edit preserved: {relative.as_posix()}")
+                    elif item.expected_sha256 != "absent":
+                        if file_hash(backup) != item.expected_sha256:
+                            raise WorkflowError("Backup hash mismatch")
+                        atomic_write(item.path, backup.read_bytes())
+                    else:
+                        item.path.unlink()
+                except (OSError, WorkflowError):
+                    recovery.append(f"Restore requires review: {relative.as_posix()}")
+            manifest["status"] = "recovery_required" if recovery else "rolled_back"
+            manifest["recovery"] = recovery
+            manifest["error_type"] = type(error).__name__
+            manifest.pop("committed_at", None)
+            try:
+                save_manifest()
+            except OSError as receipt_error:
+                raise WorkflowError(f"Inspect transaction backups and targets; receipt update failed: {self.dir}") from receipt_error
             raise
-        manifest["status"] = "committed"
-        manifest["committed_at"] = now_utc()
-        atomic_write(self.dir / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
 
 def config_path(root: Path) -> Path:
@@ -308,7 +370,7 @@ def load_config(root: Path) -> dict:
     path = config_path(root)
     if not path.exists():
         raise WorkflowError(f"Missing {path}. Run the init command first.")
-    config = json.loads(path.read_text(encoding="utf-8"))
+    config = json.loads(read_text(path))
     missing = REQUIRED_CONFIG_KEYS - set(config)
     if missing:
         raise WorkflowError(f"workflow.json is missing: {', '.join(sorted(missing))}")
@@ -368,7 +430,7 @@ def read_records(directory: Path, record_type: str) -> list[tuple[Path, dict[str
     if not directory.exists():
         return records
     for path in sorted(directory.glob("*.md")):
-        data, body = parse_frontmatter(path.read_text(encoding="utf-8"), path)
+        data, body = parse_frontmatter(read_text(path), path)
         if data.get("record_type") != record_type:
             raise WorkflowError(f"Unexpected record_type in {path}: {data.get('record_type')}")
         records.append((path, data, body))
@@ -676,7 +738,7 @@ def validate_capability(data: dict[str, str], path: Path, category_ids: set[str]
     return errors
 
 
-def collect_validation(root: Path) -> tuple[list[str], dict]:
+def collect_validation(root: Path, template_root: Path | None = None) -> tuple[list[str], dict]:
     config = load_config(root)
     paths = resolve_paths(root, config)
     projects = read_records(paths["project_records"], "github-project")
@@ -697,7 +759,7 @@ def collect_validation(root: Path) -> tuple[list[str], dict]:
     errors.extend(validate_semantic_uniqueness(projects))
     expected: dict[Path, str] = {
         root / "AGENT-ROUTER.md": replace_template(
-            REPO_ROOT / "templates" / "vault-rules.md",
+            (template_root or REPO_ROOT) / "templates" / "vault-rules.md",
             {
                 "SCHEMA_VERSION": SCHEMA_VERSION,
                 "CLIENT_PROFILE": config["client_profile"],
@@ -723,7 +785,7 @@ def collect_validation(root: Path) -> tuple[list[str], dict]:
     for path, content in expected.items():
         if not path.exists():
             errors.append(f"Missing generated file: {path}")
-        elif path.read_text(encoding="utf-8").replace("\r\n", "\n") != content:
+        elif read_text(path).replace("\r\n", "\n") != content:
             errors.append(f"Generated file is stale: {path}")
     summary = {
         "schema_version": int(SCHEMA_VERSION),
@@ -830,7 +892,7 @@ def command_migrate_v3(args: argparse.Namespace) -> dict:
     path = config_path(root)
     if not path.exists():
         raise WorkflowError(f"Missing {path}. Only initialized schema v1/v2 workflows can be migrated.")
-    config = json.loads(path.read_text(encoding="utf-8"))
+    config = json.loads(read_text(path))
     missing_config = REQUIRED_CONFIG_KEYS - set(config)
     if missing_config:
         raise WorkflowError(f"workflow.json is missing: {', '.join(sorted(missing_config))}")
@@ -985,7 +1047,7 @@ def command_migrate_v3(args: argparse.Namespace) -> dict:
         filtered_project_table("Rejection Log / 否决记录", migrated_projects, {"rejected"}),
     )
     transaction.add(paths["router"], capability_router(migrated_config, migrated_capabilities))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(
         paths["maintenance_log"],
         append_log(
@@ -1011,7 +1073,7 @@ def command_init(args: argparse.Namespace) -> dict:
         if errors:
             raise WorkflowError("Already initialized but invalid:\n" + "\n".join(errors))
         return {"action": "init", "result": "already_initialized", **summary}
-    config = json.loads((REPO_ROOT / "config" / "workflow.example.json").read_text(encoding="utf-8"))
+    config = json.loads(read_text(REPO_ROOT / "config" / "workflow.example.json"))
     config["language"] = args.language
     config["client_profile"] = args.client
     paths = resolve_paths(root, config)
@@ -1087,7 +1149,7 @@ def command_new_project(args: argparse.Namespace) -> dict:
         filtered_project_table("Candidate Pool / 候选池", updated_records, {"candidate", "evaluated"}),
     )
     transaction.add(paths["rejection_log"], filtered_project_table("Rejection Log / 否决记录", updated_records, {"rejected"}))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(
         paths["maintenance_log"],
         append_log(current_log, f"Created candidate `{record_id}` for {canonical}; no clone, install, login, publishing, deletion, or client configuration change was performed."),
@@ -1134,7 +1196,7 @@ def command_new_capability(args: argparse.Namespace) -> dict:
     transaction.add(target, card)
     updated_records = [*records, (target, parse_frontmatter(card)[0], parse_frontmatter(card)[1])]
     transaction.add(paths["router"], capability_router(config, updated_records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(
         paths["maintenance_log"],
         append_log(current_log, f"Created candidate capability `{capability_id}` as unverified, explicit-only, and not-installed; no capability was installed, enabled, or configured."),
@@ -1147,13 +1209,18 @@ def locate_record(directory: Path, record_id: str, record_type: str) -> tuple[Pa
     target = directory / f"{record_id}.md"
     if not target.exists():
         raise WorkflowError(f"Unknown {record_type} id: {record_id}")
-    data, body = parse_frontmatter(target.read_text(encoding="utf-8"), target)
+    data, body = parse_frontmatter(read_text(target), target)
     if data.get("record_type") != record_type:
         raise WorkflowError(f"Unexpected record_type in {target}")
     return target, data, body
 
 
-def read_update_draft(draft_path: str, target: Path, current: dict[str, str]) -> tuple[dict[str, str], str]:
+def read_update_draft(draft_path: str, target: Path, current: dict[str, str], expected_sha256: str | None) -> tuple[dict[str, str], str]:
+    if not expected_sha256 or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256):
+        raise WorkflowError("Body updates require --expected-sha256 from record-hash before drafting; reread the current record and review a fresh draft.")
+    observed = OBSERVED_READS.get() or {}
+    if expected_sha256.lower() != observed.get(target.resolve(), file_hash(target)):
+        raise WorkflowError("Stale draft: original SHA256 no longer matches; current record preserved. Review the intervening changes before preparing a new draft.")
     draft = Path(draft_path).resolve()
     if draft == target.resolve():
         raise WorkflowError("--from-file must point to a separate reviewed draft, not the canonical record itself.")
@@ -1161,9 +1228,10 @@ def read_update_draft(draft_path: str, target: Path, current: dict[str, str]) ->
         raise WorkflowError(f"Update draft does not exist: {draft}")
     if draft.stat().st_size > 2 * 1024 * 1024:
         raise WorkflowError("Update draft exceeds the 2 MiB safety limit.")
-    incoming, body = parse_frontmatter(draft.read_text(encoding="utf-8"), draft)
-    ignored = {"revision", "updated_at"}
-    for key in sorted((set(current) | set(incoming)) - ignored):
+    incoming, body = parse_frontmatter(read_text(draft), draft)
+    if any(incoming.get(key) != current.get(key) for key in ("revision", "updated_at")):
+        raise WorkflowError("Stale draft revision or timestamp; copy the current record and review the changes again.")
+    for key in sorted(set(current) | set(incoming)):
         if incoming.get(key) != current.get(key):
             raise WorkflowError(
                 f"Protected frontmatter change rejected for {key!r}; use the dedicated state, health, or approval command."
@@ -1171,12 +1239,24 @@ def read_update_draft(draft_path: str, target: Path, current: dict[str, str]) ->
     return incoming, body
 
 
+def command_record_hash(args: argparse.Namespace) -> dict:
+    root = Path(args.root).resolve()
+    paths = resolve_paths(root, load_config(root))
+    record_type = "github-project" if args.kind == "project" else "capability"
+    directory = paths["project_records" if args.kind == "project" else "capability_records"]
+    target, _, _ = locate_record(directory, args.id, record_type)
+    raw = target.read_bytes()
+    data, _ = parse_frontmatter(raw.decode("utf-8"), target)
+    return {"action": "record-hash", "id": data["id"], "revision": int(data["revision"]),
+            "sha256": hashlib.sha256(raw).hexdigest(), "path": str(target)}
+
+
 def command_update_project(args: argparse.Namespace) -> dict:
     root = Path(args.root).resolve()
     config = load_config(root)
     paths = resolve_paths(root, config)
     target, data, _ = locate_record(paths["project_records"], args.id, "github-project")
-    _, body = read_update_draft(args.from_file, target, data)
+    _, body = read_update_draft(args.from_file, target, data, args.expected_sha256)
     if args.evidence_level:
         data["evidence_level"] = args.evidence_level
     data["revision"] = str(int(data["revision"]) + 1)
@@ -1194,7 +1274,7 @@ def command_update_project(args: argparse.Namespace) -> dict:
     transaction.add(paths["semantic_router"], semantic_project_router(all_records))
     transaction.add(paths["candidate_pool"], filtered_project_table("Candidate Pool / 候选池", all_records, {"candidate", "evaluated"}))
     transaction.add(paths["rejection_log"], filtered_project_table("Rejection Log / 否决记录", all_records, {"rejected"}))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(paths["maintenance_log"], append_log(current_log, f"Project `{args.id}` body updated from a reviewed draft at revision {data['revision']}; protected frontmatter was preserved."))
     transaction.commit()
     return {"action": "update-project", "id": args.id, "revision": int(data["revision"]), "evidence_level": data["evidence_level"]}
@@ -1205,7 +1285,7 @@ def command_update_capability(args: argparse.Namespace) -> dict:
     config = load_config(root)
     paths = resolve_paths(root, config)
     target, data, _ = locate_record(paths["capability_records"], args.id, "capability")
-    _, body = read_update_draft(args.from_file, target, data)
+    _, body = read_update_draft(args.from_file, target, data, args.expected_sha256)
     data["revision"] = str(int(data["revision"]) + 1)
     data["updated_at"] = now_utc()
     changed = render_frontmatter(data, body)
@@ -1219,7 +1299,7 @@ def command_update_capability(args: argparse.Namespace) -> dict:
     transaction = Transaction(root, "update-capability")
     transaction.add(target, changed)
     transaction.add(paths["router"], capability_router(config, records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(paths["maintenance_log"], append_log(current_log, f"Capability `{args.id}` body updated from a reviewed draft at revision {data['revision']}; protected frontmatter was preserved."))
     transaction.commit()
     return {"action": "update-capability", "id": args.id, "revision": int(data["revision"])}
@@ -1281,7 +1361,7 @@ def command_project_routing(args: argparse.Namespace) -> dict:
     transaction.add(target, changed)
     transaction.add(paths["project_index"], project_index(records))
     transaction.add(paths["semantic_router"], semantic_project_router(records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(
         paths["maintenance_log"],
         append_log(
@@ -1357,7 +1437,7 @@ def command_project_transition(args: argparse.Namespace) -> dict:
     transaction.add(paths["semantic_router"], semantic_project_router(all_records))
     transaction.add(paths["candidate_pool"], filtered_project_table("Candidate Pool / 候选池", all_records, {"candidate", "evaluated"}))
     transaction.add(paths["rejection_log"], filtered_project_table("Rejection Log / 否决记录", all_records, {"rejected"}))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(paths["maintenance_log"], append_log(current_log, f"Project `{args.id}` transitioned {old} -> {new} at revision {data['revision']}."))
     transaction.commit()
     return {"action": "project-transition", "id": args.id, "from": old, "to": new, "revision": int(data["revision"])}
@@ -1389,7 +1469,7 @@ def command_capability_health(args: argparse.Namespace) -> dict:
     for path, current, current_body in read_records(paths["capability_records"], "capability"):
         records.append((path, data, body) if path == target else (path, current, current_body))
     transaction.add(paths["router"], capability_router(config, records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     safety_note = f" Safety transition: {safety_transition}; invocation disabled." if safety_transition else ""
     transaction.add(paths["maintenance_log"], append_log(current_log, f"Capability `{args.id}` health changed {old} -> {args.to}; evidence summary recorded in the manifest frontmatter.{safety_note}"))
     transaction.commit()
@@ -1442,7 +1522,7 @@ def command_capability_deployment(args: argparse.Namespace) -> dict:
     for path, current, current_body in read_records(paths["capability_records"], "capability"):
         records.append((path, data, body) if path == target else (path, current, current_body))
     transaction.add(paths["router"], capability_router(config, records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(
         paths["maintenance_log"],
         append_log(
@@ -1506,7 +1586,7 @@ def command_capability_transition(args: argparse.Namespace) -> dict:
     for path, current, current_body in read_records(paths["capability_records"], "capability"):
         records.append((path, data, body) if path == target else (path, current, current_body))
     transaction.add(paths["router"], capability_router(config, records))
-    current_log = paths["maintenance_log"].read_text(encoding="utf-8")
+    current_log = read_text(paths["maintenance_log"])
     transaction.add(paths["maintenance_log"], append_log(current_log, f"Capability `{args.id}` transitioned {old} -> {new}; invocation={invocation}. This records routing state only and does not alter client configuration."))
     transaction.commit()
     return {"action": "capability-transition", "id": args.id, "from": old, "to": new, "invocation": invocation, "revision": int(data["revision"])}
@@ -1545,7 +1625,7 @@ def secret_findings(text: str, location: str, patterns: dict[str, str]) -> list[
 
 
 def skill_identity_and_body(path: Path) -> tuple[dict[str, str], str]:
-    normalized = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+    normalized = read_text(path).replace("\r\n", "\n")
     match = re.match(r"^---\n(.*?)\n---\n(.*)$", normalized, flags=re.DOTALL)
     if not match:
         raise WorkflowError(f"Invalid Skill frontmatter in {path}")
@@ -1559,8 +1639,41 @@ def skill_identity_and_body(path: Path) -> tuple[dict[str, str], str]:
     return identity, match.group(2)
 
 
-def command_validate_repo(args: argparse.Namespace) -> dict:
-    root = Path(args.root).resolve()
+def git_bytes(root: Path, *arguments: str, input_data: bytes | None = None) -> bytes:
+    try:
+        result = subprocess.run(["git", "-C", str(root), *arguments], input=input_data,
+                                capture_output=True, timeout=60, check=False)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise WorkflowError("Git validation command unavailable or timed out.") from error
+    if result.returncode:
+        raise WorkflowError("Git validation failed: " + result.stderr.decode("utf-8", errors="replace").strip())
+    return result.stdout
+
+
+def scratch_path(path: Path) -> Path:
+    """Use Windows extended paths for deeply nested, disposable index snapshots."""
+    absolute = str(path.resolve())
+    if os.name == "nt" and not absolute.startswith("\\\\?\\"):
+        absolute = "\\\\?\\UNC\\" + absolute[2:] if absolute.startswith("\\\\") else "\\\\?\\" + absolute
+    return Path(absolute)
+
+
+def repository_files(root: Path) -> list[Path]:
+    if (root / ".git").exists():
+        names = git_bytes(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
+        files = [root / name.decode("utf-8") for name in names.split(b"\0") if name]
+    else:
+        files = [path for path in root.rglob("*") if ".git" not in path.relative_to(root).parts]
+    selected = []
+    for path in files:
+        if path.is_symlink() or not path.resolve().is_relative_to(root):
+            raise WorkflowError(f"Repository validation cannot follow a linked path: {path.relative_to(root)}")
+        if path.is_file():
+            selected.append(path)
+    return sorted(set(selected))
+
+
+def validate_repository(root: Path, files: list[Path], history_root: Path | None = None) -> dict:
     required = [
         ".gitignore",
         "AGENT-START.md",
@@ -1624,47 +1737,37 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
     openai_yaml = root / ".agents" / "skills" / "github-vault-router" / "agents" / "openai.yaml"
     if openai_yaml.exists() and "$github-vault-router" not in openai_yaml.read_text(encoding="utf-8"):
         errors.append("Repo-scoped Codex Skill default_prompt must mention $github-vault-router.")
-    markdown = sorted(root.rglob("*.md"))
+    markdown = [path for path in files if path.suffix == ".md"]
     for path in markdown:
         if any(part in {".git", ".workflow"} for part in path.parts):
             continue
-        text = path.read_text(encoding="utf-8")
+        text = read_text(path)
         for target in relative_markdown_links(path, text):
             resolved = (path.parent / target).resolve()
             if not resolved.exists():
                 errors.append(f"Broken relative link: {path.relative_to(root)} -> {target}")
-    for path in sorted(item for item in root.rglob("*.json") if ".git" not in item.parts):
+    for path in (item for item in files if item.suffix == ".json"):
         try:
-            json.loads(path.read_text(encoding="utf-8"))
+            json.loads(read_text(path))
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             errors.append(f"Invalid JSON: {path.relative_to(root)}: {exc}")
     demo_root = root / "examples" / "generated-demo-v1"
     if (demo_root / "workflow.json").exists():
-        demo_errors, _ = collect_validation(demo_root)
+        demo_errors, _ = collect_validation(demo_root, template_root=root)
         errors.extend(f"Generated demo: {error}" for error in demo_errors)
-    for path in sorted(item for item in root.rglob("*") if item.is_file() and ".git" not in item.parts):
+    for path in files:
         if path.stat().st_size > 2 * 1024 * 1024:
             continue
         try:
-            text = path.read_text(encoding="utf-8")
+            text = read_text(path)
         except UnicodeDecodeError:
             continue
         errors.extend(secret_findings(text, str(path.relative_to(root)), REPOSITORY_SECRET_PATTERNS))
     history_scanned = False
-    if (root / ".git").exists() and shutil.which("git"):
-        history = subprocess.run(
-            ["git", "-C", str(root), "log", "-p", "--all", "--no-ext-diff", "--no-color"],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-        if history.returncode != 0:
-            errors.append(f"Git history scan failed: {history.stderr.strip() or 'unknown git error'}")
-        else:
-            history_scanned = True
-            errors.extend(secret_findings(history.stdout, "Git history", REPOSITORY_SECRET_PATTERNS))
+    if history_root is not None:
+        history = git_bytes(history_root, "log", "-p", "--all", "--no-ext-diff", "--no-color", "--no-textconv")
+        history_scanned = True
+        errors.extend(secret_findings(history.decode("utf-8", errors="replace"), "Git history", REPOSITORY_SECRET_PATTERNS))
     if errors:
         raise WorkflowError("Repository validation failed:\n" + "\n".join(errors))
     return {
@@ -1674,6 +1777,69 @@ def command_validate_repo(args: argparse.Namespace) -> dict:
         "history_scanned": history_scanned,
         "errors": 0,
     }
+
+
+def command_validate_repo(args: argparse.Namespace) -> dict:
+    root = Path(args.root).resolve()
+    return validate_repository(root, repository_files(root), root if (root / ".git").exists() else None)
+
+
+def command_validate_staged(args: argparse.Namespace) -> dict:
+    """Read index blobs as data. Never execute the staged Python, hooks, or tests."""
+    root = Path(args.root).resolve()
+    if not Path(git_bytes(root, "rev-parse", "--show-toplevel").decode("utf-8").strip()).samefile(root):
+        raise WorkflowError("--root must be the Git working tree root.")
+    index = git_bytes(root, "ls-files", "--stage", "-z")
+    entries: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for entry in index.split(b"\0"):
+        if not entry:
+            continue
+        header, raw_name = entry.split(b"\t", 1)
+        mode, oid, stage = header.decode("ascii").split()
+        name = raw_name.decode("utf-8")
+        if stage != "0":
+            raise WorkflowError(f"Unmerged index entry: {name}")
+        if mode not in ("100644", "100755"):
+            raise WorkflowError(f"Staged validation supports regular files only: {name}")
+        parts = name.split("/")
+        if any(part in ("", ".", "..") or part.casefold() == ".git" for part in parts) or "\\" in name or ":" in name:
+            raise WorkflowError(f"Unsafe index path: {name}")
+        key = name.casefold() if os.name == "nt" else name
+        if key in seen:
+            raise WorkflowError(f"Index path collision: {name}")
+        seen.add(key)
+        entries.append((name, oid))
+    if not entries:
+        raise WorkflowError("Index is empty; stage the public repository before checking it.")
+    output = git_bytes(root, "cat-file", "--batch", input_data=("\n".join(oid for _, oid in entries) + "\n").encode("ascii"))
+    temporary_root = root / "_test-logs"
+    if temporary_root.is_symlink() or not temporary_root.resolve().is_relative_to(root):
+        raise WorkflowError("Staged validation scratch directory must stay inside the repository.")
+    temporary_root = scratch_path(temporary_root)
+    temporary_root.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="staged-validation-", dir=temporary_root) as directory:
+        snapshot = Path(directory)
+        files: list[Path] = []
+        offset = 0
+        for name, oid in entries:
+            end = output.index(b"\n", offset)
+            object_id, kind, size_text = output[offset:end].decode("ascii").split()
+            size = int(size_text)
+            offset = end + 1
+            if object_id != oid or kind != "blob" or len(output) < offset + size + 1:
+                raise WorkflowError("Invalid Git blob response.")
+            target = snapshot / name
+            if not target.resolve().is_relative_to(snapshot):
+                raise WorkflowError(f"Index path escapes snapshot: {name}")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(output[offset:offset + size])
+            offset += size + 1
+            files.append(target)
+        result = validate_repository(snapshot, files)
+    if git_bytes(root, "ls-files", "--stage", "-z") != index:
+        raise WorkflowError("Index changed during validation; check the newly staged content again.")
+    return {**result, "action": "validate-staged", "source": "git-index", "index_files": len(entries)}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1726,6 +1892,7 @@ def build_parser() -> argparse.ArgumentParser:
     update_project.add_argument("--root", required=True)
     update_project.add_argument("--id", required=True)
     update_project.add_argument("--from-file", required=True)
+    update_project.add_argument("--expected-sha256", help="SHA256 captured before editing the draft with record-hash.")
     update_project.add_argument("--evidence-level", choices=sorted(EVIDENCE_LEVELS))
     update_project.set_defaults(handler=command_update_project, mutates=True)
 
@@ -1745,6 +1912,7 @@ def build_parser() -> argparse.ArgumentParser:
     update_capability.add_argument("--root", required=True)
     update_capability.add_argument("--id", required=True)
     update_capability.add_argument("--from-file", required=True)
+    update_capability.add_argument("--expected-sha256", help="SHA256 captured before editing the draft with record-hash.")
     update_capability.set_defaults(handler=command_update_capability, mutates=True)
 
     project_transition = sub.add_parser("project-transition", help="Apply a validated project state transition.")
@@ -1799,6 +1967,16 @@ def build_parser() -> argparse.ArgumentParser:
     validate_repo = sub.add_parser("validate-repo", help="Validate this public repository.")
     validate_repo.add_argument("--root", default=str(REPO_ROOT))
     validate_repo.set_defaults(handler=command_validate_repo, mutates=False)
+
+    staged = sub.add_parser("validate-staged", help="Validate the actual Git index without running staged code or scanning history.")
+    staged.add_argument("--root", default=str(REPO_ROOT))
+    staged.set_defaults(handler=command_validate_staged, mutates=False)
+
+    record_hash = sub.add_parser("record-hash", help="Read the base hash and revision before preparing a body-update draft.")
+    record_hash.add_argument("--root", required=True)
+    record_hash.add_argument("--kind", choices=("project", "capability"), required=True)
+    record_hash.add_argument("--id", required=True)
+    record_hash.set_defaults(handler=command_record_hash, mutates=False)
     return parser
 
 
@@ -1810,7 +1988,11 @@ def main(argv: list[str] | None = None) -> int:
             root = Path(args.root).resolve()
             root.mkdir(parents=True, exist_ok=True)
             with workflow_lock(root):
-                result = args.handler(args)
+                token = OBSERVED_READS.set({})
+                try:
+                    result = args.handler(args)
+                finally:
+                    OBSERVED_READS.reset(token)
         else:
             result = args.handler(args)
         print(json.dumps(result, ensure_ascii=False, indent=2))

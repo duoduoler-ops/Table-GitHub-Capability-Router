@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -643,6 +644,8 @@ class WorkflowCLITests(unittest.TestCase):
             "gh-example-evidence-project",
             "--from-file",
             str(draft),
+            "--expected-sha256",
+            workflow.file_hash(card),
         )
         self.assertEqual(code, 2)
         self.assertIn("protected frontmatter", blocked["error"].lower())
@@ -655,6 +658,8 @@ class WorkflowCLITests(unittest.TestCase):
             "gh-example-evidence-project",
             "--from-file",
             str(draft),
+            "--expected-sha256",
+            workflow.file_hash(card),
             "--evidence-level",
             "online-check",
         )
@@ -693,6 +698,8 @@ class WorkflowCLITests(unittest.TestCase):
             "reviewed-tool",
             "--from-file",
             str(draft),
+            "--expected-sha256",
+            workflow.file_hash(card),
         )
         self.assertEqual(code, 0, updated)
         data, body = workflow.parse_frontmatter(card.read_text(encoding="utf-8"))
@@ -1062,7 +1069,7 @@ class WorkflowCLITests(unittest.TestCase):
         code, result = self.invoke("validate-repo", "--root", str(REPO_ROOT))
         self.assertEqual(code, 0, result)
         self.assertEqual(result["errors"], 0)
-        if (REPO_ROOT / ".git").exists() and workflow.shutil.which("git"):
+        if (REPO_ROOT / ".git").exists() and shutil.which("git"):
             self.assertTrue(result["history_scanned"])
 
     def test_repository_secret_scan_detects_private_windows_paths(self) -> None:
