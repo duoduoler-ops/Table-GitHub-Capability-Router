@@ -1,5 +1,7 @@
 # Table-GitHub-Capability-Router
 
+https://github.com/user-attachments/assets/a4cae58c-ccff-4dd1-ba6a-38dbb53dd7ad
+
 这套工具帮你整理收藏的 GitHub 项目，让 Agent 做任务时能找到合适的工具，并查到它们之前的使用结果。
 
 从收集链接、评估项目，到按需安装或留作参考，再到记录检查和使用结果，都有对应的流程。项目资料用 Markdown 保存，脚本负责去重、写入、检查和更新索引。这里的“能力”包括 Skill、Plugin、MCP、CLI、脚本，也包括值得参考的方法。
