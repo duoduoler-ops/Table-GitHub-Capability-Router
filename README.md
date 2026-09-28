@@ -1,5 +1,7 @@
 # Table-GitHub-Capability-Router
 
+[抖音 · 一只桌子](https://v.douyin.com/7jbgafVeA4U/) · [YouTube · 一只桌子](https://www.youtube.com/@%E4%B8%80%E5%8F%AA%E6%A1%8C%E5%AD%90) · [小红书 · 一只桌桌桌子](https://xhslink.cn/o/2iZQ3Yc2j4E) · [bilibili · 一只桌子_table](https://b23.tv/7Y34qaP) · [X · 一只桌子](https://x.com/D_uoduo)
+
 https://github.com/user-attachments/assets/a4cae58c-ccff-4dd1-ba6a-38dbb53dd7ad
 
 这套工具帮你整理收藏的 GitHub 项目，让 Agent 做任务时能找到合适的工具，并查到它们之前的使用结果。
@@ -189,3 +191,12 @@ python scripts/workflow.py validate-staged --root .
 - [进阶篇 · Advanced guide](https://www.youtube.com/watch?v=k7S5ewLaMVI&t=16s)
 
 采用 [MIT License](LICENSE)。准备公开自己的资料库前，请阅读 [SECURITY.md](SECURITY.md)。
+
+## Get in touch / 联系我
+
+欢迎交流实际使用中的问题与改进建议。
+
+| 渠道 | 联系方式 |
+| --- | --- |
+| 邮箱 | [duoduoler@gmail.com](mailto:duoduoler@gmail.com) |
+| X | [一只桌子 · @D_uoduo](https://x.com/D_uoduo) |
